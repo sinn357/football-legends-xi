@@ -182,6 +182,17 @@ select,
   grid-template-columns: repeat(5, minmax(80px, 1fr));
 }
 
+.app-tabs {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 18px;
+  padding: 8px;
+}
+
 .tab,
 .primary-button,
 .ghost-button {
@@ -211,6 +222,13 @@ select,
   justify-content: flex-end;
 }
 
+.toggles.vertical {
+  align-items: flex-start;
+  display: grid;
+  justify-content: stretch;
+  margin-top: 12px;
+}
+
 .toggles label {
   align-items: center;
   display: flex;
@@ -223,6 +241,10 @@ select,
   gap: 14px;
   grid-template-columns: repeat(4, 1fr);
   margin-bottom: 18px;
+}
+
+.summary-grid.compact {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .metric-card {
@@ -243,12 +265,53 @@ select,
   margin-bottom: 18px;
 }
 
+.atlas-grid,
+.builder-grid,
+.rankings-grid,
+.compare-grid {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+}
+
+.atlas-grid {
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.builder-grid {
+  grid-template-columns: 280px minmax(0, 1fr) 340px;
+}
+
+.rankings-grid {
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.compare-grid {
+  grid-template-columns: 340px minmax(0, 1fr);
+}
+
 .weights-panel,
 .pitch-panel,
 .bench-panel,
 .roster-panel,
-.saved-panel {
+.saved-panel,
+.atlas-sidebar,
+.atlas-main,
+.top-list-panel,
+.candidate-panel,
+.comparison-table-panel {
   padding: 18px;
+}
+
+.atlas-sidebar,
+.atlas-main,
+.top-list-panel,
+.candidate-panel,
+.comparison-table-panel {
+  background: rgba(255, 253, 248, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
 }
 
 .section-heading {
@@ -305,6 +368,16 @@ input[type="range"] {
   background: transparent;
   border: 1px solid var(--line);
   color: var(--ink);
+}
+
+.primary-inline {
+  background: var(--green-dark);
+  border: 1px solid var(--green-dark);
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 800;
+  min-height: 40px;
+  padding: 0 14px;
 }
 
 .pitch-actions {
@@ -414,6 +487,11 @@ input[type="range"] {
   width: 132px;
 }
 
+.player-token.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(194, 138, 44, 0.28), 0 14px 30px rgba(18, 49, 32, 0.3);
+}
+
 .player-token:hover,
 .player-token:focus-visible {
   border-color: rgba(255, 255, 255, 0.9);
@@ -479,6 +557,12 @@ input[type="range"] {
   gap: 10px;
   grid-template-columns: 34px 1fr 38px;
   padding: 10px;
+}
+
+.player-row.as-button {
+  color: inherit;
+  text-align: left;
+  width: 100%;
 }
 
 .row-index {
@@ -601,6 +685,302 @@ td strong {
   height: 100%;
 }
 
+.continent-stack,
+.country-list,
+.candidate-list,
+.ranking-list,
+.profile-section-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.continent-block {
+  display: grid;
+  gap: 8px;
+}
+
+.continent-button,
+.country-button,
+.player-mini-card,
+.candidate-item button,
+.ranking-item button,
+.remove-button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+}
+
+.continent-button,
+.country-button {
+  align-items: center;
+  display: flex;
+  font-weight: 800;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.continent-button.active,
+.country-button.active {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+  color: #fff;
+}
+
+.continent-button em,
+.country-button span {
+  font-style: normal;
+  opacity: 0.8;
+}
+
+.nation-dashboard {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 300px;
+}
+
+.roster-section {
+  display: grid;
+  gap: 18px;
+}
+
+.position-group {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.position-group h3 {
+  color: var(--green-dark);
+  margin-bottom: 10px;
+}
+
+.player-card-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+
+.player-mini-card {
+  display: grid;
+  gap: 5px;
+  min-height: 86px;
+  padding: 12px;
+  text-align: left;
+}
+
+.player-mini-card strong {
+  font-size: 14px;
+}
+
+.player-mini-card span,
+.player-mini-card em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.compact-tabs {
+  margin-bottom: 14px;
+}
+
+.slider-stack.compact {
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.candidate-list {
+  margin-top: 12px;
+  max-height: 720px;
+  overflow: auto;
+}
+
+.candidate-item {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 8px;
+}
+
+.candidate-item > button {
+  border: 0;
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  text-align: left;
+}
+
+.candidate-item strong {
+  font-size: 14px;
+}
+
+.candidate-item span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.candidate-item div {
+  display: flex;
+  gap: 6px;
+}
+
+.candidate-item div button,
+.ranking-item > button:last-child {
+  font-size: 12px;
+  min-height: 32px;
+  padding: 0 8px;
+}
+
+.candidate-item button.active {
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.ranking-list {
+  max-height: 760px;
+  overflow: auto;
+}
+
+.ranking-item {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 42px minmax(0, 1fr) 48px 58px;
+  padding: 10px 0;
+}
+
+.ranking-item > span {
+  align-items: center;
+  background: #f3eadb;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 900;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.ranking-item > button:nth-child(2) {
+  border: 0;
+  display: grid;
+  gap: 3px;
+  padding: 0;
+  text-align: left;
+}
+
+.ranking-item small {
+  color: var(--muted);
+}
+
+.ranking-item em {
+  color: var(--green-dark);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.compare-cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.profile-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.profile-card p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.remove-button {
+  float: right;
+  min-height: 30px;
+  padding: 0 8px;
+}
+
+.compare-row {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.compare-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.player-drawer {
+  background: rgba(255, 253, 248, 0.98);
+  border-left: 1px solid var(--line);
+  bottom: 0;
+  box-shadow: -20px 0 50px rgba(45, 38, 28, 0.18);
+  max-width: 460px;
+  overflow: auto;
+  padding: 22px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: min(460px, 92vw);
+  z-index: 20;
+}
+
+.drawer-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.drawer-header button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.drawer-summary {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.drawer-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.profile-section {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.profile-section div {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-section p,
+.profile-section li {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .empty-state {
   color: var(--muted);
   margin-bottom: 0;
@@ -702,7 +1082,12 @@ td strong {
 @media (max-width: 1180px) {
   .workspace-header,
   .main-grid,
-  .data-grid {
+  .data-grid,
+  .atlas-grid,
+  .builder-grid,
+  .rankings-grid,
+  .compare-grid,
+  .nation-dashboard {
     grid-template-columns: 1fr;
   }
 
@@ -717,6 +1102,11 @@ td strong {
   .summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .candidate-list,
+  .ranking-list {
+    max-height: none;
+  }
 }
 
 @media (max-width: 720px) {
@@ -729,9 +1119,12 @@ td strong {
   }
 
   .formation-tabs,
+  .app-tabs,
   .slot-editor,
   .summary-grid,
-  .comparison-grid {
+  .summary-grid.compact,
+  .comparison-grid,
+  .compare-cards {
     grid-template-columns: 1fr;
   }
 

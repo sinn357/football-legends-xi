@@ -31,29 +31,56 @@ export type ScoreKey =
 
 export type PlayerScores = Record<ScoreKey, number>;
 
+export type Continent = "America" | "Europe" | "Asia" | "Africa";
+
+export type PlayerProfileSection = {
+  score: number;
+  grade: string;
+  title: string;
+  bullets: string[];
+  explanation: string;
+};
+
+export type PlayerProfile = {
+  isCurated: boolean;
+  summary: string;
+  sections: Record<ScoreKey, PlayerProfileSection>;
+};
+
 export type LegendPlayer = {
   id: string;
   name: string;
   country: string;
+  continent: Continent;
   region: string;
   primaryPosition: PositionCode;
   status: PlayerStatus;
   tags: string[];
+  topTierRank: number | null;
   sourceOrder: number;
   positionOrder: number;
   scores: PlayerScores;
+  profile: PlayerProfile;
 };
 
 export type CountrySummary = {
   name: string;
+  continent: Continent;
   region: string;
   count: number;
   positions: Partial<Record<PositionCode, number>>;
 };
 
+export type ContinentSummary = {
+  name: Continent;
+  count: number;
+  countries: CountrySummary[];
+};
+
 export type LegendData = {
   players: LegendPlayer[];
   countries: CountrySummary[];
+  continents: ContinentSummary[];
   sourcePath: string;
 };
 
@@ -130,13 +157,69 @@ const iconOverrides: Record<string, Partial<PlayerScores>> = {
   "손흥민": { teamCareer: 93, individualCareer: 92, primeSkill: 96, teamImportance: 96, legacy: 97 },
 };
 
+const topTierNames = [
+  "Lionel Messi",
+  "Pele",
+  "Diego Maradona",
+  "Cristiano Ronaldo",
+  "Johan Cruyff",
+  "Franz Beckenbauer",
+  "Ronaldo",
+  "Zinedine Zidane",
+  "Michel Platini",
+  "Alfredo Di Stefano",
+  "Paolo Maldini",
+  "Marco Van Basten",
+  "Gerd Muller",
+  "Eusebio",
+  "Garrincha",
+  "Ronaldinho",
+  "Romário",
+  "Xavi",
+  "Andres Iniesta",
+  "Lothar Matthaus",
+  "Gianluigi Buffon",
+  "Franco Baresi",
+  "Roberto Baggio",
+  "Zico",
+  "Neymar",
+  "Thierry Henry",
+  "Ferenc Puskas",
+  "George Best",
+  "Bobby Charlton",
+  "Bobby Moore",
+  "Lev Yashin",
+  "Manuel Neuer",
+  "Kylian Mbappe",
+  "Luka Modrić",
+  "Andrea Pirlo",
+  "Sergio Ramos",
+  "Cafu",
+  "Roberto Carlos",
+  "Didi",
+  "Rivaldo",
+  "Ruud Gullit",
+  "Frank Rijkaard",
+  "Dennis Bergkamp",
+  "Luis Figo",
+  "Karim Benzema",
+  "Kevin De Bruyne",
+  "손흥민",
+  "차범근",
+  "박지성",
+  "홍명보",
+];
+
+const topTierRankByName = new Map(topTierNames.map((name, index) => [normalizedName(name), index + 1]));
+
 export function loadLegendData(): LegendData {
   const sourcePath = resolveSourcePath();
   const markdown = fs.readFileSync(sourcePath, "utf8");
   const players = parseLegendMarkdown(markdown);
   const countries = summarizeCountries(players);
+  const continents = summarizeContinents(countries);
 
-  return { players, countries, sourcePath };
+  return { players, countries, continents, sourcePath };
 }
 
 function resolveSourcePath() {
@@ -242,23 +325,28 @@ function parseLegendMarkdown(markdown: string) {
     const positionOrder = (positionCounts.get(positionKey) ?? 0) + 1;
     positionCounts.set(positionKey, positionOrder);
 
+    const scores = makeSeedScores({
+      name: parsedName.name,
+      country: currentCountry,
+      position: currentPosition,
+      status: parsedName.status,
+      positionOrder,
+    });
+
     const player: LegendPlayer = {
       id: makePlayerId(currentCountry, parsedName.name, players.length),
       name: parsedName.name,
       country: currentCountry,
+      continent: getContinent(currentCountry),
       region: currentRegion,
       primaryPosition: currentPosition,
       status: parsedName.status,
       tags: [positionLabels[currentPosition], ...parsedName.tags],
+      topTierRank: topTierRankByName.get(normalizedName(parsedName.name)) ?? null,
       sourceOrder: players.length + 1,
       positionOrder,
-      scores: makeSeedScores({
-        name: parsedName.name,
-        country: currentCountry,
-        position: currentPosition,
-        status: parsedName.status,
-        positionOrder,
-      }),
+      scores,
+      profile: makePlayerProfile(parsedName.name, currentCountry, currentPosition, parsedName.status, scores),
     };
 
     players.push(player);
@@ -313,6 +401,51 @@ function normalizeCountryName(value: string) {
   };
 
   return map[clean] ?? clean;
+}
+
+function getContinent(country: string): Continent {
+  const america = new Set([
+    "Argentina",
+    "Brazil",
+    "우루과이",
+    "칠레",
+    "페루",
+    "콜롬비아",
+    "멕시코",
+    "파라과이",
+    "트리니다드 토바고",
+    "미국",
+    "코스타리카",
+  ]);
+
+  const asia = new Set(["Korea", "일본", "이란", "오스트레일리아"]);
+  const africa = new Set([
+    "가나",
+    "나이지리아",
+    "카메룬",
+    "코트디부아르",
+    "라이베리아",
+    "남아공",
+    "세네갈",
+    "모로코",
+    "가봉",
+    "이집트",
+    "알제리",
+  ]);
+
+  if (asia.has(country)) {
+    return "Asia";
+  }
+
+  if (africa.has(country)) {
+    return "Africa";
+  }
+
+  if (america.has(country)) {
+    return "America";
+  }
+
+  return "Europe";
 }
 
 function parseNameAndStatus(content: string): {
@@ -406,6 +539,99 @@ function makeSeedScores({
   };
 }
 
+function makePlayerProfile(
+  name: string,
+  country: string,
+  position: PositionCode,
+  status: PlayerStatus,
+  scores: PlayerScores,
+): PlayerProfile {
+  const topTierRank = topTierRankByName.get(normalizedName(name)) ?? null;
+  const isCurated = topTierRank !== null;
+  const statusNote =
+    status === "active-hold"
+      ? "현역 커리어가 진행 중이라 최종 평가는 보류된 상태입니다."
+      : status === "delete-candidate"
+        ? "원본 리스트에서 삭제 후보로 표시되어 재검토가 필요한 선수입니다."
+        : "레전드 풀에 포함된 선수입니다.";
+
+  const summary = isCurated
+    ? `${name}는 ${country} 레전드 풀의 핵심 티어로 우선 큐레이션된 선수입니다. 현재 상세 평가는 앱 내부 기준인 팀 커리어, 개인 수상, 프라임 실력, 팀 내 비중, 장기 존재감으로 분리해 보여줍니다.`
+    : `${name}는 ${country}의 ${positionLabels[position]} 후보입니다. 상세 리서치 메모는 아직 확장 전이지만, 빌더와 랭킹에서는 동일하게 사용할 수 있습니다. ${statusNote}`;
+
+  return {
+    isCurated,
+    summary,
+    sections: {
+      teamCareer: makeProfileSection({
+        score: scores.teamCareer,
+        title: "팀 커리어",
+        bullets: [
+          isCurated ? "클럽/국가대표 커리어의 팀 성과를 우선 검토할 핵심 선수입니다." : "주요 우승 및 대표팀 성과를 추가 기록할 예정입니다.",
+          "리그, 국제 대회, 국가대표 토너먼트 성과를 별도 축으로 분리합니다.",
+        ],
+        explanation: "팀 커리어 점수는 소속 팀의 우승, 장기 지배력, 국가대표 성취를 함께 반영하는 축입니다.",
+      }),
+      individualCareer: makeProfileSection({
+        score: scores.individualCareer,
+        title: "개인 수상",
+        bullets: [
+          isCurated ? "개인상과 시즌 베스트급 평가를 우선 큐레이션 대상으로 둡니다." : "개인상, 득점왕, 베스트11 등 세부 수상 기록을 보강할 예정입니다.",
+          "공격수와 창조형 선수는 개인 수상 영향이 상대적으로 크게 반영됩니다.",
+        ],
+        explanation: "개인 수상 점수는 발롱도르급 평가, 리그/대회 개인상, 시대별 개인 인지도를 보는 축입니다.",
+      }),
+      primeSkill: makeProfileSection({
+        score: scores.primeSkill,
+        title: "프라임 실력",
+        bullets: [
+          isCurated ? "전성기 단기 고점이 논쟁의 중심이 되는 선수로 우선 표시합니다." : "전성기 시즌과 강점 메모를 추가할 예정입니다.",
+          "순수 기량, 경기 지배력, 포지션 내 희소성을 같이 봅니다.",
+        ],
+        explanation: "프라임 실력은 누적 커리어와 분리해, 전성기 퍼포먼스의 고점만 따로 보는 축입니다.",
+      }),
+      teamImportance: makeProfileSection({
+        score: scores.teamImportance,
+        title: "팀 내 비중",
+        bullets: [
+          isCurated ? "소속 팀 또는 대표팀에서의 에이스성/중심성을 우선 평가합니다." : "팀 내 역할과 핵심도 메모를 추가할 예정입니다.",
+          "우승팀의 일부였는지, 우승팀을 끌고 간 축이었는지를 구분합니다.",
+        ],
+        explanation: "팀 내 비중은 커리어 성과 안에서 해당 선수가 차지한 책임과 영향력을 보는 축입니다.",
+      }),
+      legacy: makeProfileSection({
+        score: scores.legacy,
+        title: "100년 뒤 존재감",
+        bullets: [
+          isCurated ? "역사적 기억에 남을 가능성이 큰 선수로 우선 큐레이션했습니다." : "장기적 존재감은 상세 리서치 후 조정할 예정입니다.",
+          "기록, 서사, 전술사적 의미, 국가 대표성을 함께 봅니다.",
+        ],
+        explanation: "장기 존재감은 지금의 실력 평가를 넘어 축구사에서 계속 호출될 가능성을 보는 축입니다.",
+      }),
+    },
+  };
+}
+
+function makeProfileSection({
+  score,
+  title,
+  bullets,
+  explanation,
+}: {
+  score: number;
+  title: string;
+  bullets: string[];
+  explanation: string;
+}): PlayerProfileSection {
+  return {
+    score,
+    grade: score >= 97 ? "S+" : score >= 92 ? "S" : score >= 86 ? "A" : score >= 78 ? "B" : "C",
+    title,
+    bullets,
+    explanation,
+  };
+}
+
 function clampScore(value: number) {
   return Math.min(100, Math.max(1, Math.round(value)));
 }
@@ -418,6 +644,7 @@ function summarizeCountries(players: LegendPlayer[]) {
       summaries.get(player.country) ??
       ({
         name: player.country,
+        continent: player.continent,
         region: player.region,
         count: 0,
         positions: {},
@@ -429,11 +656,35 @@ function summarizeCountries(players: LegendPlayer[]) {
   }
 
   return Array.from(summaries.values()).sort((a, b) => {
-    const regionCompare = a.region.localeCompare(b.region);
-    if (regionCompare !== 0) {
-      return regionCompare;
+    const continentCompare = continentOrder(a.continent) - continentOrder(b.continent);
+    if (continentCompare !== 0) {
+      return continentCompare;
     }
 
     return b.count - a.count || a.name.localeCompare(b.name);
   });
+}
+
+function summarizeContinents(countries: CountrySummary[]) {
+  const continentNames: Continent[] = ["America", "Europe", "Asia", "Africa"];
+
+  return continentNames.map((name) => {
+    const continentCountries = countries.filter((country) => country.continent === name);
+    return {
+      name,
+      count: continentCountries.reduce((sum, country) => sum + country.count, 0),
+      countries: continentCountries,
+    };
+  });
+}
+
+function continentOrder(continent: Continent) {
+  const order: Record<Continent, number> = {
+    America: 0,
+    Europe: 1,
+    Asia: 2,
+    Africa: 3,
+  };
+
+  return order[continent];
 }

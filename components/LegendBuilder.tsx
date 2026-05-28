@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent } from "react";
-import type { LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey } from "@/lib/legend-data";
+import type { MutableRefObject, PointerEvent, RefObject } from "react";
+import type { Continent, LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey } from "@/lib/legend-data";
 
+type TabId = "atlas" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
+type FilterValue = "ALL";
 
 type FormationSlot = {
   id: string;
@@ -31,7 +33,7 @@ type SavedSlot = {
 type SavedSquad = {
   id: string;
   name: string;
-  country: string;
+  scope: string;
   formationId: string;
   formationName: string;
   createdAt: string;
@@ -41,7 +43,7 @@ type SavedSquad = {
 
 const scoreLabels: Record<ScoreKey, string> = {
   teamCareer: "팀 커리어",
-  individualCareer: "개인 커리어",
+  individualCareer: "개인 수상",
   primeSkill: "프라임 실력",
   teamImportance: "팀 내 비중",
   legacy: "100년 뒤 존재감",
@@ -54,6 +56,9 @@ const statusLabels: Record<PlayerStatus, string> = {
   "delete-candidate": "삭제후보",
   watch: "검토",
 };
+
+const positionOptions: PositionCode[] = ["ST", "SS", "RW", "LW", "AM", "CM", "DM", "CB", "RB", "LB", "GK"];
+const continentOptions: Continent[] = ["America", "Europe", "Asia", "Africa"];
 
 const initialWeights: WeightMap = {
   teamCareer: 25,
@@ -146,52 +151,54 @@ const formations: Record<string, { name: string; slots: FormationSlot[] }> = {
   },
 };
 
-const storageKey = "football-legends-xi.saved-squads.v1";
+const storageKey = "football-legends-xi.saved-squads.v2";
 const slotPositionsStorageKey = "football-legends-xi.slot-positions.v1";
 
 export function LegendBuilder({ data }: { data: LegendData }) {
   const pitchRef = useRef<HTMLDivElement | null>(null);
   const activeDragSlotRef = useRef<string | null>(null);
   const defaultCountry = data.countries.find((country) => country.name === "Brazil")?.name ?? data.countries[0]?.name ?? "";
-  const [country, setCountry] = useState(defaultCountry);
+  const [activeTab, setActiveTab] = useState<TabId>("atlas");
+  const [atlasContinent, setAtlasContinent] = useState<Continent>("America");
+  const [atlasCountry, setAtlasCountry] = useState(defaultCountry);
   const [formationId, setFormationId] = useState("4-3-3");
   const [weights, setWeights] = useState<WeightMap>(initialWeights);
   const [includeActiveHold, setIncludeActiveHold] = useState(true);
   const [includeDeleteCandidates, setIncludeDeleteCandidates] = useState(false);
-  const [query, setQuery] = useState("");
+  const [builderContinent, setBuilderContinent] = useState<Continent | FilterValue>("ALL");
+  const [builderCountry, setBuilderCountry] = useState<string | FilterValue>("ALL");
+  const [builderPosition, setBuilderPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [candidateQuery, setCandidateQuery] = useState("");
+  const [topOnly, setTopOnly] = useState(true);
   const [manualSlots, setManualSlots] = useState<Record<string, string>>({});
-  const [savedSquads, setSavedSquads] = useState<SavedSquad[]>([]);
+  const [selectedSlotId, setSelectedSlotId] = useState("st");
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [savedSquads, setSavedSquads] = useState<SavedSquad[]>([]);
   const [slotPositions, setSlotPositions] = useState<Record<string, Record<string, SlotPosition>>>({});
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
 
   const formation = formations[formationId];
-  const countries = data.countries;
   const currentSlotPositions = slotPositions[formationId] ?? {};
+  const playerById = useMemo(() => new Map(data.players.map((player) => [player.id, player])), [data.players]);
+  const selectedPlayer = selectedPlayerId ? playerById.get(selectedPlayerId) ?? null : null;
+  const selectedSlot = formation.slots.find((slot) => slot.id === selectedSlotId) ?? formation.slots[0];
 
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(storageKey);
-      if (!raw) {
-        return;
+      if (raw) {
+        setSavedSquads(JSON.parse(raw) as SavedSquad[]);
       }
-
-      const parsed = JSON.parse(raw) as SavedSquad[];
-      setSavedSquads(parsed);
-      setCompareIds(parsed.slice(0, 3).map((squad) => squad.id));
     } catch {
       setSavedSquads([]);
     }
-  }, []);
 
-  useEffect(() => {
     try {
       const raw = window.localStorage.getItem(slotPositionsStorageKey);
-      if (!raw) {
-        return;
+      if (raw) {
+        setSlotPositions(JSON.parse(raw) as Record<string, Record<string, SlotPosition>>);
       }
-
-      setSlotPositions(JSON.parse(raw) as Record<string, Record<string, SlotPosition>>);
     } catch {
       setSlotPositions({});
     }
@@ -206,21 +213,57 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   }, [slotPositions]);
 
   useEffect(() => {
-    setManualSlots({});
-  }, [country, formationId, includeActiveHold, includeDeleteCandidates]);
+    if (!data.countries.some((country) => country.name === atlasCountry && country.continent === atlasContinent)) {
+      setAtlasCountry(data.countries.find((country) => country.continent === atlasContinent)?.name ?? defaultCountry);
+    }
+  }, [atlasContinent, atlasCountry, data.countries, defaultCountry]);
 
-  const countryPlayers = useMemo(
+  const statusFilteredPlayers = useMemo(
     () =>
       data.players
-        .filter((player) => player.country === country)
         .filter((player) => includeActiveHold || player.status !== "active-hold")
         .filter((player) => includeDeleteCandidates || player.status !== "delete-candidate"),
-    [country, data.players, includeActiveHold, includeDeleteCandidates],
+    [data.players, includeActiveHold, includeDeleteCandidates],
   );
 
+  const builderCountries = useMemo(
+    () =>
+      data.countries.filter((country) => builderContinent === "ALL" || country.continent === builderContinent),
+    [builderContinent, data.countries],
+  );
+
+  const candidatePlayers = useMemo(() => {
+    const normalizedQuery = candidateQuery.trim().toLowerCase();
+    return statusFilteredPlayers
+      .filter((player) => builderContinent === "ALL" || player.continent === builderContinent)
+      .filter((player) => builderCountry === "ALL" || player.country === builderCountry)
+      .filter((player) => builderPosition === "ALL" || player.primaryPosition === builderPosition)
+      .filter((player) => !topOnly || player.topTierRank !== null)
+      .filter((player) => {
+        if (!normalizedQuery) {
+          return true;
+        }
+        return `${player.name} ${player.country} ${player.continent} ${player.primaryPosition} ${player.tags.join(" ")}`
+          .toLowerCase()
+          .includes(normalizedQuery);
+      })
+      .map((player) => ({ player, rating: ratePlayerForSlot(player, selectedSlot, weights) }))
+      .sort((a, b) => b.rating - a.rating || (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999))
+      .slice(0, 80);
+  }, [
+    builderContinent,
+    builderCountry,
+    builderPosition,
+    candidateQuery,
+    selectedSlot,
+    statusFilteredPlayers,
+    topOnly,
+    weights,
+  ]);
+
   const squad = useMemo(
-    () => buildSquad(countryPlayers, formation.slots, weights, manualSlots),
-    [countryPlayers, formation.slots, manualSlots, weights],
+    () => buildSquad(candidatePlayers.map(({ player }) => player), data.players, formation.slots, weights, manualSlots),
+    [candidatePlayers, data.players, formation.slots, manualSlots, weights],
   );
 
   const starters = formation.slots
@@ -230,25 +273,32 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     })
     .filter(Boolean) as Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
 
-  const selectedIds = new Set(starters.map((starter) => starter.player.id));
-  const bench = countryPlayers
-    .filter((player) => !selectedIds.has(player.id))
-    .map((player) => ({ player, rating: ratePlayer(player, weights) }))
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 12);
-
-  const roster = countryPlayers
-    .filter((player) => {
-      const searchable = `${player.name} ${player.primaryPosition} ${player.tags.join(" ")}`.toLowerCase();
-      return searchable.includes(query.toLowerCase());
-    })
-    .map((player) => ({ player, rating: ratePlayer(player, weights) }))
-    .sort((a, b) => b.rating - a.rating || a.player.positionOrder - b.player.positionOrder);
-
-  const selectedCountry = countries.find((item) => item.name === country);
   const averageRating = starters.length
     ? Math.round(starters.reduce((sum, starter) => sum + starter.rating, 0) / starters.length)
     : 0;
+
+  const rankingPlayers = useMemo(
+    () =>
+      statusFilteredPlayers
+        .map((player) => ({ player, rating: ratePlayer(player, weights) }))
+        .sort((a, b) => b.rating - a.rating || (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999))
+        .slice(0, 100),
+    [statusFilteredPlayers, weights],
+  );
+
+  const atlasPlayers = useMemo(
+    () =>
+      data.players
+        .filter((player) => player.country === atlasCountry)
+        .sort((a, b) => positionOptions.indexOf(a.primaryPosition) - positionOptions.indexOf(b.primaryPosition) || a.positionOrder - b.positionOrder),
+    [atlasCountry, data.players],
+  );
+
+  const selectedCountrySummary = data.countries.find((country) => country.name === atlasCountry);
+  const selectedCountryTop = atlasPlayers
+    .map((player) => ({ player, rating: ratePlayer(player, weights) }))
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 10);
 
   function updateWeight(key: ScoreKey, value: number) {
     setWeights((current) => ({ ...current, [key]: value }));
@@ -279,6 +329,11 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     }));
   }
 
+  function assignPlayerToSelectedSlot(playerId: string) {
+    setManualSlots((current) => ({ ...current, [selectedSlot.id]: playerId }));
+    setSelectedPlayerId(playerId);
+  }
+
   function resetCurrentFormationPositions() {
     setSlotPositions((current) => {
       const next = { ...current };
@@ -288,6 +343,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   }
 
   function saveCurrentSquad() {
+    const scope = builderCountry !== "ALL" ? builderCountry : builderContinent !== "ALL" ? builderContinent : "World";
     const slots: SavedSlot[] = starters.map(({ slot, player, rating }) => ({
       slotId: slot.id,
       slotLabel: slot.label,
@@ -299,9 +355,9 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
     const now = new Date();
     const saved: SavedSquad = {
-      id: `${country}-${formationId}-${now.getTime()}`,
-      name: `${country} ${formation.name} #${savedSquads.length + 1}`,
-      country,
+      id: `${scope}-${formationId}-${now.getTime()}`,
+      name: `${scope} ${formation.name} #${savedSquads.length + 1}`,
+      scope,
       formationId,
       formationName: formation.name,
       createdAt: now.toISOString(),
@@ -310,21 +366,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     };
 
     setSavedSquads((current) => [saved, ...current].slice(0, 20));
-    setCompareIds((current) => [saved.id, ...current].slice(0, 3));
   }
 
-  function removeSavedSquad(id: string) {
-    setSavedSquads((current) => current.filter((squadItem) => squadItem.id !== id));
-    setCompareIds((current) => current.filter((compareId) => compareId !== id));
-  }
-
-  function toggleComparison(id: string) {
+  function toggleCompare(playerId: string) {
     setCompareIds((current) => {
-      if (current.includes(id)) {
-        return current.filter((compareId) => compareId !== id);
+      if (current.includes(playerId)) {
+        return current.filter((id) => id !== playerId);
       }
 
-      return [id, ...current].slice(0, 3);
+      return [playerId, ...current].slice(0, 4);
     });
   }
 
@@ -332,328 +382,729 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     <main className="app-shell">
       <section className="workspace-header">
         <div>
-          <p className="eyebrow">Local XI Lab</p>
+          <p className="eyebrow">Football Legends Atlas</p>
           <h1>Football Legends XI</h1>
           <p className="header-copy">
-            원본 레전드 리스트를 바탕으로 국가, 가중치, 포메이션을 바꿔가며 역대 베스트11을 실험합니다.
+            국가별 레전드 아카이브를 탐색하고, 랭킹과 비교를 거쳐 월드 베스트 일레븐까지 직접 구성합니다.
           </p>
         </div>
         <div className="source-panel">
-          <span>Source</span>
+          <span>Archive</span>
           <strong>{data.players.length.toLocaleString()} players</strong>
-          <small>{data.sourcePath}</small>
+          <small>
+            {data.continents.length} continents · {data.countries.length} countries
+          </small>
         </div>
       </section>
 
-      <section className="control-strip" aria-label="조합 설정">
+      <nav className="app-tabs" aria-label="주요 기능">
+        {[
+          ["atlas", "Atlas"],
+          ["best-xi", "Best XI"],
+          ["rankings", "Rankings"],
+          ["compare", "Compare"],
+        ].map(([id, label]) => (
+          <button
+            className={activeTab === id ? "tab active" : "tab"}
+            key={id}
+            onClick={() => setActiveTab(id as TabId)}
+            type="button"
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === "atlas" ? (
+        <AtlasView
+          atlasContinent={atlasContinent}
+          atlasCountry={atlasCountry}
+          atlasPlayers={atlasPlayers}
+          continents={data.continents}
+          countries={data.countries}
+          onContinentChange={setAtlasContinent}
+          onCountryChange={setAtlasCountry}
+          onOpenBestXi={() => {
+            setBuilderContinent(selectedCountrySummary?.continent ?? "ALL");
+            setBuilderCountry(atlasCountry);
+            setTopOnly(false);
+            setActiveTab("best-xi");
+          }}
+          onPlayerSelect={setSelectedPlayerId}
+          selectedCountryTop={selectedCountryTop}
+          selectedCountrySummary={selectedCountrySummary}
+          weights={weights}
+        />
+      ) : null}
+
+      {activeTab === "best-xi" ? (
+        <BestXiView
+          averageRating={averageRating}
+          builderContinent={builderContinent}
+          builderCountries={builderCountries}
+          builderCountry={builderCountry}
+          builderPosition={builderPosition}
+          candidatePlayers={candidatePlayers}
+          candidateQuery={candidateQuery}
+          compareIds={compareIds}
+          formation={formation}
+          formationId={formationId}
+          includeActiveHold={includeActiveHold}
+          includeDeleteCandidates={includeDeleteCandidates}
+          manualSlots={manualSlots}
+          onAssignPlayer={assignPlayerToSelectedSlot}
+          onCandidateQueryChange={setCandidateQuery}
+          onContinentChange={(value) => {
+            setBuilderContinent(value);
+            setBuilderCountry("ALL");
+          }}
+          onCountryChange={setBuilderCountry}
+          onFormationChange={setFormationId}
+          onIncludeActiveHoldChange={setIncludeActiveHold}
+          onIncludeDeleteCandidatesChange={setIncludeDeleteCandidates}
+          onPlayerSelect={setSelectedPlayerId}
+          onPositionChange={setBuilderPosition}
+          onResetPositions={resetCurrentFormationPositions}
+          onSave={saveCurrentSquad}
+          onSelectedSlotChange={setSelectedSlotId}
+          onToggleCompare={toggleCompare}
+          onTopOnlyChange={setTopOnly}
+          pitchRef={pitchRef}
+          selectedSlotId={selectedSlot.id}
+          setDraggingSlotId={setDraggingSlotId}
+          slotPositions={currentSlotPositions}
+          squad={squad}
+          topOnly={topOnly}
+          updateSlotPosition={updateSlotPosition}
+          activeDragSlotRef={activeDragSlotRef}
+          draggingSlotId={draggingSlotId}
+          weights={weights}
+          onWeightChange={updateWeight}
+        />
+      ) : null}
+
+      {activeTab === "rankings" ? (
+        <RankingsView
+          onPlayerSelect={setSelectedPlayerId}
+          onToggleCompare={toggleCompare}
+          rankings={rankingPlayers}
+          weights={weights}
+          onWeightChange={updateWeight}
+        />
+      ) : null}
+
+      {activeTab === "compare" ? (
+        <CompareView
+          compareIds={compareIds}
+          onPlayerSelect={setSelectedPlayerId}
+          onToggleCompare={toggleCompare}
+          players={data.players}
+          playerById={playerById}
+          weights={weights}
+        />
+      ) : null}
+
+      <PlayerDetailDrawer player={selectedPlayer} onClose={() => setSelectedPlayerId(null)} onToggleCompare={toggleCompare} />
+    </main>
+  );
+}
+
+function AtlasView({
+  atlasContinent,
+  atlasCountry,
+  atlasPlayers,
+  continents,
+  countries,
+  onContinentChange,
+  onCountryChange,
+  onOpenBestXi,
+  onPlayerSelect,
+  selectedCountryTop,
+  selectedCountrySummary,
+  weights,
+}: {
+  atlasContinent: Continent;
+  atlasCountry: string;
+  atlasPlayers: LegendPlayer[];
+  continents: LegendData["continents"];
+  countries: LegendData["countries"];
+  onContinentChange: (continent: Continent) => void;
+  onCountryChange: (country: string) => void;
+  onOpenBestXi: () => void;
+  onPlayerSelect: (playerId: string) => void;
+  selectedCountryTop: Array<{ player: LegendPlayer; rating: number }>;
+  selectedCountrySummary?: LegendData["countries"][number];
+  weights: WeightMap;
+}) {
+  const groupedByPosition = groupPlayersByPosition(atlasPlayers);
+
+  return (
+    <section className="atlas-grid">
+      <aside className="atlas-sidebar">
+        <div className="section-heading">
+          <p className="eyebrow">Continents</p>
+          <h2>대륙별 국가</h2>
+        </div>
+        <div className="continent-stack">
+          {continents.map((continent) => (
+            <section className="continent-block" key={continent.name}>
+              <button
+                className={atlasContinent === continent.name ? "continent-button active" : "continent-button"}
+                onClick={() => onContinentChange(continent.name)}
+                type="button"
+              >
+                <span>{continent.name}</span>
+                <em>{continent.count}</em>
+              </button>
+              {atlasContinent === continent.name ? (
+                <div className="country-list">
+                  {countries
+                    .filter((country) => country.continent === continent.name)
+                    .map((country) => (
+                      <button
+                        className={country.name === atlasCountry ? "country-button active" : "country-button"}
+                        key={country.name}
+                        onClick={() => onCountryChange(country.name)}
+                        type="button"
+                      >
+                        {country.name}
+                        <span>{country.count}</span>
+                      </button>
+                    ))}
+                </div>
+              ) : null}
+            </section>
+          ))}
+        </div>
+      </aside>
+
+      <section className="atlas-main">
+        <div className="section-heading row">
+          <div>
+            <p className="eyebrow">{selectedCountrySummary?.continent ?? atlasContinent}</p>
+            <h2>{atlasCountry} Legend Archive</h2>
+          </div>
+          <button className="primary-inline" onClick={onOpenBestXi} type="button">
+            이 국가로 XI 만들기
+          </button>
+        </div>
+
+        <section className="summary-grid compact">
+          <Metric label="선수 풀" value={`${selectedCountrySummary?.count ?? 0}명`} detail="원본 리스트 기준" />
+          <Metric label="포지션 수" value={`${Object.keys(selectedCountrySummary?.positions ?? {}).length}`} detail="분류된 포지션" />
+          <Metric label="Top 10 평균" value={`${average(selectedCountryTop.map((item) => item.rating))}`} detail="현재 가중치" />
+        </section>
+
+        <div className="nation-dashboard">
+          <div className="roster-section">
+            {positionOptions.map((position) => {
+              const players = groupedByPosition[position] ?? [];
+              if (!players.length) {
+                return null;
+              }
+
+              return (
+                <section className="position-group" key={position}>
+                  <h3>{position}</h3>
+                  <div className="player-card-grid">
+                    {players.map((player) => (
+                      <PlayerMiniCard
+                        key={player.id}
+                        onClick={() => onPlayerSelect(player.id)}
+                        player={player}
+                        rating={ratePlayer(player, weights)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+
+          <aside className="top-list-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Country Top 10</p>
+              <h2>국가 핵심 선수</h2>
+            </div>
+            <div className="bench-list">
+              {selectedCountryTop.map(({ player, rating }, index) => (
+                <PlayerRow key={player.id} index={index + 1} player={player} rating={rating} onClick={() => onPlayerSelect(player.id)} />
+              ))}
+            </div>
+          </aside>
+        </div>
+      </section>
+    </section>
+  );
+}
+
+function BestXiView({
+  activeDragSlotRef,
+  averageRating,
+  builderContinent,
+  builderCountries,
+  builderCountry,
+  builderPosition,
+  candidatePlayers,
+  candidateQuery,
+  compareIds,
+  draggingSlotId,
+  formation,
+  formationId,
+  includeActiveHold,
+  includeDeleteCandidates,
+  manualSlots,
+  onAssignPlayer,
+  onCandidateQueryChange,
+  onContinentChange,
+  onCountryChange,
+  onFormationChange,
+  onIncludeActiveHoldChange,
+  onIncludeDeleteCandidatesChange,
+  onPlayerSelect,
+  onPositionChange,
+  onResetPositions,
+  onSave,
+  onSelectedSlotChange,
+  onToggleCompare,
+  onTopOnlyChange,
+  onWeightChange,
+  pitchRef,
+  selectedSlotId,
+  setDraggingSlotId,
+  slotPositions,
+  squad,
+  topOnly,
+  updateSlotPosition,
+  weights,
+}: {
+  activeDragSlotRef: MutableRefObject<string | null>;
+  averageRating: number;
+  builderContinent: Continent | FilterValue;
+  builderCountries: LegendData["countries"];
+  builderCountry: string | FilterValue;
+  builderPosition: PositionCode | FilterValue;
+  candidatePlayers: Array<{ player: LegendPlayer; rating: number }>;
+  candidateQuery: string;
+  compareIds: string[];
+  draggingSlotId: string | null;
+  formation: { name: string; slots: FormationSlot[] };
+  formationId: string;
+  includeActiveHold: boolean;
+  includeDeleteCandidates: boolean;
+  manualSlots: Record<string, string>;
+  onAssignPlayer: (playerId: string) => void;
+  onCandidateQueryChange: (query: string) => void;
+  onContinentChange: (value: Continent | FilterValue) => void;
+  onCountryChange: (value: string | FilterValue) => void;
+  onFormationChange: (formationId: string) => void;
+  onIncludeActiveHoldChange: (value: boolean) => void;
+  onIncludeDeleteCandidatesChange: (value: boolean) => void;
+  onPlayerSelect: (playerId: string) => void;
+  onPositionChange: (value: PositionCode | FilterValue) => void;
+  onResetPositions: () => void;
+  onSave: () => void;
+  onSelectedSlotChange: (slotId: string) => void;
+  onToggleCompare: (playerId: string) => void;
+  onTopOnlyChange: (value: boolean) => void;
+  onWeightChange: (key: ScoreKey, value: number) => void;
+  pitchRef: RefObject<HTMLDivElement | null>;
+  selectedSlotId: string;
+  setDraggingSlotId: (slotId: string | null) => void;
+  slotPositions: Record<string, SlotPosition>;
+  squad: Record<string, { player: LegendPlayer; rating: number }>;
+  topOnly: boolean;
+  updateSlotPosition: (slotId: string, event: PointerEvent<HTMLElement>) => void;
+  weights: WeightMap;
+}) {
+  const selectedSlot = formation.slots.find((slot) => slot.id === selectedSlotId) ?? formation.slots[0];
+
+  return (
+    <section className="builder-grid">
+      <aside className="weights-panel">
+        <div className="section-heading">
+          <p className="eyebrow">World Builder</p>
+          <h2>필터와 기준</h2>
+        </div>
         <label className="field">
-          <span>국가</span>
-          <select value={country} onChange={(event) => setCountry(event.target.value)}>
-            {countries.map((countryItem) => (
-              <option value={countryItem.name} key={countryItem.name}>
-                {countryItem.name} ({countryItem.count})
+          <span>대륙</span>
+          <select value={builderContinent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
+            <option value="ALL">전체</option>
+            {continentOptions.map((continent) => (
+              <option key={continent} value={continent}>
+                {continent}
               </option>
             ))}
           </select>
         </label>
-
-        <div className="formation-tabs" role="tablist" aria-label="포메이션">
-          {Object.entries(formations).map(([id, item]) => (
-            <button
-              className={id === formationId ? "tab active" : "tab"}
-              key={id}
-              onClick={() => setFormationId(id)}
-              type="button"
-            >
-              {item.name}
-            </button>
-          ))}
-        </div>
-
-        <div className="toggles" aria-label="필터">
+        <label className="field">
+          <span>국가</span>
+          <select value={builderCountry} onChange={(event) => onCountryChange(event.target.value)}>
+            <option value="ALL">전체</option>
+            {builderCountries.map((country) => (
+              <option key={country.name} value={country.name}>
+                {country.name} ({country.count})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field">
+          <span>포지션</span>
+          <select value={builderPosition} onChange={(event) => onPositionChange(event.target.value as PositionCode | FilterValue)}>
+            <option value="ALL">전체</option>
+            {positionOptions.map((position) => (
+              <option key={position} value={position}>
+                {position}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="toggles vertical">
           <label>
-            <input
-              checked={includeActiveHold}
-              onChange={(event) => setIncludeActiveHold(event.target.checked)}
-              type="checkbox"
-            />
+            <input checked={topOnly} onChange={(event) => onTopOnlyChange(event.target.checked)} type="checkbox" />
+            Top 50 기본 리스트
+          </label>
+          <label>
+            <input checked={includeActiveHold} onChange={(event) => onIncludeActiveHoldChange(event.target.checked)} type="checkbox" />
             현역보류 포함
           </label>
           <label>
             <input
               checked={includeDeleteCandidates}
-              onChange={(event) => setIncludeDeleteCandidates(event.target.checked)}
+              onChange={(event) => onIncludeDeleteCandidatesChange(event.target.checked)}
               type="checkbox"
             />
             삭제후보 포함
           </label>
         </div>
-      </section>
+        <div className="slider-stack compact">
+          {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
+            <label className="slider-row" key={key}>
+              <span>
+                {scoreLabels[key]}
+                <strong>{weights[key]}</strong>
+              </span>
+              <input max="50" min="0" onChange={(event) => onWeightChange(key, Number(event.target.value))} type="range" value={weights[key]} />
+            </label>
+          ))}
+        </div>
+      </aside>
 
-      <section className="summary-grid">
-        <Metric label="선수 풀" value={`${countryPlayers.length}명`} detail={selectedCountry?.region ?? "Core Nations"} />
-        <Metric label="추천 XI 평균" value={`${averageRating}`} detail="현재 가중치 기준" />
-        <Metric label="저장된 조합" value={`${savedSquads.length}`} detail="브라우저 로컬 저장" />
-        <Metric label="수동 고정" value={`${Object.keys(manualSlots).length}`} detail="슬롯 오버라이드" />
-      </section>
-
-      <section className="main-grid">
-        <aside className="weights-panel" aria-label="평가 가중치">
-          <div className="section-heading">
-            <p className="eyebrow">Scoring</p>
-            <h2>평가 가중치</h2>
+      <section className="pitch-panel">
+        <div className="section-heading row">
+          <div>
+            <p className="eyebrow">Best XI</p>
+            <h2>{formation.name} Custom XI</h2>
           </div>
-          <p className="panel-note">
-            현재 점수는 원본 문서 순서 기반 MVP 시드입니다. 실제 커리어 리서치 점수로 교체할 수 있게 축을 분리해두었습니다.
-          </p>
-
-          <div className="slider-stack">
-            {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
-              <label className="slider-row" key={key}>
-                <span>
-                  {scoreLabels[key]}
-                  <strong>{weights[key]}</strong>
-                </span>
-                <input
-                  max="50"
-                  min="0"
-                  onChange={(event) => updateWeight(key, Number(event.target.value))}
-                  type="range"
-                  value={weights[key]}
-                />
-              </label>
-            ))}
+          <div className="pitch-actions">
+            <button className="small-button" onClick={onSave} type="button">
+              XI 저장
+            </button>
+            <button className="small-button" onClick={onResetPositions} type="button">
+              위치 초기화
+            </button>
+            <span className="rating-pill">{averageRating}</span>
           </div>
-
-          <button className="primary-button" onClick={saveCurrentSquad} type="button">
-            현재 XI 저장
-          </button>
-          <button className="ghost-button" onClick={() => setManualSlots({})} type="button">
-            수동 고정 초기화
-          </button>
-        </aside>
-
-        <section className="pitch-panel" aria-label="추천 베스트 일레븐">
-          <div className="section-heading row">
-            <div>
-              <p className="eyebrow">{country}</p>
-              <h2>{formation.name} 추천 XI</h2>
-            </div>
-            <div className="pitch-actions">
-              <button className="small-button" onClick={resetCurrentFormationPositions} type="button">
-                위치 초기화
-              </button>
-              <span className="rating-pill">{averageRating}</span>
-            </div>
-          </div>
-
-          <div className="pitch" aria-label="축구장" ref={pitchRef}>
-            <div className="center-circle" />
-            <div className="box top-box" />
-            <div className="box bottom-box" />
-            {formation.slots.map((slot) => {
-              const selected = squad[slot.id];
-              const position = getSlotPosition(slot);
-
-              return (
-                <div
-                  aria-label={`${slot.label} ${selected?.player.name ?? "비어 있음"} 위치 이동`}
-                  className={draggingSlotId === slot.id ? "player-token dragging" : "player-token"}
-                  key={slot.id}
-                  onPointerDown={(event) => {
-                    activeDragSlotRef.current = slot.id;
-                    setDraggingSlotId(slot.id);
-                    event.currentTarget.setPointerCapture(event.pointerId);
+        </div>
+        <div className="formation-tabs compact-tabs">
+          {Object.entries(formations).map(([id, item]) => (
+            <button className={id === formationId ? "tab active" : "tab"} key={id} onClick={() => onFormationChange(id)} type="button">
+              {item.name}
+            </button>
+          ))}
+        </div>
+        <div className="pitch" aria-label="축구장" ref={pitchRef}>
+          <div className="center-circle" />
+          <div className="box top-box" />
+          <div className="box bottom-box" />
+          {formation.slots.map((slot) => {
+            const selected = squad[slot.id];
+            const position = slotPositions[slot.id] ?? { left: slot.left, top: slot.top };
+            return (
+              <div
+                aria-label={`${slot.label} ${selected?.player.name ?? "비어 있음"} 위치 이동`}
+                className={[
+                  "player-token",
+                  selectedSlotId === slot.id ? "selected" : "",
+                  draggingSlotId === slot.id ? "dragging" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                key={slot.id}
+                onClick={() => onSelectedSlotChange(slot.id)}
+                onPointerCancel={() => {
+                  activeDragSlotRef.current = null;
+                  setDraggingSlotId(null);
+                }}
+                onPointerDown={(event) => {
+                  activeDragSlotRef.current = slot.id;
+                  setDraggingSlotId(slot.id);
+                  onSelectedSlotChange(slot.id);
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                  updateSlotPosition(slot.id, event);
+                }}
+                onPointerMove={(event) => {
+                  if (activeDragSlotRef.current === slot.id) {
                     updateSlotPosition(slot.id, event);
-                  }}
-                  onPointerMove={(event) => {
-                    if (activeDragSlotRef.current === slot.id) {
-                      updateSlotPosition(slot.id, event);
-                    }
-                  }}
-                  onPointerCancel={() => {
-                    activeDragSlotRef.current = null;
-                    setDraggingSlotId(null);
-                  }}
-                  onPointerUp={(event) => {
-                    activeDragSlotRef.current = null;
-                    setDraggingSlotId(null);
-                    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-                      event.currentTarget.releasePointerCapture(event.pointerId);
-                    }
-                  }}
-                  role="button"
-                  style={{ left: `${position.left}%`, top: `${position.top}%` }}
-                  tabIndex={0}
-                  title="드래그해서 위치 이동"
+                  }
+                }}
+                onPointerUp={(event) => {
+                  activeDragSlotRef.current = null;
+                  setDraggingSlotId(null);
+                  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                  }
+                }}
+                role="button"
+                style={{ left: `${position.left}%`, top: `${position.top}%` }}
+                tabIndex={0}
+                title="클릭해서 슬롯 선택, 드래그해서 위치 이동"
+              >
+                <span className="slot-label">{slot.label}</span>
+                <strong>{selected?.player.name ?? "비어 있음"}</strong>
+                <small>{selected ? `${selected.player.country} · ${selected.rating}` : slot.accepts.join("/")}</small>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <aside className="candidate-panel">
+        <div className="section-heading">
+          <p className="eyebrow">Selected Slot</p>
+          <h2>{selectedSlot.label} 후보</h2>
+        </div>
+        <input
+          className="search-input"
+          onChange={(event) => onCandidateQueryChange(event.target.value)}
+          placeholder="선수, 국가, 포지션 검색"
+          type="search"
+          value={candidateQuery}
+        />
+        <div className="candidate-list">
+          {candidatePlayers.map(({ player, rating }) => (
+            <article className="candidate-item" key={player.id}>
+              <button onClick={() => onAssignPlayer(player.id)} type="button">
+                <strong>{player.name}</strong>
+                <span>
+                  {player.country} · {player.primaryPosition} · {rating}
+                </span>
+              </button>
+              <div>
+                <button onClick={() => onPlayerSelect(player.id)} type="button">
+                  정보
+                </button>
+                <button
+                  className={compareIds.includes(player.id) ? "active" : ""}
+                  onClick={() => onToggleCompare(player.id)}
+                  type="button"
                 >
-                  <span className="slot-label">{slot.label}</span>
-                  <strong>{selected?.player.name ?? "비어 있음"}</strong>
-                  <small>
-                    {selected ? `${selected.player.primaryPosition} · ${selected.rating}` : slot.accepts.join("/")}
-                  </small>
-                </div>
-              );
-            })}
-          </div>
+                  비교
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </aside>
+    </section>
+  );
+}
 
-          <div className="slot-editor" aria-label="슬롯별 수동 교체">
-            {formation.slots.map((slot) => {
-              const selected = squad[slot.id];
-              const candidates = rankCandidatesForSlot(countryPlayers, slot, weights);
+function RankingsView({
+  onPlayerSelect,
+  onToggleCompare,
+  onWeightChange,
+  rankings,
+  weights,
+}: {
+  onPlayerSelect: (playerId: string) => void;
+  onToggleCompare: (playerId: string) => void;
+  onWeightChange: (key: ScoreKey, value: number) => void;
+  rankings: Array<{ player: LegendPlayer; rating: number }>;
+  weights: WeightMap;
+}) {
+  return (
+    <section className="rankings-grid">
+      <aside className="weights-panel">
+        <div className="section-heading">
+          <p className="eyebrow">Ranking Lab</p>
+          <h2>내 기준 랭킹</h2>
+        </div>
+        <div className="slider-stack">
+          {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
+            <label className="slider-row" key={key}>
+              <span>
+                {scoreLabels[key]}
+                <strong>{weights[key]}</strong>
+              </span>
+              <input max="50" min="0" onChange={(event) => onWeightChange(key, Number(event.target.value))} type="range" value={weights[key]} />
+            </label>
+          ))}
+        </div>
+      </aside>
+      <section className="roster-panel">
+        <div className="section-heading">
+          <p className="eyebrow">Top 100</p>
+          <h2>동적 레전드 랭킹</h2>
+        </div>
+        <div className="ranking-list">
+          {rankings.map(({ player, rating }, index) => (
+            <article className="ranking-item" key={player.id}>
+              <span>{index + 1}</span>
+              <button onClick={() => onPlayerSelect(player.id)} type="button">
+                <strong>{player.name}</strong>
+                <small>
+                  {player.country} · {player.primaryPosition}
+                </small>
+              </button>
+              <em>{rating}</em>
+              <button onClick={() => onToggleCompare(player.id)} type="button">
+                비교
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
+    </section>
+  );
+}
 
-              return (
-                <label key={slot.id}>
-                  <span>
-                    {slot.label}
-                    {selected ? <em>{selected.player.name}</em> : null}
-                  </span>
-                  <select
-                    value={manualSlots[slot.id] ?? ""}
-                    onChange={(event) =>
-                      setManualSlots((current) => {
-                        const next = { ...current };
-                        if (event.target.value) {
-                          next[slot.id] = event.target.value;
-                        } else {
-                          delete next[slot.id];
-                        }
-                        return next;
-                      })
-                    }
-                  >
-                    <option value="">자동 추천</option>
-                    {candidates.map(({ player, rating, fit }) => (
-                      <option value={player.id} key={player.id}>
-                        {player.name} · {player.primaryPosition} · {rating} · 적합도 {Math.round(fit * 100)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              );
-            })}
-          </div>
-        </section>
+function CompareView({
+  compareIds,
+  onPlayerSelect,
+  onToggleCompare,
+  playerById,
+  players,
+  weights,
+}: {
+  compareIds: string[];
+  onPlayerSelect: (playerId: string) => void;
+  onToggleCompare: (playerId: string) => void;
+  playerById: Map<string, LegendPlayer>;
+  players: LegendPlayer[];
+  weights: WeightMap;
+}) {
+  const comparedPlayers = compareIds.map((id) => playerById.get(id)).filter(Boolean) as LegendPlayer[];
+  const quickChoices = players
+    .filter((player) => player.topTierRank !== null)
+    .sort((a, b) => (a.topTierRank ?? 999) - (b.topTierRank ?? 999))
+    .slice(0, 80);
 
-        <aside className="bench-panel" aria-label="후보 선수">
-          <div className="section-heading">
-            <p className="eyebrow">Bench</p>
-            <h2>상위 후보</h2>
-          </div>
-          <div className="bench-list">
-            {bench.map(({ player, rating }, index) => (
-              <PlayerRow key={player.id} index={index + 1} player={player} rating={rating} />
+  return (
+    <section className="compare-grid">
+      <aside className="candidate-panel">
+        <div className="section-heading">
+          <p className="eyebrow">Compare</p>
+          <h2>비교 선수 선택</h2>
+        </div>
+        <div className="candidate-list">
+          {quickChoices.map((player) => (
+            <article className="candidate-item" key={player.id}>
+              <button onClick={() => onToggleCompare(player.id)} type="button">
+                <strong>{player.name}</strong>
+                <span>
+                  {player.country} · {player.primaryPosition}
+                </span>
+              </button>
+              <div>
+                <button onClick={() => onPlayerSelect(player.id)} type="button">
+                  정보
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </aside>
+      <section className="comparison-table-panel">
+        <div className="section-heading">
+          <p className="eyebrow">Max 4</p>
+          <h2>선수 비교</h2>
+        </div>
+        {comparedPlayers.length === 0 ? (
+          <p className="empty-state">비교할 선수를 선택하세요.</p>
+        ) : (
+          <div className="compare-cards">
+            {comparedPlayers.map((player) => (
+              <article className="profile-card" key={player.id}>
+                <button className="remove-button" onClick={() => onToggleCompare(player.id)} type="button">
+                  제거
+                </button>
+                <h3>{player.name}</h3>
+                <p>
+                  {player.country} · {player.primaryPosition} · {ratePlayer(player, weights)}
+                </p>
+                <ScoreBars player={player} />
+                {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
+                  <div className="compare-row" key={key}>
+                    <span>{scoreLabels[key]}</span>
+                    <strong>{player.scores[key]}</strong>
+                  </div>
+                ))}
+              </article>
             ))}
           </div>
-        </aside>
+        )}
       </section>
+    </section>
+  );
+}
 
-      <section className="data-grid">
-        <div className="roster-panel">
-          <div className="section-heading row">
-            <div>
-              <p className="eyebrow">Roster</p>
-              <h2>선수 풀</h2>
-            </div>
-            <input
-              aria-label="선수 검색"
-              className="search-input"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="선수, 포지션, 태그 검색"
-              type="search"
-              value={query}
-            />
-          </div>
+function PlayerDetailDrawer({
+  onClose,
+  onToggleCompare,
+  player,
+}: {
+  onClose: () => void;
+  onToggleCompare: (playerId: string) => void;
+  player: LegendPlayer | null;
+}) {
+  if (!player) {
+    return null;
+  }
 
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>선수</th>
-                  <th>포지션</th>
-                  <th>상태</th>
-                  <th>종합</th>
-                  <th>세부 점수</th>
-                </tr>
-              </thead>
-              <tbody>
-                {roster.map(({ player, rating }) => (
-                  <tr key={player.id}>
-                    <td>
-                      <strong>{player.name}</strong>
-                    </td>
-                    <td>{player.primaryPosition}</td>
-                    <td>
-                      <span className={`status ${player.status}`}>{statusLabels[player.status]}</span>
-                    </td>
-                    <td>{rating}</td>
-                    <td>
-                      <ScoreBars player={player} />
-                    </td>
-                  </tr>
+  return (
+    <aside className="player-drawer" aria-label="선수 상세">
+      <div className="drawer-header">
+        <div>
+          <p className="eyebrow">
+            {player.continent} · {player.country} · {player.primaryPosition}
+          </p>
+          <h2>{player.name}</h2>
+        </div>
+        <button onClick={onClose} type="button">
+          닫기
+        </button>
+      </div>
+      <p className="drawer-summary">{player.profile.summary}</p>
+      <div className="drawer-actions">
+        <button className="primary-inline" onClick={() => onToggleCompare(player.id)} type="button">
+          비교에 추가
+        </button>
+        <span className={`status ${player.status}`}>{statusLabels[player.status]}</span>
+      </div>
+      <ScoreBars player={player} />
+      <div className="profile-section-stack">
+        {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => {
+          const section = player.profile.sections[key];
+          return (
+            <section className="profile-section" key={key}>
+              <div>
+                <h3>{section.title}</h3>
+                <strong>
+                  {section.score} · {section.grade}
+                </strong>
+              </div>
+              <p>{section.explanation}</p>
+              <ul>
+                {section.bullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="saved-panel">
-          <div className="section-heading">
-            <p className="eyebrow">Compare</p>
-            <h2>저장 조합</h2>
-          </div>
-
-          {savedSquads.length === 0 ? (
-            <p className="empty-state">아직 저장된 조합이 없습니다.</p>
-          ) : (
-            <div className="saved-list">
-              {savedSquads.map((saved) => (
-                <article className="saved-item" key={saved.id}>
-                  <label>
-                    <input
-                      checked={compareIds.includes(saved.id)}
-                      onChange={() => toggleComparison(saved.id)}
-                      type="checkbox"
-                    />
-                    <span>
-                      <strong>{saved.name}</strong>
-                      <small>
-                        {saved.formationName} · {new Date(saved.createdAt).toLocaleString("ko-KR")}
-                      </small>
-                    </span>
-                  </label>
-                  <button onClick={() => removeSavedSquad(saved.id)} type="button">
-                    삭제
-                  </button>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <div className="comparison-grid">
-            {savedSquads
-              .filter((saved) => compareIds.includes(saved.id))
-              .map((saved) => (
-                <article className="comparison-card" key={saved.id}>
-                  <h3>{saved.name}</h3>
-                  <p>
-                    {saved.country} · {saved.formationName}
-                  </p>
-                  <ol>
-                    {saved.slots.map((slot) => (
-                      <li key={slot.slotId}>
-                        <span>{slot.slotLabel}</span>
-                        <strong>{slot.playerName}</strong>
-                        <em>{slot.rating}</em>
-                      </li>
-                    ))}
-                  </ol>
-                </article>
-              ))}
-          </div>
-        </div>
-      </section>
-    </main>
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+    </aside>
   );
 }
 
@@ -667,18 +1118,40 @@ function Metric({ label, value, detail }: { label: string; value: string; detail
   );
 }
 
-function PlayerRow({ index, player, rating }: { index: number; player: LegendPlayer; rating: number }) {
+function PlayerMiniCard({ onClick, player, rating }: { onClick: () => void; player: LegendPlayer; rating: number }) {
   return (
-    <article className="player-row">
+    <button className="player-mini-card" onClick={onClick} type="button">
+      <strong>{player.name}</strong>
+      <span>
+        {player.primaryPosition} · {rating}
+      </span>
+      <em>{statusLabels[player.status]}</em>
+    </button>
+  );
+}
+
+function PlayerRow({
+  index,
+  onClick,
+  player,
+  rating,
+}: {
+  index: number;
+  onClick: () => void;
+  player: LegendPlayer;
+  rating: number;
+}) {
+  return (
+    <button className="player-row as-button" onClick={onClick} type="button">
       <span className="row-index">{index}</span>
       <div>
         <strong>{player.name}</strong>
         <small>
-          {player.primaryPosition} · {statusLabels[player.status]}
+          {player.country} · {player.primaryPosition}
         </small>
       </div>
       <em>{rating}</em>
-    </article>
+    </button>
   );
 }
 
@@ -695,7 +1168,8 @@ function ScoreBars({ player }: { player: LegendPlayer }) {
 }
 
 function buildSquad(
-  players: LegendPlayer[],
+  autoPlayers: LegendPlayer[],
+  allPlayers: LegendPlayer[],
   slots: FormationSlot[],
   weights: WeightMap,
   manualSlots: Record<string, string>,
@@ -704,7 +1178,7 @@ function buildSquad(
   const squad: Record<string, { player: LegendPlayer; rating: number }> = {};
 
   for (const slot of slots) {
-    const manualPlayer = players.find((player) => player.id === manualSlots[slot.id]);
+    const manualPlayer = allPlayers.find((player) => player.id === manualSlots[slot.id]);
     if (!manualPlayer || selected.has(manualPlayer.id)) {
       continue;
     }
@@ -721,7 +1195,7 @@ function buildSquad(
       continue;
     }
 
-    const best = rankCandidatesForSlot(players, slot, weights).find((candidate) => !selected.has(candidate.player.id));
+    const best = rankCandidatesForSlot(autoPlayers, slot, weights).find((candidate) => !selected.has(candidate.player.id));
     if (!best) {
       continue;
     }
@@ -746,7 +1220,7 @@ function rankCandidatesForSlot(players: LegendPlayer[], slot: FormationSlot, wei
         rating: ratePlayerForSlot(player, slot, weights),
       };
     })
-    .filter((candidate) => candidate.fit >= 0.68)
+    .filter((candidate) => candidate.fit >= 0.5)
     .sort((a, b) => b.rating - a.rating || b.fit - a.fit || a.player.positionOrder - b.player.positionOrder);
 }
 
@@ -764,10 +1238,6 @@ function ratePlayer(player: LegendPlayer, weights: WeightMap) {
   );
 
   return Math.round(weighted / totalWeight);
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
 }
 
 function positionFit(position: PositionCode, accepts: PositionCode[]) {
@@ -795,4 +1265,23 @@ function positionFit(position: PositionCode, accepts: PositionCode[]) {
   }
 
   return position === "LEGEND" ? 0.7 : 0.55;
+}
+
+function groupPlayersByPosition(players: LegendPlayer[]) {
+  return players.reduce<Partial<Record<PositionCode, LegendPlayer[]>>>((groups, player) => {
+    groups[player.primaryPosition] = [...(groups[player.primaryPosition] ?? []), player];
+    return groups;
+  }, {});
+}
+
+function average(values: number[]) {
+  if (!values.length) {
+    return 0;
+  }
+
+  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
