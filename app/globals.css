@@ -482,6 +482,8 @@ input[type="range"] {
   transition:
     border-color 120ms ease,
     box-shadow 120ms ease,
+    left 180ms ease,
+    top 180ms ease,
     transform 120ms ease;
   user-select: none;
   width: 132px;
@@ -503,7 +505,16 @@ input[type="range"] {
   border-color: var(--gold);
   box-shadow: 0 18px 38px rgba(18, 49, 32, 0.38);
   transform: translate(-50%, -50%) scale(1.04);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
   z-index: 4;
+}
+
+.player-token.drop-target {
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px rgba(183, 67, 67, 0.24), 0 14px 30px rgba(18, 49, 32, 0.3);
 }
 
 .player-token strong {

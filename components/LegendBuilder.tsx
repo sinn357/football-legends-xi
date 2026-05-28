@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { MutableRefObject, PointerEvent, RefObject } from "react";
+import type { MutableRefObject, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey } from "@/lib/legend-data";
 
 type TabId = "atlas" | "best-xi" | "rankings" | "compare";
@@ -19,6 +19,11 @@ type FormationSlot = {
 type SlotPosition = {
   left: number;
   top: number;
+};
+
+type DragPoint = {
+  clientX: number;
+  clientY: number;
 };
 
 type SavedSlot = {
@@ -157,6 +162,7 @@ const slotPositionsStorageKey = "football-legends-xi.slot-positions.v1";
 export function LegendBuilder({ data }: { data: LegendData }) {
   const pitchRef = useRef<HTMLDivElement | null>(null);
   const activeDragSlotRef = useRef<string | null>(null);
+  const dragStartPositionsRef = useRef<Record<string, SlotPosition>>({});
   const defaultCountry = data.countries.find((country) => country.name === "Brazil")?.name ?? data.countries[0]?.name ?? "";
   const [activeTab, setActiveTab] = useState<TabId>("atlas");
   const [atlasContinent, setAtlasContinent] = useState<Continent>("America");
@@ -177,6 +183,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [savedSquads, setSavedSquads] = useState<SavedSquad[]>([]);
   const [slotPositions, setSlotPositions] = useState<Record<string, Record<string, SlotPosition>>>({});
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
+  const [dropTargetSlotId, setDropTargetSlotId] = useState<string | null>(null);
 
   const formation = formations[formationId];
   const currentSlotPositions = slotPositions[formationId] ?? {};
@@ -308,24 +315,100 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     return currentSlotPositions[slot.id] ?? { left: slot.left, top: slot.top };
   }
 
-  function updateSlotPosition(slotId: string, event: PointerEvent<HTMLElement>) {
+  function getSlotPositionsForDrag() {
+    return formation.slots.reduce<Record<string, SlotPosition>>((positions, slot) => {
+      positions[slot.id] = getSlotPosition(slot);
+      return positions;
+    }, {});
+  }
+
+  function getPointerPitchPosition(event: DragPoint) {
     const rect = pitchRef.current?.getBoundingClientRect();
     if (!rect) {
+      return null;
+    }
+
+    return {
+      left: clamp(((event.clientX - rect.left) / rect.width) * 100, 7, 93),
+      top: clamp(((event.clientY - rect.top) / rect.height) * 100, 8, 92),
+    };
+  }
+
+  function findDropTargetSlotId(sourceSlotId: string, position: SlotPosition) {
+    const referencePositions = dragStartPositionsRef.current;
+    let nearest: { id: string; distance: number } | null = null;
+
+    for (const slot of formation.slots) {
+      if (slot.id === sourceSlotId) {
+        continue;
+      }
+
+      const slotPosition = referencePositions[slot.id] ?? { left: slot.left, top: slot.top };
+      const distance = Math.hypot(position.left - slotPosition.left, (position.top - slotPosition.top) * 1.25);
+
+      if (!nearest || distance < nearest.distance) {
+        nearest = { id: slot.id, distance };
+      }
+    }
+
+    return nearest && nearest.distance <= 13 ? nearest.id : null;
+  }
+
+  function updateSlotPosition(slotId: string, event: DragPoint) {
+    const position = getPointerPitchPosition(event);
+    if (!position) {
       return;
     }
 
-    const left = clamp(((event.clientX - rect.left) / rect.width) * 100, 7, 93);
-    const top = clamp(((event.clientY - rect.top) / rect.height) * 100, 8, 92);
+    const nextPosition = {
+      left: Math.round(position.left * 10) / 10,
+      top: Math.round(position.top * 10) / 10,
+    };
 
     setSlotPositions((current) => ({
       ...current,
       [formationId]: {
         ...(current[formationId] ?? {}),
-        [slotId]: {
-          left: Math.round(left * 10) / 10,
-          top: Math.round(top * 10) / 10,
-        },
+        [slotId]: nextPosition,
       },
+    }));
+    setDropTargetSlotId(findDropTargetSlotId(slotId, nextPosition));
+  }
+
+  function finalizeSlotDrag(slotId: string, event: DragPoint) {
+    const position = getPointerPitchPosition(event);
+    const targetSlotId = position ? findDropTargetSlotId(slotId, position) : null;
+    activeDragSlotRef.current = null;
+    setDraggingSlotId(null);
+    setDropTargetSlotId(null);
+
+    if (!targetSlotId || targetSlotId === slotId) {
+      return;
+    }
+
+    const sourcePlayer = squad[slotId]?.player;
+    const targetPlayer = squad[targetSlotId]?.player;
+
+    if (!sourcePlayer) {
+      return;
+    }
+
+    setManualSlots((current) => {
+      const next = { ...current };
+      next[targetSlotId] = sourcePlayer.id;
+
+      if (targetPlayer) {
+        next[slotId] = targetPlayer.id;
+      } else {
+        delete next[slotId];
+      }
+
+      return next;
+    });
+    setSelectedSlotId(targetSlotId);
+    setSlotPositions((current) => ({
+      ...current,
+      [formationId]: dragStartPositionsRef.current,
     }));
   }
 
@@ -472,12 +555,17 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           pitchRef={pitchRef}
           selectedSlotId={selectedSlot.id}
           setDraggingSlotId={setDraggingSlotId}
+          setDropTargetSlotId={setDropTargetSlotId}
           slotPositions={currentSlotPositions}
           squad={squad}
           topOnly={topOnly}
+          finalizeSlotDrag={finalizeSlotDrag}
+          getSlotPositionsForDrag={getSlotPositionsForDrag}
           updateSlotPosition={updateSlotPosition}
           activeDragSlotRef={activeDragSlotRef}
+          dragStartPositionsRef={dragStartPositionsRef}
           draggingSlotId={draggingSlotId}
+          dropTargetSlotId={dropTargetSlotId}
           weights={weights}
           onWeightChange={updateWeight}
         />
@@ -648,9 +736,13 @@ function BestXiView({
   candidatePlayers,
   candidateQuery,
   compareIds,
+  dragStartPositionsRef,
   draggingSlotId,
+  dropTargetSlotId,
+  finalizeSlotDrag,
   formation,
   formationId,
+  getSlotPositionsForDrag,
   includeActiveHold,
   includeDeleteCandidates,
   manualSlots,
@@ -672,6 +764,7 @@ function BestXiView({
   pitchRef,
   selectedSlotId,
   setDraggingSlotId,
+  setDropTargetSlotId,
   slotPositions,
   squad,
   topOnly,
@@ -687,9 +780,13 @@ function BestXiView({
   candidatePlayers: Array<{ player: LegendPlayer; rating: number }>;
   candidateQuery: string;
   compareIds: string[];
+  dragStartPositionsRef: MutableRefObject<Record<string, SlotPosition>>;
   draggingSlotId: string | null;
+  dropTargetSlotId: string | null;
+  finalizeSlotDrag: (slotId: string, event: DragPoint) => void;
   formation: { name: string; slots: FormationSlot[] };
   formationId: string;
+  getSlotPositionsForDrag: () => Record<string, SlotPosition>;
   includeActiveHold: boolean;
   includeDeleteCandidates: boolean;
   manualSlots: Record<string, string>;
@@ -711,13 +808,41 @@ function BestXiView({
   pitchRef: RefObject<HTMLDivElement | null>;
   selectedSlotId: string;
   setDraggingSlotId: (slotId: string | null) => void;
+  setDropTargetSlotId: (slotId: string | null) => void;
   slotPositions: Record<string, SlotPosition>;
   squad: Record<string, { player: LegendPlayer; rating: number }>;
   topOnly: boolean;
-  updateSlotPosition: (slotId: string, event: PointerEvent<HTMLElement>) => void;
+  updateSlotPosition: (slotId: string, event: DragPoint) => void;
   weights: WeightMap;
 }) {
   const selectedSlot = formation.slots.find((slot) => slot.id === selectedSlotId) ?? formation.slots[0];
+
+  useEffect(() => {
+    if (!draggingSlotId) {
+      return;
+    }
+
+    function handleMouseMove(event: MouseEvent) {
+      const slotId = activeDragSlotRef.current;
+      if (slotId) {
+        updateSlotPosition(slotId, event);
+      }
+    }
+
+    function handleMouseUp(event: MouseEvent) {
+      const slotId = activeDragSlotRef.current;
+      if (slotId) {
+        finalizeSlotDrag(slotId, event);
+      }
+    }
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [activeDragSlotRef, draggingSlotId, finalizeSlotDrag, updateSlotPosition]);
 
   return (
     <section className="builder-grid">
@@ -826,6 +951,7 @@ function BestXiView({
                 className={[
                   "player-token",
                   selectedSlotId === slot.id ? "selected" : "",
+                  dropTargetSlotId === slot.id ? "drop-target" : "",
                   draggingSlotId === slot.id ? "dragging" : "",
                 ]
                   .filter(Boolean)
@@ -835,9 +961,11 @@ function BestXiView({
                 onPointerCancel={() => {
                   activeDragSlotRef.current = null;
                   setDraggingSlotId(null);
+                  setDropTargetSlotId(null);
                 }}
                 onPointerDown={(event) => {
                   activeDragSlotRef.current = slot.id;
+                  dragStartPositionsRef.current = getSlotPositionsForDrag();
                   setDraggingSlotId(slot.id);
                   onSelectedSlotChange(slot.id);
                   event.currentTarget.setPointerCapture(event.pointerId);
@@ -849,11 +977,20 @@ function BestXiView({
                   }
                 }}
                 onPointerUp={(event) => {
-                  activeDragSlotRef.current = null;
-                  setDraggingSlotId(null);
+                  finalizeSlotDrag(slot.id, event);
                   if (event.currentTarget.hasPointerCapture(event.pointerId)) {
                     event.currentTarget.releasePointerCapture(event.pointerId);
                   }
+                }}
+                onMouseDown={(event) => {
+                  if (activeDragSlotRef.current) {
+                    return;
+                  }
+                  activeDragSlotRef.current = slot.id;
+                  dragStartPositionsRef.current = getSlotPositionsForDrag();
+                  setDraggingSlotId(slot.id);
+                  onSelectedSlotChange(slot.id);
+                  updateSlotPosition(slot.id, event);
                 }}
                 role="button"
                 style={{ left: `${position.left}%`, top: `${position.top}%` }}
