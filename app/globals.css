@@ -307,6 +307,22 @@ input[type="range"] {
   color: var(--ink);
 }
 
+.pitch-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.small-button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-weight: 800;
+  min-height: 36px;
+  padding: 0 12px;
+}
+
 .rating-pill {
   align-items: center;
   background: var(--red);
@@ -388,8 +404,28 @@ input[type="range"] {
   padding: 8px;
   position: absolute;
   text-align: center;
+  touch-action: none;
   transform: translate(-50%, -50%);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+  user-select: none;
   width: 132px;
+}
+
+.player-token:hover,
+.player-token:focus-visible {
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 30px rgba(18, 49, 32, 0.32);
+  outline: none;
+}
+
+.player-token.dragging {
+  border-color: var(--gold);
+  box-shadow: 0 18px 38px rgba(18, 49, 32, 0.38);
+  transform: translate(-50%, -50%) scale(1.04);
+  z-index: 4;
 }
 
 .player-token strong {

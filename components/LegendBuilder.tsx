@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent } from "react";
 import type { LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey } from "@/lib/legend-data";
 
 type WeightMap = Record<ScoreKey, number>;
@@ -13,12 +14,18 @@ type FormationSlot = {
   top: number;
 };
 
+type SlotPosition = {
+  left: number;
+  top: number;
+};
+
 type SavedSlot = {
   slotId: string;
   slotLabel: string;
   playerId: string;
   playerName: string;
   rating: number;
+  position: SlotPosition;
 };
 
 type SavedSquad = {
@@ -140,8 +147,11 @@ const formations: Record<string, { name: string; slots: FormationSlot[] }> = {
 };
 
 const storageKey = "football-legends-xi.saved-squads.v1";
+const slotPositionsStorageKey = "football-legends-xi.slot-positions.v1";
 
 export function LegendBuilder({ data }: { data: LegendData }) {
+  const pitchRef = useRef<HTMLDivElement | null>(null);
+  const activeDragSlotRef = useRef<string | null>(null);
   const defaultCountry = data.countries.find((country) => country.name === "Brazil")?.name ?? data.countries[0]?.name ?? "";
   const [country, setCountry] = useState(defaultCountry);
   const [formationId, setFormationId] = useState("4-3-3");
@@ -152,9 +162,12 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [manualSlots, setManualSlots] = useState<Record<string, string>>({});
   const [savedSquads, setSavedSquads] = useState<SavedSquad[]>([]);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [slotPositions, setSlotPositions] = useState<Record<string, Record<string, SlotPosition>>>({});
+  const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
 
   const formation = formations[formationId];
   const countries = data.countries;
+  const currentSlotPositions = slotPositions[formationId] ?? {};
 
   useEffect(() => {
     try {
@@ -172,8 +185,25 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   }, []);
 
   useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(slotPositionsStorageKey);
+      if (!raw) {
+        return;
+      }
+
+      setSlotPositions(JSON.parse(raw) as Record<string, Record<string, SlotPosition>>);
+    } catch {
+      setSlotPositions({});
+    }
+  }, []);
+
+  useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(savedSquads));
   }, [savedSquads]);
+
+  useEffect(() => {
+    window.localStorage.setItem(slotPositionsStorageKey, JSON.stringify(slotPositions));
+  }, [slotPositions]);
 
   useEffect(() => {
     setManualSlots({});
@@ -224,6 +254,39 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     setWeights((current) => ({ ...current, [key]: value }));
   }
 
+  function getSlotPosition(slot: FormationSlot) {
+    return currentSlotPositions[slot.id] ?? { left: slot.left, top: slot.top };
+  }
+
+  function updateSlotPosition(slotId: string, event: PointerEvent<HTMLElement>) {
+    const rect = pitchRef.current?.getBoundingClientRect();
+    if (!rect) {
+      return;
+    }
+
+    const left = clamp(((event.clientX - rect.left) / rect.width) * 100, 7, 93);
+    const top = clamp(((event.clientY - rect.top) / rect.height) * 100, 8, 92);
+
+    setSlotPositions((current) => ({
+      ...current,
+      [formationId]: {
+        ...(current[formationId] ?? {}),
+        [slotId]: {
+          left: Math.round(left * 10) / 10,
+          top: Math.round(top * 10) / 10,
+        },
+      },
+    }));
+  }
+
+  function resetCurrentFormationPositions() {
+    setSlotPositions((current) => {
+      const next = { ...current };
+      delete next[formationId];
+      return next;
+    });
+  }
+
   function saveCurrentSquad() {
     const slots: SavedSlot[] = starters.map(({ slot, player, rating }) => ({
       slotId: slot.id,
@@ -231,6 +294,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       playerId: player.id,
       playerName: player.name,
       rating,
+      position: getSlotPosition(slot),
     }));
 
     const now = new Date();
@@ -375,21 +439,53 @@ export function LegendBuilder({ data }: { data: LegendData }) {
               <p className="eyebrow">{country}</p>
               <h2>{formation.name} 추천 XI</h2>
             </div>
-            <span className="rating-pill">{averageRating}</span>
+            <div className="pitch-actions">
+              <button className="small-button" onClick={resetCurrentFormationPositions} type="button">
+                위치 초기화
+              </button>
+              <span className="rating-pill">{averageRating}</span>
+            </div>
           </div>
 
-          <div className="pitch" aria-label="축구장">
+          <div className="pitch" aria-label="축구장" ref={pitchRef}>
             <div className="center-circle" />
             <div className="box top-box" />
             <div className="box bottom-box" />
             {formation.slots.map((slot) => {
               const selected = squad[slot.id];
+              const position = getSlotPosition(slot);
 
               return (
                 <div
-                  className="player-token"
+                  aria-label={`${slot.label} ${selected?.player.name ?? "비어 있음"} 위치 이동`}
+                  className={draggingSlotId === slot.id ? "player-token dragging" : "player-token"}
                   key={slot.id}
-                  style={{ left: `${slot.left}%`, top: `${slot.top}%` }}
+                  onPointerDown={(event) => {
+                    activeDragSlotRef.current = slot.id;
+                    setDraggingSlotId(slot.id);
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    updateSlotPosition(slot.id, event);
+                  }}
+                  onPointerMove={(event) => {
+                    if (activeDragSlotRef.current === slot.id) {
+                      updateSlotPosition(slot.id, event);
+                    }
+                  }}
+                  onPointerCancel={() => {
+                    activeDragSlotRef.current = null;
+                    setDraggingSlotId(null);
+                  }}
+                  onPointerUp={(event) => {
+                    activeDragSlotRef.current = null;
+                    setDraggingSlotId(null);
+                    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                      event.currentTarget.releasePointerCapture(event.pointerId);
+                    }
+                  }}
+                  role="button"
+                  style={{ left: `${position.left}%`, top: `${position.top}%` }}
+                  tabIndex={0}
+                  title="드래그해서 위치 이동"
                 >
                   <span className="slot-label">{slot.label}</span>
                   <strong>{selected?.player.name ?? "비어 있음"}</strong>
@@ -668,6 +764,10 @@ function ratePlayer(player: LegendPlayer, weights: WeightMap) {
   );
 
   return Math.round(weighted / totalWeight);
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function positionFit(position: PositionCode, accepts: PositionCode[]) {
