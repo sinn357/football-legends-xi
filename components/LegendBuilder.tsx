@@ -7,6 +7,7 @@ import type { Continent, LegendData, LegendPlayer, PlayerStatus, PositionCode, S
 type TabId = "atlas" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
+type PitchRole = Exclude<PositionCode, "LEGEND">;
 
 type FormationSlot = {
   id: string;
@@ -64,6 +65,19 @@ const statusLabels: Record<PlayerStatus, string> = {
 
 const positionOptions: PositionCode[] = ["ST", "SS", "RW", "LW", "AM", "CM", "DM", "CB", "RB", "LB", "GK"];
 const continentOptions: Continent[] = ["America", "Europe", "Asia", "Africa"];
+const pitchZones: Array<{ role: PitchRole; left: number; top: number; width: number; height: number }> = [
+  { role: "LW", left: 5, top: 8, width: 28, height: 34 },
+  { role: "ST", left: 35, top: 8, width: 30, height: 20 },
+  { role: "RW", left: 67, top: 8, width: 28, height: 34 },
+  { role: "SS", left: 38, top: 28, width: 24, height: 12 },
+  { role: "AM", left: 34, top: 42, width: 32, height: 12 },
+  { role: "CM", left: 26, top: 54, width: 48, height: 12 },
+  { role: "LB", left: 5, top: 64, width: 24, height: 22 },
+  { role: "DM", left: 30, top: 66, width: 40, height: 10 },
+  { role: "RB", left: 71, top: 64, width: 24, height: 22 },
+  { role: "CB", left: 30, top: 76, width: 40, height: 10 },
+  { role: "GK", left: 38, top: 86, width: 24, height: 8 },
+];
 
 const initialWeights: WeightMap = {
   teamCareer: 25,
@@ -158,6 +172,7 @@ const formations: Record<string, { name: string; slots: FormationSlot[] }> = {
 
 const storageKey = "football-legends-xi.saved-squads.v2";
 const slotPositionsStorageKey = "football-legends-xi.slot-positions.v1";
+const slotRolesStorageKey = "football-legends-xi.slot-roles.v1";
 
 export function LegendBuilder({ data }: { data: LegendData }) {
   const pitchRef = useRef<HTMLDivElement | null>(null);
@@ -165,7 +180,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const dragStartPositionsRef = useRef<Record<string, SlotPosition>>({});
   const defaultCountry = data.countries.find((country) => country.name === "Brazil")?.name ?? data.countries[0]?.name ?? "";
   const [activeTab, setActiveTab] = useState<TabId>("atlas");
-  const [atlasContinent, setAtlasContinent] = useState<Continent>("America");
+  const [atlasContinent, setAtlasContinent] = useState<Continent | null>("America");
   const [atlasCountry, setAtlasCountry] = useState(defaultCountry);
   const [formationId, setFormationId] = useState("4-3-3");
   const [weights, setWeights] = useState<WeightMap>(initialWeights);
@@ -182,14 +197,24 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [savedSquads, setSavedSquads] = useState<SavedSquad[]>([]);
   const [slotPositions, setSlotPositions] = useState<Record<string, Record<string, SlotPosition>>>({});
+  const [slotRoles, setSlotRoles] = useState<Record<string, Record<string, PitchRole>>>({});
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
   const [dropTargetSlotId, setDropTargetSlotId] = useState<string | null>(null);
+  const [dropTargetRole, setDropTargetRole] = useState<PitchRole | null>(null);
 
   const formation = formations[formationId];
+  const effectiveSlots = useMemo(
+    () =>
+      formation.slots.map((slot) => {
+        const role = slotRoles[formationId]?.[slot.id] ?? getDefaultSlotRole(slot);
+        return { ...slot, label: role, accepts: [role] };
+      }),
+    [formation.slots, formationId, slotRoles],
+  );
   const currentSlotPositions = slotPositions[formationId] ?? {};
   const playerById = useMemo(() => new Map(data.players.map((player) => [player.id, player])), [data.players]);
   const selectedPlayer = selectedPlayerId ? playerById.get(selectedPlayerId) ?? null : null;
-  const selectedSlot = formation.slots.find((slot) => slot.id === selectedSlotId) ?? formation.slots[0];
+  const selectedSlot = effectiveSlots.find((slot) => slot.id === selectedSlotId) ?? effectiveSlots[0];
 
   useEffect(() => {
     try {
@@ -209,6 +234,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     } catch {
       setSlotPositions({});
     }
+
+    try {
+      const raw = window.localStorage.getItem(slotRolesStorageKey);
+      if (raw) {
+        setSlotRoles(JSON.parse(raw) as Record<string, Record<string, PitchRole>>);
+      }
+    } catch {
+      setSlotRoles({});
+    }
   }, []);
 
   useEffect(() => {
@@ -220,7 +254,11 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   }, [slotPositions]);
 
   useEffect(() => {
-    if (!data.countries.some((country) => country.name === atlasCountry && country.continent === atlasContinent)) {
+    window.localStorage.setItem(slotRolesStorageKey, JSON.stringify(slotRoles));
+  }, [slotRoles]);
+
+  useEffect(() => {
+    if (atlasContinent && !data.countries.some((country) => country.name === atlasCountry && country.continent === atlasContinent)) {
       setAtlasCountry(data.countries.find((country) => country.continent === atlasContinent)?.name ?? defaultCountry);
     }
   }, [atlasContinent, atlasCountry, data.countries, defaultCountry]);
@@ -269,11 +307,11 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   ]);
 
   const squad = useMemo(
-    () => buildSquad(candidatePlayers.map(({ player }) => player), data.players, formation.slots, weights, manualSlots),
-    [candidatePlayers, data.players, formation.slots, manualSlots, weights],
+    () => buildSquad(candidatePlayers.map(({ player }) => player), data.players, effectiveSlots, weights, manualSlots),
+    [candidatePlayers, data.players, effectiveSlots, manualSlots, weights],
   );
 
-  const starters = formation.slots
+  const starters = effectiveSlots
     .map((slot) => {
       const selected = squad[slot.id];
       return selected ? { slot, player: selected.player, rating: selected.rating } : null;
@@ -351,7 +389,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       }
     }
 
-    return nearest && nearest.distance <= 13 ? nearest.id : null;
+    return nearest && nearest.distance <= 9 ? nearest.id : null;
   }
 
   function updateSlotPosition(slotId: string, event: DragPoint) {
@@ -373,16 +411,34 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       },
     }));
     setDropTargetSlotId(findDropTargetSlotId(slotId, nextPosition));
+    setDropTargetRole(findPitchRole(nextPosition));
   }
 
   function finalizeSlotDrag(slotId: string, event: DragPoint) {
     const position = getPointerPitchPosition(event);
     const targetSlotId = position ? findDropTargetSlotId(slotId, position) : null;
+    const targetRole = position ? findPitchRole(position) : null;
     activeDragSlotRef.current = null;
     setDraggingSlotId(null);
     setDropTargetSlotId(null);
+    setDropTargetRole(null);
 
     if (!targetSlotId || targetSlotId === slotId) {
+      const sourcePlayer = squad[slotId]?.player;
+
+      if (targetRole) {
+        setSlotRoles((current) => ({
+          ...current,
+          [formationId]: {
+            ...(current[formationId] ?? {}),
+            [slotId]: targetRole,
+          },
+        }));
+      }
+
+      if (sourcePlayer) {
+        setManualSlots((current) => ({ ...current, [slotId]: sourcePlayer.id }));
+      }
       return;
     }
 
@@ -419,6 +475,11 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
   function resetCurrentFormationPositions() {
     setSlotPositions((current) => {
+      const next = { ...current };
+      delete next[formationId];
+      return next;
+    });
+    setSlotRoles((current) => {
       const next = { ...current };
       delete next[formationId];
       return next;
@@ -505,7 +566,9 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           atlasPlayers={atlasPlayers}
           continents={data.continents}
           countries={data.countries}
-          onContinentChange={setAtlasContinent}
+          onContinentChange={(continent) => {
+            setAtlasContinent((current) => (current === continent ? null : continent));
+          }}
           onCountryChange={setAtlasCountry}
           onOpenBestXi={() => {
             setBuilderContinent(selectedCountrySummary?.continent ?? "ALL");
@@ -530,7 +593,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           candidatePlayers={candidatePlayers}
           candidateQuery={candidateQuery}
           compareIds={compareIds}
-          formation={formation}
+          formation={{ name: formation.name, slots: effectiveSlots }}
           formationId={formationId}
           includeActiveHold={includeActiveHold}
           includeDeleteCandidates={includeDeleteCandidates}
@@ -556,6 +619,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           selectedSlotId={selectedSlot.id}
           setDraggingSlotId={setDraggingSlotId}
           setDropTargetSlotId={setDropTargetSlotId}
+          setDropTargetRole={setDropTargetRole}
           slotPositions={currentSlotPositions}
           squad={squad}
           topOnly={topOnly}
@@ -566,6 +630,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           dragStartPositionsRef={dragStartPositionsRef}
           draggingSlotId={draggingSlotId}
           dropTargetSlotId={dropTargetSlotId}
+          dropTargetRole={dropTargetRole}
           weights={weights}
           onWeightChange={updateWeight}
         />
@@ -611,7 +676,7 @@ function AtlasView({
   selectedCountrySummary,
   weights,
 }: {
-  atlasContinent: Continent;
+  atlasContinent: Continent | null;
   atlasCountry: string;
   atlasPlayers: LegendPlayer[];
   continents: LegendData["continents"];
@@ -634,15 +699,22 @@ function AtlasView({
           <h2>대륙별 국가</h2>
         </div>
         <div className="continent-stack">
-          {continents.map((continent) => (
-            <section className="continent-block" key={continent.name}>
-              <button
-                className={atlasContinent === continent.name ? "continent-button active" : "continent-button"}
+          {continents.map((continent) => {
+            const isOpen = atlasContinent === continent.name;
+
+            return (
+              <section className="continent-block" key={continent.name}>
+                <button
+                  aria-expanded={isOpen}
+                  className={isOpen ? "continent-button active" : "continent-button"}
                 onClick={() => onContinentChange(continent.name)}
                 type="button"
               >
                 <span>{continent.name}</span>
-                <em>{continent.count}</em>
+                <span className="continent-meta">
+                  <em>{continent.count}</em>
+                  <i aria-hidden="true">{isOpen ? "-" : "+"}</i>
+                </span>
               </button>
               {atlasContinent === continent.name ? (
                 <div className="country-list">
@@ -658,11 +730,12 @@ function AtlasView({
                         {country.name}
                         <span>{country.count}</span>
                       </button>
-                    ))}
+                  ))}
                 </div>
               ) : null}
-            </section>
-          ))}
+              </section>
+            );
+          })}
         </div>
       </aside>
 
@@ -738,6 +811,7 @@ function BestXiView({
   compareIds,
   dragStartPositionsRef,
   draggingSlotId,
+  dropTargetRole,
   dropTargetSlotId,
   finalizeSlotDrag,
   formation,
@@ -765,6 +839,7 @@ function BestXiView({
   selectedSlotId,
   setDraggingSlotId,
   setDropTargetSlotId,
+  setDropTargetRole,
   slotPositions,
   squad,
   topOnly,
@@ -782,6 +857,7 @@ function BestXiView({
   compareIds: string[];
   dragStartPositionsRef: MutableRefObject<Record<string, SlotPosition>>;
   draggingSlotId: string | null;
+  dropTargetRole: PitchRole | null;
   dropTargetSlotId: string | null;
   finalizeSlotDrag: (slotId: string, event: DragPoint) => void;
   formation: { name: string; slots: FormationSlot[] };
@@ -809,6 +885,7 @@ function BestXiView({
   selectedSlotId: string;
   setDraggingSlotId: (slotId: string | null) => void;
   setDropTargetSlotId: (slotId: string | null) => void;
+  setDropTargetRole: (role: PitchRole | null) => void;
   slotPositions: Record<string, SlotPosition>;
   squad: Record<string, { player: LegendPlayer; rating: number }>;
   topOnly: boolean;
@@ -942,6 +1019,21 @@ function BestXiView({
           <div className="center-circle" />
           <div className="box top-box" />
           <div className="box bottom-box" />
+          {pitchZones.map((zone) => (
+            <div
+              aria-hidden="true"
+              className={dropTargetRole === zone.role ? "pitch-zone active" : "pitch-zone"}
+              key={zone.role}
+              style={{
+                height: `${zone.height}%`,
+                left: `${zone.left}%`,
+                top: `${zone.top}%`,
+                width: `${zone.width}%`,
+              }}
+            >
+              {zone.role}
+            </div>
+          ))}
           {formation.slots.map((slot) => {
             const selected = squad[slot.id];
             const position = slotPositions[slot.id] ?? { left: slot.left, top: slot.top };
@@ -962,6 +1054,7 @@ function BestXiView({
                   activeDragSlotRef.current = null;
                   setDraggingSlotId(null);
                   setDropTargetSlotId(null);
+                  setDropTargetRole(null);
                 }}
                 onPointerDown={(event) => {
                   activeDragSlotRef.current = slot.id;
@@ -995,7 +1088,7 @@ function BestXiView({
                 role="button"
                 style={{ left: `${position.left}%`, top: `${position.top}%` }}
                 tabIndex={0}
-                title="클릭해서 슬롯 선택, 드래그해서 위치 이동"
+                title="드래그해서 위치와 포지션 구역을 바꾸기"
               >
                 <span className="slot-label">{slot.label}</span>
                 <strong>{selected?.player.name ?? "비어 있음"}</strong>
@@ -1302,6 +1395,35 @@ function ScoreBars({ player }: { player: LegendPlayer }) {
       ))}
     </div>
   );
+}
+
+function getDefaultSlotRole(slot: FormationSlot): PitchRole {
+  return (slot.accepts.find((position) => position !== "LEGEND") ?? "CM") as PitchRole;
+}
+
+function findPitchRole(position: SlotPosition): PitchRole {
+  const containingZone = pitchZones.find(
+    (zone) =>
+      position.left >= zone.left &&
+      position.left <= zone.left + zone.width &&
+      position.top >= zone.top &&
+      position.top <= zone.top + zone.height,
+  );
+
+  if (containingZone) {
+    return containingZone.role;
+  }
+
+  return pitchZones
+    .map((zone) => {
+      const centerLeft = zone.left + zone.width / 2;
+      const centerTop = zone.top + zone.height / 2;
+      return {
+        role: zone.role,
+        distance: Math.hypot(position.left - centerLeft, (position.top - centerTop) * 1.15),
+      };
+    })
+    .sort((a, b) => a.distance - b.distance)[0].role;
 }
 
 function buildSquad(
