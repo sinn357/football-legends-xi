@@ -13,6 +13,8 @@ football-legends-xi/
 ├── lib/
 │   └── legend-data.ts
 ├── docs/
+│   ├── design/
+│   │   └── SCORE_AND_PROFILE_SYSTEM.md
 │   └── STRUCTURE.md
 ├── next.config.ts
 ├── package.json
@@ -24,4 +26,5 @@ football-legends-xi/
 
 - `lib/legend-data.ts` reads and parses `data/football-legends.md` first, with a local workspace fallback for development.
 - `components/LegendBuilder.tsx` owns all client-side interaction, squad generation, manual slot overrides, and saved XI state.
+- `docs/design/SCORE_AND_PROFILE_SYSTEM.md` defines the rating anchors, score bands, evidence schema, source priority, and Africa player workflow.
 - No remote API, external DB, or deployment config is required for the MVP.
