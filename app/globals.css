@@ -1099,6 +1099,21 @@ td strong {
   line-height: 1.55;
 }
 
+.source-section {
+  margin-top: 14px;
+}
+
+.source-section a {
+  color: var(--blue);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.source-section a:hover,
+.source-section a:focus-visible {
+  text-decoration: underline;
+}
+
 .empty-state {
   color: var(--muted);
   margin-bottom: 0;

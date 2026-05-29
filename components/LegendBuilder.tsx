@@ -1334,6 +1334,22 @@ function PlayerDetailDrawer({
           );
         })}
       </div>
+      {player.profile.sources.length ? (
+        <section className="profile-section source-section">
+          <div>
+            <h3>출처</h3>
+          </div>
+          <ul>
+            {player.profile.sources.map((source) => (
+              <li key={source.url}>
+                <a href={source.url} rel="noreferrer" target="_blank">
+                  {source.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </aside>
   );
 }
