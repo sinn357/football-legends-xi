@@ -441,8 +441,9 @@ type PlayerEvidenceProfile = {
 
 ## 현재 커버리지 상태
 
-- Africa 21명: 모두 개별 큐레이션 프로필 보유
+- Africa 21명: 모두 개별 큐레이션 프로필 보유, computed score 0명
 - Africa 상위 8명: 상세 fact group, 소속팀, 팀 우승, 개인 수상, 프라임 근거, 팀 비중, 레거시 근거 보유
+- Africa 잔여 13명: 전체 adjusted score 확정
 - Asia 62명: South Korea 39명, Japan 21명, Ali Daei, Tim Cahill 전체 큐레이션 프로필 적용
 - America 130명: Argentina 37명, Brazil 55명, 기타 America 38명 전체 큐레이션 프로필 적용
 - 유럽 제외 총 213명: profile override 누락 0명
@@ -458,8 +459,9 @@ type PlayerEvidenceProfile = {
 - Belgium 17명: 전체 큐레이션 프로필/점수 적용
 - Europe 누적 443명: profile override 누락 0명, computed score 0명
 - Europe 잔여 0명
+- 전체 656명: profile override 누락 0명, computed score 0명
 
-Baseline profile은 이제 Europe 선수에게는 남아 있지 않다. 유럽 제외 선수와 Europe 전체 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
+Baseline profile은 이제 현재 등록 선수에게 남아 있지 않다. 전체 656명은 모두 선수별 큐레이션 profile override와 anchor/adjusted score를 우선 사용한다.
 
 Focused profile 적용 완료:
 
