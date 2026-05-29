@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { MutableRefObject, RefObject } from "react";
+import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
 type TabId = "atlas" | "best-xi" | "rankings" | "compare";
@@ -528,6 +528,8 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     });
   }
 
+  const inspector = <PlayerDetailDrawer player={selectedPlayer} onClose={() => setSelectedPlayerId(null)} onToggleCompare={toggleCompare} />;
+
   return (
     <main className="app-shell">
       <section className="workspace-header">
@@ -585,6 +587,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onPlayerSelect={setSelectedPlayerId}
           selectedCountryTop={selectedCountryTop}
           selectedCountrySummary={selectedCountrySummary}
+          inspector={inspector}
           weights={weights}
         />
       ) : null}
@@ -637,6 +640,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           draggingSlotId={draggingSlotId}
           dropTargetSlotId={dropTargetSlotId}
           dropTargetRole={dropTargetRole}
+          inspector={inspector}
           weights={weights}
           onWeightChange={updateWeight}
         />
@@ -647,6 +651,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onPlayerSelect={setSelectedPlayerId}
           onToggleCompare={toggleCompare}
           rankings={rankingPlayers}
+          inspector={inspector}
           weights={weights}
           onWeightChange={updateWeight}
         />
@@ -659,11 +664,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onToggleCompare={toggleCompare}
           players={data.players}
           playerById={playerById}
+          inspector={inspector}
           weights={weights}
         />
       ) : null}
-
-      <PlayerDetailDrawer player={selectedPlayer} onClose={() => setSelectedPlayerId(null)} onToggleCompare={toggleCompare} />
     </main>
   );
 }
@@ -680,6 +684,7 @@ function AtlasView({
   onPlayerSelect,
   selectedCountryTop,
   selectedCountrySummary,
+  inspector,
   weights,
 }: {
   atlasContinent: Continent | null;
@@ -693,6 +698,7 @@ function AtlasView({
   onPlayerSelect: (playerId: string) => void;
   selectedCountryTop: Array<{ player: LegendPlayer; rating: number }>;
   selectedCountrySummary?: LegendData["countries"][number];
+  inspector: ReactNode;
   weights: WeightMap;
 }) {
   const groupedByPosition = groupPlayersByPosition(atlasPlayers);
@@ -801,6 +807,7 @@ function AtlasView({
           </aside>
         </div>
       </section>
+      {inspector}
     </section>
   );
 }
@@ -825,6 +832,7 @@ function BestXiView({
   getSlotPositionsForDrag,
   includeActiveHold,
   includeDeleteCandidates,
+  inspector,
   manualSlots,
   onAssignPlayer,
   onCandidateQueryChange,
@@ -871,6 +879,7 @@ function BestXiView({
   getSlotPositionsForDrag: () => Record<string, SlotPosition>;
   includeActiveHold: boolean;
   includeDeleteCandidates: boolean;
+  inspector: ReactNode;
   manualSlots: Record<string, string>;
   onAssignPlayer: (playerId: string) => void;
   onCandidateQueryChange: (query: string) => void;
@@ -899,6 +908,24 @@ function BestXiView({
   weights: WeightMap;
 }) {
   const selectedSlot = formation.slots.find((slot) => slot.id === selectedSlotId) ?? formation.slots[0];
+  const dragPointerStartRef = useRef<DragPoint | null>(null);
+
+  function isDraggingPastThreshold(event: DragPoint) {
+    const start = dragPointerStartRef.current;
+    if (!start) {
+      return true;
+    }
+
+    return Math.hypot(event.clientX - start.clientX, event.clientY - start.clientY) > 4;
+  }
+
+  function clearDragState() {
+    activeDragSlotRef.current = null;
+    dragPointerStartRef.current = null;
+    setDraggingSlotId(null);
+    setDropTargetSlotId(null);
+    setDropTargetRole(null);
+  }
 
   useEffect(() => {
     if (!draggingSlotId) {
@@ -908,6 +935,9 @@ function BestXiView({
     function handleMouseMove(event: MouseEvent) {
       const slotId = activeDragSlotRef.current;
       if (slotId) {
+        if (!isDraggingPastThreshold(event)) {
+          return;
+        }
         updateSlotPosition(slotId, event);
       }
     }
@@ -915,7 +945,12 @@ function BestXiView({
     function handleMouseUp(event: MouseEvent) {
       const slotId = activeDragSlotRef.current;
       if (slotId) {
+        if (!isDraggingPastThreshold(event)) {
+          clearDragState();
+          return;
+        }
         finalizeSlotDrag(slotId, event);
+        dragPointerStartRef.current = null;
       }
     }
 
@@ -929,73 +964,112 @@ function BestXiView({
 
   return (
     <section className="builder-grid">
-      <aside className="weights-panel">
-        <div className="section-heading">
-          <p className="eyebrow">World Builder</p>
-          <h2>필터와 기준</h2>
-        </div>
-        <label className="field">
-          <span>대륙</span>
-          <select value={builderContinent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
-            <option value="ALL">전체</option>
-            {continentOptions.map((continent) => (
-              <option key={continent} value={continent}>
-                {continent}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>국가</span>
-          <select value={builderCountry} onChange={(event) => onCountryChange(event.target.value)}>
-            <option value="ALL">전체</option>
-            {builderCountries.map((country) => (
-              <option key={country.name} value={country.name}>
-                {country.name} ({country.count})
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>포지션</span>
-          <select value={builderPosition} onChange={(event) => onPositionChange(event.target.value as PositionCode | FilterValue)}>
-            <option value="ALL">전체</option>
-            {positionOptions.map((position) => (
-              <option key={position} value={position}>
-                {position}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="toggles vertical">
-          <label>
-            <input checked={topOnly} onChange={(event) => onTopOnlyChange(event.target.checked)} type="checkbox" />
-            Top 50 기본 리스트
+      <aside className="builder-finder-panel">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">World Builder</p>
+            <h2>필터와 기준</h2>
+          </div>
+          <label className="field">
+            <span>대륙</span>
+            <select value={builderContinent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
+              <option value="ALL">전체</option>
+              {continentOptions.map((continent) => (
+                <option key={continent} value={continent}>
+                  {continent}
+                </option>
+              ))}
+            </select>
           </label>
-          <label>
-            <input checked={includeActiveHold} onChange={(event) => onIncludeActiveHoldChange(event.target.checked)} type="checkbox" />
-            현역보류 포함
+          <label className="field">
+            <span>국가</span>
+            <select value={builderCountry} onChange={(event) => onCountryChange(event.target.value)}>
+              <option value="ALL">전체</option>
+              {builderCountries.map((country) => (
+                <option key={country.name} value={country.name}>
+                  {country.name} ({country.count})
+                </option>
+              ))}
+            </select>
           </label>
-          <label>
-            <input
-              checked={includeDeleteCandidates}
-              onChange={(event) => onIncludeDeleteCandidatesChange(event.target.checked)}
-              type="checkbox"
-            />
-            삭제후보 포함
+          <label className="field">
+            <span>포지션</span>
+            <select value={builderPosition} onChange={(event) => onPositionChange(event.target.value as PositionCode | FilterValue)}>
+              <option value="ALL">전체</option>
+              {positionOptions.map((position) => (
+                <option key={position} value={position}>
+                  {position}
+                </option>
+              ))}
+            </select>
           </label>
-        </div>
-        <div className="slider-stack compact">
-          {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
-            <label className="slider-row" key={key}>
-              <span>
-                {scoreLabels[key]}
-                <strong>{weights[key]}</strong>
-              </span>
-              <input max="50" min="0" onChange={(event) => onWeightChange(key, Number(event.target.value))} type="range" value={weights[key]} />
+          <div className="toggles vertical">
+            <label>
+              <input checked={topOnly} onChange={(event) => onTopOnlyChange(event.target.checked)} type="checkbox" />
+              Top 50 기본 리스트
             </label>
-          ))}
-        </div>
+            <label>
+              <input checked={includeActiveHold} onChange={(event) => onIncludeActiveHoldChange(event.target.checked)} type="checkbox" />
+              현역보류 포함
+            </label>
+            <label>
+              <input
+                checked={includeDeleteCandidates}
+                onChange={(event) => onIncludeDeleteCandidatesChange(event.target.checked)}
+                type="checkbox"
+              />
+              삭제후보 포함
+            </label>
+          </div>
+          <div className="slider-stack compact">
+            {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
+              <label className="slider-row" key={key}>
+                <span>
+                  {scoreLabels[key]}
+                  <strong>{weights[key]}</strong>
+                </span>
+                <input max="50" min="0" onChange={(event) => onWeightChange(key, Number(event.target.value))} type="range" value={weights[key]} />
+              </label>
+            ))}
+          </div>
+        </section>
+        <section className="candidate-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Selected Slot</p>
+            <h2>{selectedSlot.label} 후보</h2>
+          </div>
+          <input
+            className="search-input"
+            onChange={(event) => onCandidateQueryChange(event.target.value)}
+            placeholder="선수, 국가, 포지션 검색"
+            type="search"
+            value={candidateQuery}
+          />
+          <div className="candidate-list">
+            {candidatePlayers.map(({ player, rating }) => (
+              <article className="candidate-item" key={player.id}>
+                <button onClick={() => onAssignPlayer(player.id)} type="button">
+                  <strong>{player.name}</strong>
+                  <span>
+                    {player.country} · {player.primaryPosition} · {rating}
+                  </span>
+                </button>
+                <div>
+                  <button onClick={() => onPlayerSelect(player.id)} type="button">
+                    정보
+                  </button>
+                  <button
+                    className={compareIds.includes(player.id) ? "active" : ""}
+                    onClick={() => onToggleCompare(player.id)}
+                    type="button"
+                  >
+                    비교
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </aside>
 
       <section className="pitch-panel">
@@ -1055,28 +1129,41 @@ function BestXiView({
                   .filter(Boolean)
                   .join(" ")}
                 key={slot.id}
-                onClick={() => onSelectedSlotChange(slot.id)}
+                onClick={() => {
+                  onSelectedSlotChange(slot.id);
+                  if (selected) {
+                    onPlayerSelect(selected.player.id);
+                  }
+                }}
                 onPointerCancel={() => {
-                  activeDragSlotRef.current = null;
-                  setDraggingSlotId(null);
-                  setDropTargetSlotId(null);
-                  setDropTargetRole(null);
+                  clearDragState();
                 }}
                 onPointerDown={(event) => {
                   activeDragSlotRef.current = slot.id;
+                  dragPointerStartRef.current = { clientX: event.clientX, clientY: event.clientY };
                   dragStartPositionsRef.current = getSlotPositionsForDrag();
                   setDraggingSlotId(slot.id);
                   onSelectedSlotChange(slot.id);
                   event.currentTarget.setPointerCapture(event.pointerId);
-                  updateSlotPosition(slot.id, event);
                 }}
                 onPointerMove={(event) => {
                   if (activeDragSlotRef.current === slot.id) {
+                    if (!isDraggingPastThreshold(event)) {
+                      return;
+                    }
                     updateSlotPosition(slot.id, event);
                   }
                 }}
                 onPointerUp={(event) => {
+                  if (!isDraggingPastThreshold(event)) {
+                    clearDragState();
+                    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                      event.currentTarget.releasePointerCapture(event.pointerId);
+                    }
+                    return;
+                  }
                   finalizeSlotDrag(slot.id, event);
+                  dragPointerStartRef.current = null;
                   if (event.currentTarget.hasPointerCapture(event.pointerId)) {
                     event.currentTarget.releasePointerCapture(event.pointerId);
                   }
@@ -1086,10 +1173,10 @@ function BestXiView({
                     return;
                   }
                   activeDragSlotRef.current = slot.id;
+                  dragPointerStartRef.current = { clientX: event.clientX, clientY: event.clientY };
                   dragStartPositionsRef.current = getSlotPositionsForDrag();
                   setDraggingSlotId(slot.id);
                   onSelectedSlotChange(slot.id);
-                  updateSlotPosition(slot.id, event);
                 }}
                 role="button"
                 style={{ left: `${position.left}%`, top: `${position.top}%` }}
@@ -1105,43 +1192,7 @@ function BestXiView({
         </div>
       </section>
 
-      <aside className="candidate-panel">
-        <div className="section-heading">
-          <p className="eyebrow">Selected Slot</p>
-          <h2>{selectedSlot.label} 후보</h2>
-        </div>
-        <input
-          className="search-input"
-          onChange={(event) => onCandidateQueryChange(event.target.value)}
-          placeholder="선수, 국가, 포지션 검색"
-          type="search"
-          value={candidateQuery}
-        />
-        <div className="candidate-list">
-          {candidatePlayers.map(({ player, rating }) => (
-            <article className="candidate-item" key={player.id}>
-              <button onClick={() => onAssignPlayer(player.id)} type="button">
-                <strong>{player.name}</strong>
-                <span>
-                  {player.country} · {player.primaryPosition} · {rating}
-                </span>
-              </button>
-              <div>
-                <button onClick={() => onPlayerSelect(player.id)} type="button">
-                  정보
-                </button>
-                <button
-                  className={compareIds.includes(player.id) ? "active" : ""}
-                  onClick={() => onToggleCompare(player.id)}
-                  type="button"
-                >
-                  비교
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </aside>
+      {inspector}
     </section>
   );
 }
@@ -1150,12 +1201,14 @@ function RankingsView({
   onPlayerSelect,
   onToggleCompare,
   onWeightChange,
+  inspector,
   rankings,
   weights,
 }: {
   onPlayerSelect: (playerId: string) => void;
   onToggleCompare: (playerId: string) => void;
   onWeightChange: (key: ScoreKey, value: number) => void;
+  inspector: ReactNode;
   rankings: Array<{ player: LegendPlayer; rating: number }>;
   weights: WeightMap;
 }) {
@@ -1201,6 +1254,7 @@ function RankingsView({
           ))}
         </div>
       </section>
+      {inspector}
     </section>
   );
 }
@@ -1211,6 +1265,7 @@ function CompareView({
   onToggleCompare,
   playerById,
   players,
+  inspector,
   weights,
 }: {
   compareIds: string[];
@@ -1218,6 +1273,7 @@ function CompareView({
   onToggleCompare: (playerId: string) => void;
   playerById: Map<string, LegendPlayer>;
   players: LegendPlayer[];
+  inspector: ReactNode;
   weights: WeightMap;
 }) {
   const comparedPlayers = compareIds.map((id) => playerById.get(id)).filter(Boolean) as LegendPlayer[];
@@ -1281,6 +1337,7 @@ function CompareView({
           </div>
         )}
       </section>
+      {inspector}
     </section>
   );
 }
@@ -1295,7 +1352,15 @@ function PlayerDetailDrawer({
   player: LegendPlayer | null;
 }) {
   if (!player) {
-    return null;
+    return (
+      <aside className="player-drawer inspector-empty" aria-label="선수 상세">
+        <div className="section-heading">
+          <p className="eyebrow">Inspector</p>
+          <h2>선수 정보</h2>
+        </div>
+        <p className="empty-state">선수를 선택하면 총점, 세부 점수, 커리어 근거가 이 패널에 표시됩니다.</p>
+      </aside>
+    );
   }
 
   return (
