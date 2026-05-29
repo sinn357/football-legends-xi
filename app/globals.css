@@ -343,6 +343,12 @@ select,
   gap: 18px;
 }
 
+.ranking-finder-panel {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+}
+
 .weights-panel,
 .pitch-panel,
 .bench-panel,
@@ -372,6 +378,7 @@ select,
 
 .atlas-sidebar,
 .builder-finder-panel,
+.ranking-finder-panel,
 .player-drawer {
   position: sticky;
   top: 18px;
@@ -725,6 +732,14 @@ input[type="range"] {
   max-width: none;
 }
 
+.weights-panel .search-input {
+  max-width: none;
+}
+
+.compact-button {
+  margin-top: 2px;
+}
+
 .table-wrap {
   max-height: 620px;
   overflow: auto;
@@ -1068,6 +1083,31 @@ td strong {
 .ranking-list {
   max-height: 760px;
   overflow: auto;
+}
+
+.ranking-summary {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.ranking-summary span,
+.ranking-summary strong {
+  background: rgba(11, 61, 46, 0.08);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.ranking-summary strong {
+  background: rgba(200, 162, 74, 0.18);
+  color: var(--main);
 }
 
 .ranking-item {
@@ -1487,6 +1527,7 @@ td strong {
 
   .atlas-sidebar,
   .builder-finder-panel,
+  .ranking-finder-panel,
   .player-drawer {
     position: static;
   }

@@ -197,6 +197,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [builderPosition, setBuilderPosition] = useState<PositionCode | FilterValue>("ALL");
   const [candidateQuery, setCandidateQuery] = useState("");
   const [compareQuery, setCompareQuery] = useState("");
+  const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
+  const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
+  const [rankingPosition, setRankingPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [rankingQuery, setRankingQuery] = useState("");
   const [topOnly, setTopOnly] = useState(true);
   const [manualSlots, setManualSlots] = useState<Record<string, string>>({});
   const [selectedSlotId, setSelectedSlotId] = useState("st");
@@ -284,6 +288,12 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     [builderContinent, data.countries],
   );
 
+  const rankingCountries = useMemo(
+    () =>
+      data.countries.filter((country) => rankingContinent === "ALL" || country.continent === rankingContinent),
+    [data.countries, rankingContinent],
+  );
+
   const candidatePlayers = useMemo(() => {
     const normalizedQuery = candidateQuery.trim().toLowerCase();
     return statusFilteredPlayers
@@ -327,14 +337,28 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     ? Math.round(starters.reduce((sum, starter) => sum + starter.rating, 0) / starters.length)
     : 0;
 
-  const rankingPlayers = useMemo(
-    () =>
-      statusFilteredPlayers
-        .map((player) => ({ player, rating: ratePlayer(player, weights) }))
-        .sort((a, b) => b.rating - a.rating || (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999))
-        .slice(0, 100),
-    [statusFilteredPlayers, weights],
-  );
+  const rankingPool = useMemo(() => {
+    const normalizedQuery = rankingQuery.trim().toLowerCase();
+    return statusFilteredPlayers
+      .filter((player) => rankingContinent === "ALL" || player.continent === rankingContinent)
+      .filter((player) => rankingCountry === "ALL" || player.country === rankingCountry)
+      .filter((player) => rankingPosition === "ALL" || player.primaryPosition === rankingPosition)
+      .filter((player) => !normalizedQuery || matchesPlayerSearch(player, normalizedQuery))
+      .map((player) => ({ player, rating: ratePlayer(player, weights) }))
+      .sort(
+        (a, b) =>
+          getPlayerSearchRank(a.player, normalizedQuery) - getPlayerSearchRank(b.player, normalizedQuery) ||
+          b.rating - a.rating ||
+          (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999),
+      );
+  }, [rankingContinent, rankingCountry, rankingPosition, rankingQuery, statusFilteredPlayers, weights]);
+
+  const rankingPlayers = rankingPool.slice(0, 150);
+  const rankingSummary = {
+    average: average(rankingPool.map((item) => item.rating)),
+    count: rankingPool.length,
+    topScore: rankingPool[0]?.rating ?? 0,
+  };
 
   const atlasPlayers = useMemo(
     () =>
@@ -682,9 +706,28 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
       {activeTab === "rankings" ? (
         <RankingsView
+          countries={rankingCountries}
+          continent={rankingContinent}
+          country={rankingCountry}
           onPlayerSelect={setSelectedPlayerId}
+          onContinentChange={(value) => {
+            setRankingContinent(value);
+            setRankingCountry("ALL");
+          }}
+          onCountryChange={setRankingCountry}
+          onPositionChange={setRankingPosition}
+          onQueryChange={setRankingQuery}
+          onResetFilters={() => {
+            setRankingContinent("ALL");
+            setRankingCountry("ALL");
+            setRankingPosition("ALL");
+            setRankingQuery("");
+          }}
           onToggleCompare={toggleCompare}
           rankings={rankingPlayers}
+          position={rankingPosition}
+          query={rankingQuery}
+          summary={rankingSummary}
           inspector={inspector}
           weights={weights}
           onWeightChange={updateWeight}
@@ -1292,60 +1335,151 @@ function SavedSquadsPanel({
 }
 
 function RankingsView({
+  continent,
+  countries,
+  country,
   onPlayerSelect,
+  onContinentChange,
+  onCountryChange,
+  onPositionChange,
+  onQueryChange,
+  onResetFilters,
   onToggleCompare,
   onWeightChange,
   inspector,
+  position,
+  query,
   rankings,
+  summary,
   weights,
 }: {
+  continent: Continent | FilterValue;
+  countries: LegendData["countries"];
+  country: string | FilterValue;
   onPlayerSelect: (playerId: string) => void;
+  onContinentChange: (value: Continent | FilterValue) => void;
+  onCountryChange: (value: string | FilterValue) => void;
+  onPositionChange: (value: PositionCode | FilterValue) => void;
+  onQueryChange: (query: string) => void;
+  onResetFilters: () => void;
   onToggleCompare: (playerId: string) => void;
   onWeightChange: (key: ScoreKey, value: number) => void;
   inspector: ReactNode;
+  position: PositionCode | FilterValue;
+  query: string;
   rankings: Array<{ player: LegendPlayer; rating: number }>;
+  summary: {
+    average: number;
+    count: number;
+    topScore: number;
+  };
   weights: WeightMap;
 }) {
   return (
     <section className="rankings-grid">
-      <aside className="weights-panel">
-        <div className="section-heading">
-          <p className="eyebrow">Ranking Lab</p>
-          <h2>내 기준 랭킹</h2>
-        </div>
-        <div className="slider-stack">
-          {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
-            <label className="slider-row" key={key}>
-              <span>
-                {scoreLabels[key]}
-                <strong>{weights[key]}</strong>
-              </span>
-              <input max="50" min="0" onChange={(event) => onWeightChange(key, Number(event.target.value))} type="range" value={weights[key]} />
-            </label>
-          ))}
-        </div>
+      <aside className="ranking-finder-panel">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Ranking Lab</p>
+            <h2>내 기준 랭킹</h2>
+          </div>
+          <label className="field">
+            <span>검색</span>
+            <input
+              className="search-input"
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="선수, 국가, 포지션 검색"
+              type="search"
+              value={query}
+            />
+          </label>
+          <label className="field">
+            <span>대륙</span>
+            <select value={continent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
+              <option value="ALL">전체</option>
+              {continentOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>국가</span>
+            <select value={country} onChange={(event) => onCountryChange(event.target.value)}>
+              <option value="ALL">전체</option>
+              {countries.map((item) => (
+                <option key={item.name} value={item.name}>
+                  {item.name} ({item.count})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>포지션</span>
+            <select value={position} onChange={(event) => onPositionChange(event.target.value as PositionCode | FilterValue)}>
+              <option value="ALL">전체</option>
+              {positionOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="ghost-button compact-button" onClick={onResetFilters} type="button">
+            필터 초기화
+          </button>
+        </section>
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Weights</p>
+            <h2>평가 가중치</h2>
+          </div>
+          <div className="slider-stack compact">
+            {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
+              <label className="slider-row" key={key}>
+                <span>
+                  {scoreLabels[key]}
+                  <strong>{weights[key]}</strong>
+                </span>
+                <input max="50" min="0" onChange={(event) => onWeightChange(key, Number(event.target.value))} type="range" value={weights[key]} />
+              </label>
+            ))}
+          </div>
+        </section>
       </aside>
       <section className="roster-panel">
-        <div className="section-heading">
-          <p className="eyebrow">Top 100</p>
-          <h2>동적 레전드 랭킹</h2>
+        <div className="section-heading row">
+          <div>
+            <p className="eyebrow">Top {Math.min(summary.count, 150)}</p>
+            <h2>동적 레전드 랭킹</h2>
+          </div>
+          <div className="ranking-summary">
+            <span>{summary.count}명</span>
+            <span>평균 {summary.average}</span>
+            <strong>최고 {summary.topScore}</strong>
+          </div>
         </div>
         <div className="ranking-list">
-          {rankings.map(({ player, rating }, index) => (
-            <article className="ranking-item" key={player.id}>
-              <span>{index + 1}</span>
-              <button onClick={() => onPlayerSelect(player.id)} type="button">
-                <strong>{player.name}</strong>
-                <small>
-                  {player.country} · {player.primaryPosition}
-                </small>
-              </button>
-              <em>{rating}</em>
-              <button onClick={() => onToggleCompare(player.id)} type="button">
-                비교
-              </button>
-            </article>
-          ))}
+          {rankings.length ? (
+            rankings.map(({ player, rating }, index) => (
+              <article className="ranking-item" key={player.id}>
+                <span>{index + 1}</span>
+                <button onClick={() => onPlayerSelect(player.id)} type="button">
+                  <strong>{player.name}</strong>
+                  <small>
+                    {player.country} · {player.continent} · {player.primaryPosition}
+                  </small>
+                </button>
+                <em>{rating}</em>
+                <button onClick={() => onToggleCompare(player.id)} type="button">
+                  비교
+                </button>
+              </article>
+            ))
+          ) : (
+            <p className="empty-state">조건에 맞는 선수가 없습니다.</p>
+          )}
         </div>
       </section>
       {inspector}
