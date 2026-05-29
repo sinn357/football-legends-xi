@@ -310,6 +310,91 @@ const scoreOverrides: Record<string, ScoreOverride> = {
     scoreMode: "adjusted",
     scores: { teamCareer: 82, individualCareer: 86, primeSkill: 86, teamImportance: 86, legacy: 88 },
   },
+  "오카자키 신지": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 89, individualCareer: 84, primeSkill: 86, teamImportance: 87, legacy: 87 },
+  },
+  "미우라 카즈요시": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 88, primeSkill: 88, teamImportance: 91, legacy: 92 },
+  },
+  "카마모토 쿠니시게": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 84, individualCareer: 91, primeSkill: 89, teamImportance: 91, legacy: 93 },
+  },
+  "미토마 카오루": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 82, individualCareer: 83, primeSkill: 88, teamImportance: 85, legacy: 85 },
+  },
+  "쿠보 타케후사": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 82, individualCareer: 84, primeSkill: 88, teamImportance: 85, legacy: 86 },
+  },
+  "오노 신지": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 87, individualCareer: 86, primeSkill: 88, teamImportance: 86, legacy: 88 },
+  },
+  "엔도 야스히토": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 90, primeSkill: 88, teamImportance: 91, legacy: 92 },
+  },
+  "하세베 마코토": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 84, primeSkill: 86, teamImportance: 91, legacy: 90 },
+  },
+  "엔도 와타루": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 83, primeSkill: 86, teamImportance: 87, legacy: 85 },
+  },
+  "나가토모 유토": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 87, individualCareer: 86, primeSkill: 87, teamImportance: 89, legacy: 89 },
+  },
+  "우치다 아쓰토": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 82, primeSkill: 86, teamImportance: 86, legacy: 85 },
+  },
+  "나카자와 유지": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 87, individualCareer: 86, primeSkill: 86, teamImportance: 89, legacy: 88 },
+  },
+  "이하라 마사미": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 87, individualCareer: 90, primeSkill: 88, teamImportance: 92, legacy: 91 },
+  },
+  "요시다 마야": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 85, individualCareer: 83, primeSkill: 86, teamImportance: 90, legacy: 88 },
+  },
+  "토미야스 타케히로": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 84, individualCareer: 82, primeSkill: 88, teamImportance: 86, legacy: 85 },
+  },
+  "가와구치 요시카쓰": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 86, primeSkill: 87, teamImportance: 90, legacy: 90 },
+  },
+  "가와시마 에이지": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 84, individualCareer: 83, primeSkill: 85, teamImportance: 88, legacy: 87 },
+  },
   "나카타 히데토시": {
     overallScore: 87,
     scoreMode: "adjusted",
@@ -1056,6 +1141,609 @@ const focusedNonEuropeProfileOverrides: Record<string, CuratedProfileEntry> = {
       { label: "AFC - Kim Byung-ji retires", url: "https://www.the-afc.com/en/more/news/legendary_korea_republic_goalkeeper_kim_byung-ji__retires.html" },
       { label: "Yonhap - Kim Byung-ji retirement", url: "https://en.yna.co.kr/view/AEN20160719010000315" },
       { label: "Wikipedia - Kim Byung-ji", url: "https://en.wikipedia.org/wiki/Kim_Byung-ji" },
+    ],
+  }),
+  "오카자키 신지": makeFocusedProfile({
+    summary:
+      "Shinji Okazaki는 Leicester City의 2015-16 Premier League 우승과 Japan 대표팀 득점 누적으로 평가하는 일본 스트라이커입니다.",
+    team: {
+      clubs: ["Shimizu S-Pulse", "VfB Stuttgart", "Mainz 05", "Leicester City", "Malaga", "Huesca", "Cartagena", "Sint-Truiden", "Japan national team"],
+      clubHonours: ["Leicester City: Premier League 2015-16", "Huesca: Segunda Division promotion 2019-20"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: FIFA World Cup appearances 2010, 2014, 2018"],
+      verdict: "Premier League 우승팀의 전방 압박 자원이라는 팀 커리어가 강합니다.",
+    },
+    individual: {
+      awards: ["AFC Asian International Player of the Year: 2016", "IFFHS AFC Men's Team of the Decade: 2011-2020 context"],
+      records: ["Japan national-team 50-goal tier", "Second Japanese player to win the Premier League"],
+      verdict: "개인상보다 대표팀 득점 누적과 Leicester 우승 서사가 중요합니다.",
+    },
+    prime: {
+      period: "2013-16 Mainz/Leicester/Japan",
+      evidence: ["Mainz Bundesliga scoring peak", "2015-16 Leicester Premier League title", "2011 Asian Cup and World Cup-cycle Japan role"],
+      skills: ["Pressing", "near-post runs", "acrobatic finishing", "second-ball reactions", "work rate"],
+      verdict: "순수 득점왕형보다 전방 수비와 활동량이 결합된 프라임입니다.",
+    },
+    importance: {
+      roles: ["Leicester City: Vardy/Mahrez behind-the-ball pressing support", "Japan: long-term scoring forward"],
+      moments: ["Leicester 2015-16 title run", "Japan Asian Cup-winning squad", "World Cup appearances across three editions"],
+      verdict: "클럽에서는 시스템형 핵심, 대표팀에서는 장기 득점 자원입니다.",
+    },
+    legacy: {
+      reasons: ["Premier League 2015-16", "AFC Asian International Player of the Year 2016", "Japan 50-goal tier"],
+      context: ["Japanese European striker benchmark", "Leicester miracle story"],
+      verdict: "Leicester 우승 때문에 일본 축구사에서 오래 남습니다.",
+    },
+    sources: [
+      { label: "AFC - Okazaki Asian International Player", url: "https://www.the-afc.com/en/about_afc/afc_annual_awards/news/afc_asian_international_player_of_the_year_2016_shinji_okazaki.html" },
+      { label: "Wikipedia - Shinji Okazaki", url: "https://en.wikipedia.org/wiki/Shinji_Okazaki" },
+    ],
+  }),
+  "미우라 카즈요시": makeFocusedProfile({
+    summary:
+      "Kazuyoshi Miura는 J.League 초기의 얼굴이자 일본 프로축구 대중화를 상징하는 'King Kazu'입니다.",
+    team: {
+      clubs: ["Santos", "Palmeiras", "Matsubara", "CRB", "XV de Jau", "Coritiba", "Yomiuri/Verdy Kawasaki", "Genoa loan", "Dinamo Zagreb", "Kyoto Purple Sanga", "Vissel Kobe", "Yokohama FC", "Sydney FC loan", "Suzuka Point Getters loan", "Atletico Suzuka", "Oliveirense loan", "Japan national team"],
+      clubHonours: ["Verdy Kawasaki: Japan Soccer League/J.League titles in early 1990s", "Yokohama FC: J2 League 2006"],
+      nationalHonours: ["Japan: AFC Asian Cup 1992", "Japan: FIFA World Cup qualification-era icon before 1998 omission"],
+      verdict: "팀 커리어보다 J.League 탄생기의 상징성과 장수성이 핵심입니다.",
+    },
+    individual: {
+      awards: ["Asian Footballer of the Year: 1993", "J.League MVP: 1993", "J.League Best XI multiple selections"],
+      records: ["World's oldest professional footballer/goalscorer records", "Japan national-team 50-goal tier"],
+      verdict: "J.League 초대 MVP와 아시아 올해의 선수 수상이 핵심입니다.",
+    },
+    prime: {
+      period: "1992-96 Verdy Kawasaki and Japan",
+      evidence: ["1992 Asian Cup title", "1993 J.League MVP", "1993 Asian Footballer of the Year"],
+      skills: ["Dribbling flair", "box finishing", "star charisma", "wide/central forward movement", "commercial-cultural pull"],
+      verdict: "J.League 초기 스타 프라임으로 일본 축구 대중화를 끌었습니다.",
+    },
+    importance: {
+      roles: ["Verdy/J.League: league-launch face", "Japan: professional-era attacking icon"],
+      moments: ["1992 Asian Cup", "1993 inaugural J.League season", "decades-long professional career"],
+      verdict: "축구 실력뿐 아니라 일본 프로축구의 이미지 형성 비중이 매우 큽니다.",
+    },
+    legacy: {
+      reasons: ["King Kazu identity", "J.League MVP 1993", "Asian Footballer of the Year 1993", "oldest professional records"],
+      context: ["Japan professional football pioneer", "cultural icon beyond pure statistics"],
+      verdict: "일본 프로축구사를 설명할 때 반드시 등장합니다.",
+    },
+    sources: [
+      { label: "J.League - King Kazu", url: "https://www.jleague.co/en/news/54-year-old-king-kazu-continues-legendary-career-with-suzuka-point-getters/" },
+      { label: "RSSSF - Asian Player of the Year", url: "https://www.rsssf.org/miscellaneous/as-poy.html" },
+      { label: "Wikipedia - Kazuyoshi Miura", url: "https://en.wikipedia.org/wiki/Kazuyoshi_Miura" },
+    ],
+  }),
+  "카마모토 쿠니시게": makeFocusedProfile({
+    summary:
+      "Kunishige Kamamoto는 1968 Olympic bronze와 대회 득점왕, 일본 대표팀 최다 득점 기록으로 남는 일본 축구의 원형적 스트라이커입니다.",
+    team: {
+      clubs: ["Yanmar Diesel", "Japan national team"],
+      clubHonours: ["Yanmar Diesel: Japan Soccer League titles 1971, 1974, 1975, 1980", "Yanmar Diesel: Emperor's Cup titles in 1968, 1970, 1974"],
+      nationalHonours: ["Japan: Olympic bronze medal 1968", "Japan: Asian Games bronze medal 1966"],
+      verdict: "클럽/대표팀 모두 일본 축구 초기 최고급 팀 성과를 갖고 있습니다.",
+    },
+    individual: {
+      awards: ["Japan Soccer League top scorer: seven times", "Japan Soccer League Best XI: 14 times", "Japan Soccer League Player of the Year: seven times"],
+      records: ["Japan men's all-time top scorer", "1968 Olympic top scorer with seven goals"],
+      verdict: "개인상과 대표팀 득점 기록은 일본 역대 최고급입니다.",
+    },
+    prime: {
+      period: "1968 Olympics to mid-1970s Yanmar/Japan",
+      evidence: ["1968 Olympic bronze and top scorer", "JSL repeated top-scorer seasons", "Japan all-time scoring record"],
+      skills: ["Box finishing", "shooting power", "aerial threat", "penalty-area timing", "two-footed striker instincts"],
+      verdict: "일본 스트라이커 원형이자 기록형 최고점입니다.",
+    },
+    importance: {
+      roles: ["Japan: 1968 Olympic attacking centerpiece", "Yanmar Diesel: domestic dynasty scorer"],
+      moments: ["1968 Mexico Olympics bronze medal", "JSL repeated scoring titles"],
+      verdict: "국가대표와 클럽 모두에서 득점 구조의 중심이었습니다.",
+    },
+    legacy: {
+      reasons: ["Japan all-time top scorer", "1968 Olympic bronze/top scorer", "JFA Hall of Fame", "JSL scoring dominance"],
+      context: ["Japan pre-professional era greatest striker", "benchmark before Miura/Nakata era"],
+      verdict: "일본 축구 초기 역사를 설명할 때 빠질 수 없습니다.",
+    },
+    sources: [
+      { label: "JFA Hall of Fame - Kunishige Kamamoto", url: "https://jfajp-img.jh.bit-drive.ne.jp/eng/about_jfa/hall_of_fame/member/KAMAMOTO_Kunishige.html" },
+      { label: "Wikipedia - Kunishige Kamamoto", url: "https://en.wikipedia.org/wiki/Kunishige_Kamamoto" },
+    ],
+  }),
+  "미토마 카오루": makeFocusedProfile({
+    summary:
+      "Kaoru Mitoma는 Brighton에서 Premier League 드리블러로 떠오른 현역 일본 윙어입니다. 커리어가 진행 중이라 점수는 보수적으로 잡습니다.",
+    team: {
+      clubs: ["University of Tsukuba", "Kawasaki Frontale", "Union SG loan", "Brighton & Hove Albion", "Japan national team"],
+      clubHonours: ["Kawasaki Frontale: J1 League 2020, 2021; Emperor's Cup 2020; Japanese Super Cup 2021"],
+      nationalHonours: ["Japan: FIFA World Cup 2022 last-16 squad", "Japan: AFC Asian Cup 2023 squad context"],
+      verdict: "팀 커리어는 아직 성장 중이지만 J1 우승과 Premier League 주전성이 있습니다.",
+    },
+    individual: {
+      awards: ["Japan Pro-Footballers Association Awards MVP: 2022, 2023", "Brighton Goal of the Season awards", "Premier League Goal of the Month recognition"],
+      records: ["One of Japan's most visible Premier League wingers", "World Cup 2022 Spain byline assist image"],
+      verdict: "현역이라 개인상 총량은 제한적이지만 드리블 프라임 인지도는 큽니다.",
+    },
+    prime: {
+      period: "2022-24 Brighton and Japan",
+      evidence: ["Premier League breakout under Brighton", "2022 World Cup assist vs Spain", "JPFA MVP awards"],
+      skills: ["One-v-one dribbling", "left-wing isolation", "acceleration", "cutback creation", "transition carrying"],
+      verdict: "드리블 고점은 일본 윙어 역사에서 매우 높은 편입니다.",
+    },
+    importance: {
+      roles: ["Brighton: left-wing progression outlet", "Japan: late-game and starting wide threat"],
+      moments: ["2022 World Cup Spain assist", "Brighton Premier League breakthrough seasons"],
+      verdict: "대표팀과 클럽에서 상대 수비를 직접 흔드는 역할입니다.",
+    },
+    legacy: {
+      reasons: ["Premier League Japanese winger benchmark", "2022 World Cup Spain assist", "elite dribbling reputation"],
+      context: ["active-hold, legacy still forming", "Japan modern winger lineage"],
+      verdict: "현역 커리어가 더 쌓이면 점수 상승 여지가 큽니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Kaoru Mitoma", url: "https://en.wikipedia.org/wiki/Kaoru_Mitoma" },
+      { label: "Brighton - Kaoru Mitoma", url: "https://www.brightonandhovealbion.com/" },
+    ],
+  }),
+  "쿠보 타케후사": makeFocusedProfile({
+    summary:
+      "Takefusa Kubo는 Real Sociedad에서 La Liga 상위권 윙어로 성장한 현역 일본 공격수입니다. 아직 완성 전이라 점수는 보수적으로 둡니다.",
+    team: {
+      clubs: ["FC Tokyo", "Yokohama F. Marinos loan", "Real Madrid", "Mallorca loan", "Villarreal loan", "Getafe loan", "Mallorca second loan", "Real Sociedad", "Japan national team"],
+      clubHonours: ["Real Sociedad: Champions League qualification-era core contributor", "Yokohama F. Marinos/FC Tokyo: J.League developmental context"],
+      nationalHonours: ["Japan: FIFA World Cup 2022 squad", "Japan: AFC Asian Cup 2023 squad context"],
+      verdict: "아직 팀 우승은 부족하지만 La Liga 주전/핵심 경력이 중요합니다.",
+    },
+    individual: {
+      awards: ["La Liga Player of the Month: September 2023", "Japan Pro-Footballers Association Awards Best XI: 2022, 2023"],
+      records: ["One of Japan's youngest elite European prospects", "Real Sociedad final-third creator"],
+      verdict: "현역 발전형이라 개인상은 시작 단계입니다.",
+    },
+    prime: {
+      period: "2022-24 Real Sociedad",
+      evidence: ["La Liga Player of the Month September 2023", "Real Sociedad Champions League qualification period", "Japan World Cup-cycle role"],
+      skills: ["Right-wing dribbling", "left-foot shooting", "chance creation", "pressing", "tight-space turns"],
+      verdict: "기술 고점은 일본 현역 최고권이지만 지속성은 더 필요합니다.",
+    },
+    importance: {
+      roles: ["Real Sociedad: right-side creative outlet", "Japan: attacking rotation/core option"],
+      moments: ["Real Sociedad 2023-24 Champions League stage", "La Liga monthly award"],
+      verdict: "클럽 비중이 대표팀 비중보다 먼저 커진 유형입니다.",
+    },
+    legacy: {
+      reasons: ["La Liga standout Japanese winger", "Barcelona/Real Madrid youth-path narrative", "active-hold future upside"],
+      context: ["Japan next-generation star after Nakata/Honda/Kagawa", "legacy still forming"],
+      verdict: "장기 평가는 앞으로의 우승/대표팀 성과에 달려 있습니다.",
+    },
+    sources: [
+      { label: "La Liga - Kubo Player of the Month", url: "https://www.laliga.com/en-ES/news/takefusa-kubo-named-laliga-ea-sports-player-of-the-month-for-september" },
+      { label: "Wikipedia - Takefusa Kubo", url: "https://en.wikipedia.org/wiki/Takefusa_Kubo" },
+    ],
+  }),
+  "오노 신지": makeFocusedProfile({
+    summary:
+      "Shinji Ono는 Feyenoord의 2001-02 UEFA Cup 우승과 2002 Asian Footballer of the Year 수상으로 평가하는 일본의 천재형 미드필더입니다.",
+    team: {
+      clubs: ["Urawa Red Diamonds", "Feyenoord", "Urawa Red Diamonds second spell", "Bochum", "Shimizu S-Pulse", "Western Sydney Wanderers", "Consadole Sapporo/Hokkaido Consadole Sapporo", "FC Ryukyu", "Japan national team"],
+      clubHonours: ["Feyenoord: UEFA Cup 2001-02", "Urawa Red Diamonds: J1 League 2006; Emperor's Cup 2005, 2006; AFC Champions League 2007 squad context"],
+      nationalHonours: ["Japan: AFC Asian Cup 2000", "Japan: FIFA World Cup appearances 1998, 2002, 2006"],
+      verdict: "UEFA Cup 우승팀 주전급 공헌이라는 유럽 팀 커리어가 일본 선수 역사에서 강하게 남습니다.",
+    },
+    individual: {
+      awards: ["Asian Footballer of the Year: 2002", "J.League Rookie of the Year: 1998", "J.League Best XI selections"],
+      records: ["First Japanese player to win a UEFA club competition", "Japan golden-generation technical midfielder"],
+      verdict: "부상 변수에도 Asian Footballer of the Year와 UEFA Cup 우승 조합은 매우 높게 평가됩니다.",
+    },
+    prime: {
+      period: "1998-2002 Urawa/Feyenoord/Japan",
+      evidence: ["1998 J.League breakout", "Feyenoord 2001-02 UEFA Cup", "Asian Footballer of the Year 2002"],
+      skills: ["Two-footed passing", "press resistance", "tempo control", "long-range distribution", "midfield creativity"],
+      verdict: "짧지만 기술 고점은 일본 미드필더 계보에서 최상위권입니다.",
+    },
+    importance: {
+      roles: ["Feyenoord: creative central/wide midfielder in UEFA Cup-winning side", "Japan: golden-generation technical connector", "Urawa: early professional-era star"],
+      moments: ["2002 UEFA Cup final run", "Japan 2002 World Cup generation", "2002 Asian Footballer of the Year"],
+      verdict: "대표팀 장기 지배력보다 유럽 클럽 고점과 기술 상징성이 큽니다.",
+    },
+    legacy: {
+      reasons: ["UEFA Cup 2001-02", "Asian Footballer of the Year 2002", "first Japanese UEFA club-competition winner"],
+      context: ["Japan technical genius archetype", "what-if legacy because injuries limited total volume"],
+      verdict: "부상으로 누적은 제한됐지만 프라임 재능과 유럽 우승 서사는 오래 남습니다.",
+    },
+    sources: [
+      { label: "UEFA - Ono is Asia's finest", url: "https://www.uefa.com/news-media/news/0191-0e6a62cb62dc-0478069f9bb0-1000--ono-is-asia-s-finest/" },
+      { label: "UEFA - Eastern promise", url: "https://www.uefa.com/uefasupercup/news/0250-0c50f1df0273-535ff267d1ec-1000--eastern-promise/" },
+      { label: "Wikipedia - Shinji Ono", url: "https://en.wikipedia.org/wiki/Shinji_Ono" },
+    ],
+  }),
+  "엔도 야스히토": makeFocusedProfile({
+    summary:
+      "Yasuhito Endo는 Gamba Osaka의 2008 AFC Champions League 우승과 J.League 30주년 MVP로 설명되는 일본 리그 역사상 최고급 플레이메이커입니다.",
+    team: {
+      clubs: ["Yokohama Flugels", "Kyoto Purple Sanga", "Gamba Osaka", "Jubilo Iwata", "Japan national team"],
+      clubHonours: ["Gamba Osaka: AFC Champions League 2008", "Gamba Osaka: J1 League 2005, 2014", "Gamba Osaka: Emperor's Cup 2008, 2009, 2014, 2015; J.League Cup 2007, 2014"],
+      nationalHonours: ["Japan: AFC Asian Cup 2004, 2011", "Japan: FIFA World Cup appearances 2006, 2010, 2014"],
+      verdict: "국내 클럽 트로피, ACL, 대표팀 아시안컵이 모두 있는 균형형 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["Asian Footballer of the Year: 2009", "AFC Champions League Best Player: 2008", "J.League MVP: 2014", "J.League 30-year MVP", "J.League Best XI record-level 12 selections"],
+      records: ["J.League record appearance tier", "Gamba Osaka all-time symbol"],
+      verdict: "J.League 역사 평가에서는 일본 선수 전체에서도 최상위권입니다.",
+    },
+    prime: {
+      period: "2005-14 Gamba Osaka/Japan",
+      evidence: ["2008 ACL Best Player and title", "2009 Asian Footballer of the Year", "2014 domestic treble/J.League MVP"],
+      skills: ["Tempo control", "set-piece delivery", "long passing", "press-resistant circulation", "late-career game management"],
+      verdict: "순간 폭발형보다 10년 이상 리그를 지배한 컨트롤러 프라임입니다.",
+    },
+    importance: {
+      roles: ["Gamba Osaka: central playmaker and franchise icon", "Japan: midfield set-piece/tempo option across three World Cups"],
+      moments: ["2008 AFC Champions League", "2014 Gamba domestic treble", "Japan 2010 World Cup midfield rotation"],
+      verdict: "클럽 내 비중은 일본 선수 중 최고권이고 대표팀도 장기적으로 기여했습니다.",
+    },
+    legacy: {
+      reasons: ["J.League 30-year MVP", "Asian Footballer of the Year 2009", "ACL Best Player 2008", "record-level Best XI selections"],
+      context: ["J.League all-time midfield benchmark", "domestic greatness vs European-career debate"],
+      verdict: "유럽 커리어가 없어도 J.League 역사성 때문에 일본 레전드 상위권에 남습니다.",
+    },
+    sources: [
+      { label: "J.League - J30 Yasuhito Endo MVP", url: "https://www.jleague.co/news/j30-yasuhito-endo-named-mvp-of-jleagues-first-30-years/" },
+      { label: "Wikipedia - Yasuhito Endo", url: "https://en.wikipedia.org/wiki/Yasuhito_End%C5%8D" },
+    ],
+  }),
+  "하세베 마코토": makeFocusedProfile({
+    summary:
+      "Makoto Hasebe는 Bundesliga, DFB-Pokal, UEFA Europa League, AFC Champions League, AFC Asian Cup을 모두 가진 일본의 장기 리더형 미드필더/수비수입니다.",
+    team: {
+      clubs: ["Urawa Red Diamonds", "Wolfsburg", "Nurnberg", "Eintracht Frankfurt", "Japan national team"],
+      clubHonours: ["Urawa Red Diamonds: J1 League 2006; Emperor's Cup 2005, 2006; J.League Cup 2003; AFC Champions League 2007", "Wolfsburg: Bundesliga 2008-09", "Eintracht Frankfurt: DFB-Pokal 2017-18; UEFA Europa League 2021-22"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: FIFA World Cup appearances 2010, 2014, 2018"],
+      verdict: "일본 선수 중 유럽 주요 타이틀과 아시아/국내 타이틀을 폭넓게 가진 드문 커리어입니다.",
+    },
+    individual: {
+      awards: ["AFC Asian International Player of the Year: 2018", "Bundesliga Asian appearance-record recognition", "Eintracht Frankfurt long-service captain/leader recognition"],
+      records: ["Bundesliga all-time Asian appearance leader at retirement context", "Japan captain across three World Cup cycles"],
+      verdict: "화려한 공격 개인상보다 리더십, 지속성, 포지션 전환 성공이 핵심입니다.",
+    },
+    prime: {
+      period: "2008-19 Wolfsburg/Frankfurt/Japan",
+      evidence: ["2008-09 Wolfsburg Bundesliga title", "Japan captaincy in 2010/2014/2018 World Cups", "2017-18 DFB-Pokal and 2018 individual recognition"],
+      skills: ["Defensive reading", "midfield-to-libero versatility", "leadership", "positioning", "low-error build-up"],
+      verdict: "공격 스탯형 프라임은 아니지만 팀 안정성을 올리는 지능형 프라임입니다.",
+    },
+    importance: {
+      roles: ["Japan: long-term captain and dressing-room standard", "Eintracht Frankfurt: veteran defensive organizer", "Wolfsburg: Bundesliga title-squad contributor"],
+      moments: ["2011 Asian Cup captain era", "Frankfurt DFB-Pokal and Europa League period", "three World Cup cycles as captain/core"],
+      verdict: "대표팀 내 비중과 클럽 장기 신뢰도가 모두 강합니다.",
+    },
+    legacy: {
+      reasons: ["Bundesliga title", "Europa League title", "AFC Asian Cup 2011", "Japan captaincy", "Bundesliga longevity record"],
+      context: ["Japan leadership archetype", "Asian Bundesliga longevity benchmark"],
+      verdict: "100년 뒤에는 화려함보다 커리어 폭과 리더십의 기준점으로 남을 가능성이 큽니다.",
+    },
+    sources: [
+      { label: "Eintracht - Makoto Hasebe profile", url: "https://en.eintracht.de/2021-2022/kader/makoto-hasebe/" },
+      { label: "Bundesliga - Hasebe record-setter", url: "https://www.bundesliga.com/en/bundesliga/news/makoto-hasebe-eintracht-frankfurt-s-record-setting-asian-still-going-strong-11454" },
+      { label: "Wikipedia - Makoto Hasebe", url: "https://en.wikipedia.org/wiki/Makoto_Hasebe" },
+    ],
+  }),
+  "엔도 와타루": makeFocusedProfile({
+    summary:
+      "Wataru Endo는 Urawa의 ACL 우승, Stuttgart captaincy, Liverpool 트로피까지 이어진 현역 일본 수비형 미드필더입니다.",
+    team: {
+      clubs: ["Shonan Bellmare", "Urawa Red Diamonds", "Sint-Truiden", "Stuttgart", "Liverpool", "Japan national team"],
+      clubHonours: ["Shonan Bellmare: J2 League 2014", "Urawa Red Diamonds: J.League Cup 2016; AFC Champions League 2017", "Liverpool: EFL Cup 2023-24; Premier League 2024-25"],
+      nationalHonours: ["Japan: AFC Asian Cup runner-up 2019", "Japan: FIFA World Cup squad 2018 and starter/core in 2022", "Japan: national-team captaincy era"],
+      verdict: "현역이지만 ACL과 Liverpool 트로피가 있어 팀 커리어 기반은 이미 강합니다.",
+    },
+    individual: {
+      awards: ["IFFHS AFC Men's Team of the Year: 2024", "Stuttgart captain and player-of-season-level club recognition", "Bundesliga duel-winning reputation during Stuttgart prime"],
+      records: ["Japan national-team captain in the 2020s", "Late-career move to Liverpool as Japan captain"],
+      verdict: "전통적 개인상 총량은 적지만 수비형 미드필더 특성상 팀 신뢰도와 리그 적응력이 중요합니다.",
+    },
+    prime: {
+      period: "2020-24 Stuttgart/Liverpool/Japan",
+      evidence: ["Stuttgart Bundesliga survival/relegation-fight leadership", "Liverpool 2023-24 EFL Cup run", "Japan captaincy and 2022 World Cup role"],
+      skills: ["Ball winning", "duel strength", "defensive positioning", "simple forward passing", "press coverage"],
+      verdict: "엘리트 볼위닝과 리더십이 강한 수비형 미드필더 프라임입니다.",
+    },
+    importance: {
+      roles: ["Stuttgart: captain and midfield shield", "Liverpool: squad-stabilizing defensive midfielder", "Japan: captain and balance setter"],
+      moments: ["Urawa ACL 2017", "Liverpool EFL Cup 2024", "Japan 2022 World Cup Germany/Spain group-stage run"],
+      verdict: "대표팀과 Stuttgart에서는 핵심, Liverpool에서는 로테이션 이상의 특정 역할 자원입니다.",
+    },
+    legacy: {
+      reasons: ["AFC Champions League 2017", "Liverpool EFL Cup/Premier League titles", "Japan captaincy", "Bundesliga/Premier League late-career proof"],
+      context: ["active-hold, legacy still forming", "Japan defensive-midfield benchmark after Hasebe/Endo Yasuhito line"],
+      verdict: "현역이라 최종 평가는 미완이지만 이미 일본 중원 레전드 후보군입니다.",
+    },
+    sources: [
+      { label: "Wataru Endo official profile", url: "https://www.wataruendo.com/en/" },
+      { label: "LFChistory - Wataru Endo", url: "https://www.lfchistory.net/players/1413" },
+      { label: "Wikipedia - Wataru Endo", url: "https://en.wikipedia.org/wiki/Wataru_Endo" },
+    ],
+  }),
+  "나가토모 유토": makeFocusedProfile({
+    summary:
+      "Yuto Nagatomo는 Inter와 Galatasaray에서 장기 유럽 커리어를 만들고 Japan 대표팀 월드컵 4회 세대를 버틴 풀백입니다.",
+    team: {
+      clubs: ["FC Tokyo", "Cesena", "Inter Milan", "Galatasaray", "Marseille", "FC Tokyo second spell", "Japan national team"],
+      clubHonours: ["FC Tokyo: J.League Cup 2009", "Inter Milan: Coppa Italia 2010-11", "Galatasaray: Super Lig 2017-18, 2018-19; Turkish Cup 2018-19; Turkish Super Cup 2019"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: FIFA World Cup appearances 2010, 2014, 2018, 2022"],
+      verdict: "빅리그 장기 출전, 터키 리그 우승, 대표팀 월드컵 4회가 결합된 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["AFC Asian International Player of the Year: 2013", "AFC Asian Cup Team of the Tournament: 2019", "J.League Best XI-level domestic recognition"],
+      records: ["Japan 140-cap tier", "One of Japan's longest-serving European fullbacks"],
+      verdict: "수비수 개인상 총량은 제한적이지만 커리어 지속성과 대표팀 누적이 큽니다.",
+    },
+    prime: {
+      period: "2010-18 Inter/Galatasaray/Japan",
+      evidence: ["Inter long stay after 2011 Asian Cup", "2013 AFC Asian International Player of the Year", "Galatasaray back-to-back league titles"],
+      skills: ["Recovery pace", "two-sided fullback usage", "overlapping runs", "stamina", "man-marking mobility"],
+      verdict: "일본 풀백의 유럽 지속성 기준점에 가까운 프라임입니다.",
+    },
+    importance: {
+      roles: ["Japan: long-term left-back and senior leader", "Inter/Galatasaray: high-work-rate flank defender", "FC Tokyo: career bookend and domestic symbol"],
+      moments: ["2011 Asian Cup", "World Cup appearances across four editions", "Galatasaray title seasons"],
+      verdict: "대표팀 내 누적 비중이 특히 크고 클럽에서도 장기 생존력을 증명했습니다.",
+    },
+    legacy: {
+      reasons: ["AFC Asian Cup 2011", "four World Cups", "Inter/Galatasaray European career", "Japan cap total"],
+      context: ["Japan all-time fullback debate", "Asian fullback export benchmark"],
+      verdict: "100년 뒤에도 일본 대표팀 장수형 풀백의 대표 사례로 남을 가능성이 큽니다.",
+    },
+    sources: [
+      { label: "Inter - Yuto Nagatomo profile archive", url: "https://www.inter.it/it/archivio_giocatore/G0874" },
+      { label: "Wikipedia - Yuto Nagatomo", url: "https://en.wikipedia.org/wiki/Y%C5%ABto_Nagatomo" },
+    ],
+  }),
+  "우치다 아쓰토": makeFocusedProfile({
+    summary:
+      "Atsuto Uchida는 Kashima의 J1 3연패와 Schalke의 Champions League/DFB-Pokal 시기를 연결한 일본 오른쪽 풀백입니다.",
+    team: {
+      clubs: ["Kashima Antlers", "Schalke 04", "Union Berlin", "Kashima Antlers second spell", "Japan national team"],
+      clubHonours: ["Kashima Antlers: J1 League 2007, 2008, 2009; Emperor's Cup 2007; Japanese Super Cup 2009", "Schalke 04: DFB-Pokal 2010-11; DFL-Supercup 2011", "Kashima Antlers: AFC Champions League 2018 squad context"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: FIFA World Cup appearances 2010, 2014"],
+      verdict: "J1 왕조와 Schalke 컵 우승을 동시에 가진 풀백 커리어입니다.",
+    },
+    individual: {
+      awards: ["J.League Best XI selections", "Bundesliga team-of-season-level recognition in Schalke peak years"],
+      records: ["One of Japan's earliest Champions League knockout-stage regular fullbacks", "Young fullback starter in Japan World Cup cycle"],
+      verdict: "부상으로 누적은 줄었지만 유럽 고점과 국내 왕조 기여가 좋습니다.",
+    },
+    prime: {
+      period: "2007-14 Kashima/Schalke/Japan",
+      evidence: ["Kashima J1 three-peat", "Schalke DFB-Pokal 2010-11", "Schalke Champions League regular role"],
+      skills: ["Right-side acceleration", "overlapping", "recovery defending", "crossing", "tactical discipline"],
+      verdict: "일본 오른쪽 풀백 고점 기준으로 상위권입니다.",
+    },
+    importance: {
+      roles: ["Kashima: young starter in domestic dynasty", "Schalke: Champions League-era right-back", "Japan: 2010s right-back option"],
+      moments: ["Kashima 2007-09 J1 run", "Schalke 2010-11 cup/Europe run", "2014 World Cup role"],
+      verdict: "클럽 커리어 고점은 강하지만 부상 이후 장기 대표팀 비중은 제한됐습니다.",
+    },
+    legacy: {
+      reasons: ["Kashima J1 three-peat", "Schalke DFB-Pokal", "Champions League regularity", "2011 Asian Cup"],
+      context: ["Japan European fullback lineage with Nagatomo", "injury-shortened but respected peak"],
+      verdict: "누적보다 고점형 풀백으로 기억될 가능성이 큽니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Atsuto Uchida", url: "https://en.wikipedia.org/wiki/Atsuto_Uchida" },
+      { label: "UEFA 2010-11 media guide excerpt", url: "https://www.uefa.com/MultimediaFiles/Download/EuroExperience/uefaorg/Publications/01/53/55/89/1535589_DOWNLOAD.pdf" },
+    ],
+  }),
+  "나카자와 유지": makeFocusedProfile({
+    summary:
+      "Yuji Nakazawa는 Yokohama F. Marinos의 2003-04 J.League 연속 우승과 Japan의 2000/2004 Asian Cup 우승을 지킨 센터백입니다.",
+    team: {
+      clubs: ["Verdy Kawasaki/Tokyo Verdy", "Yokohama F. Marinos", "Japan national team"],
+      clubHonours: ["Yokohama F. Marinos: J1 League 2003, 2004", "Yokohama F. Marinos: Emperor's Cup 2013"],
+      nationalHonours: ["Japan: AFC Asian Cup 2000, 2004", "Japan: FIFA World Cup appearances 2006, 2010"],
+      verdict: "클럽 리그 우승과 대표팀 아시안컵 우승이 모두 있는 일본 센터백 상위 커리어입니다.",
+    },
+    individual: {
+      awards: ["J.League MVP: 2004", "Japanese Footballer of the Year: 2004", "J.League Best XI: five selections"],
+      records: ["Yokohama F. Marinos long-term defensive icon", "Japan 100-cap tier centre-back"],
+      verdict: "센터백으로 J.League MVP를 받은 점이 개인 평가에서 매우 큽니다.",
+    },
+    prime: {
+      period: "2003-10 Yokohama/Japan",
+      evidence: ["Yokohama 2003-04 league titles", "2004 J.League MVP", "2004 Asian Cup title"],
+      skills: ["Aerial duels", "penalty-box defending", "durability", "one-v-one defending", "set-piece threat"],
+      verdict: "국내 리그와 대표팀을 동시에 지탱한 센터백 프라임입니다.",
+    },
+    importance: {
+      roles: ["Yokohama F. Marinos: defensive leader", "Japan: 2000s centre-back core"],
+      moments: ["2004 J.League title/MVP", "2004 Asian Cup retention", "2010 World Cup defensive campaign"],
+      verdict: "대표팀과 클럽 모두에서 수비 라인의 기준점 역할을 했습니다.",
+    },
+    legacy: {
+      reasons: ["J.League MVP 2004", "two Asian Cup titles", "Yokohama league titles", "long-term domestic icon"],
+      context: ["Japan all-time centre-back debate with Ihara/Yoshida/Tomiyasu", "domestic-defender benchmark"],
+      verdict: "일본 센터백 역사에서 반드시 비교 대상이 되는 선수입니다.",
+    },
+    sources: [
+      { label: "J.League - Nakazawa contract renewal", url: "https://www.jleague.co/news/f-marinos-renew-with-veteran-nakazawa/" },
+      { label: "Japan Times - Nakazawa Footballer of the Year", url: "https://www.japantimes.co.jp/sports/2005/03/02/soccer/j-league/defender-nakazawa-honored-by-soccer-writers/" },
+      { label: "Wikipedia - Yuji Nakazawa", url: "https://en.wikipedia.org/wiki/Yuji_Nakazawa" },
+    ],
+  }),
+  "이하라 마사미": makeFocusedProfile({
+    summary:
+      "Masami Ihara는 'Wall of Asia'로 불린 일본 1990년대 대표팀 주장 센터백이자 1995 Asian Footballer of the Year 수상자입니다.",
+    team: {
+      clubs: ["Nissan Motors/Yokohama Marinos", "Jubilo Iwata", "Urawa Red Diamonds", "Japan national team"],
+      clubHonours: ["Nissan/Yokohama Marinos: Emperor's Cup 1991, 1992; Asian Cup Winners' Cup 1991-92, 1992-93; J.League 1995", "Yokohama Marinos: domestic cups/titles across early J.League transition"],
+      nationalHonours: ["Japan: AFC Asian Cup 1992", "Japan: FIFA World Cup 1998 captain", "Japan: Dynasty Cup 1992"],
+      verdict: "일본 대표팀 첫 아시안컵 우승과 J.League 초기 클럽 성공을 모두 가진 수비수입니다.",
+    },
+    individual: {
+      awards: ["Asian Footballer of the Year: 1995", "J.League Best XI: 1993, 1994, 1995, 1996, 1997", "JFA Hall of Fame"],
+      records: ["Japan 120-cap tier", "Captain of Japan's first World Cup team in 1998"],
+      verdict: "센터백으로 Asian Footballer of the Year를 받은 역사성이 매우 큽니다.",
+    },
+    prime: {
+      period: "1992-98 Yokohama/Japan",
+      evidence: ["1992 Asian Cup", "1995 Asian Footballer of the Year", "1998 World Cup captaincy"],
+      skills: ["Sweeping", "cover defending", "calm decision-making", "leadership", "aerial positioning"],
+      verdict: "프로화 초창기 일본 수비 기준을 만든 프라임입니다.",
+    },
+    importance: {
+      roles: ["Japan: national-team captain and defensive organizer", "Yokohama Marinos: early J.League defensive pillar"],
+      moments: ["1992 Asian Cup title", "1998 World Cup captaincy", "five straight J.League Best XI selections"],
+      verdict: "대표팀 상징성과 수비 조직 비중이 매우 강합니다.",
+    },
+    legacy: {
+      reasons: ["Asian Footballer of the Year 1995", "Japan first World Cup captain", "JFA Hall of Fame", "Wall of Asia identity"],
+      context: ["Japan's pre-Nakazawa/Yoshida centre-back benchmark", "professional-era defensive pioneer"],
+      verdict: "일본 대표팀 역사 서사에서는 수비수 중 최상위권으로 남습니다.",
+    },
+    sources: [
+      { label: "JFA Hall of Fame - Masami Ihara", url: "https://www.jfa.jp/eng/about_jfa/hall_of_fame/member/IHARA_Masami.html" },
+      { label: "RSSSF - Asian Player of the Year", url: "https://www.rsssf.org/miscellaneous/as-poy.html" },
+      { label: "Wikipedia - Masami Ihara", url: "https://en.wikipedia.org/wiki/Masami_Ihara" },
+    ],
+  }),
+  "요시다 마야": makeFocusedProfile({
+    summary:
+      "Maya Yoshida는 Premier League 장기 생존과 Japan captaincy, 2011 Asian Cup 우승을 가진 현대 일본 센터백입니다.",
+    team: {
+      clubs: ["Nagoya Grampus", "VVV-Venlo", "Southampton", "Sampdoria", "Schalke 04", "LA Galaxy", "Japan national team"],
+      clubHonours: ["Nagoya Grampus: J1 League 2010", "Southampton: EFL Cup runner-up 2016-17"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: AFC Asian Cup runner-up 2019", "Japan: FIFA World Cup appearances 2014, 2018, 2022"],
+      verdict: "우승 트로피 총량은 제한적이지만 Premier League 장기 주전성과 대표팀 주장 이력이 큽니다.",
+    },
+    individual: {
+      awards: ["Japan captaincy recognition", "Southampton long-service defensive leader recognition", "AFC Asian Cup Team of the Tournament-level tournament recognition"],
+      records: ["Japan 120-cap tier", "Captain of Japan at the 2022 World Cup"],
+      verdict: "공식 개인상보다 장기 주전성, 주장직, 빅리그 생존력이 평가 포인트입니다.",
+    },
+    prime: {
+      period: "2012-19 Southampton/Japan",
+      evidence: ["Southampton Premier League regular seasons", "2018 World Cup last-16 run", "2019 Asian Cup final run as senior leader"],
+      skills: ["Aerial defending", "line leadership", "right-foot build-up", "set-piece threat", "big-league adaptability"],
+      verdict: "일본 센터백의 Premier League 지속성 기준을 만든 프라임입니다.",
+    },
+    importance: {
+      roles: ["Japan: captain and back-line leader", "Southampton: long-serving centre-back", "Olympic/Japan senior squads: senior organizer"],
+      moments: ["2011 Asian Cup", "2018 World Cup Belgium last-16", "2022 World Cup group win over Germany/Spain"],
+      verdict: "대표팀 비중이 특히 크고 클럽에서는 장기 신뢰도가 핵심입니다.",
+    },
+    legacy: {
+      reasons: ["Japan captaincy", "three World Cups", "Premier League long spell", "AFC Asian Cup 2011"],
+      context: ["modern Japanese centre-back benchmark before Tomiyasu/Kim Min-jae Asian comparison era", "leadership and durability profile"],
+      verdict: "일본 현대 수비수 계보에서 장기 누적형 레전드로 남습니다.",
+    },
+    sources: [
+      { label: "Japan Times - Yoshida Schalke move", url: "https://www.japantimes.co.jp/sports/2022/07/06/soccer/yoshida-schalke-transfer/" },
+      { label: "Wikipedia - Maya Yoshida", url: "https://en.wikipedia.org/wiki/Maya_Yoshida" },
+    ],
+  }),
+  "토미야스 타케히로": makeFocusedProfile({
+    summary:
+      "Takehiro Tomiyasu는 Bologna와 Arsenal에서 멀티 수비수로 검증된 현역 일본 수비수입니다. 부상과 커리어 진행 중이라는 점 때문에 점수는 보수적으로 둡니다.",
+    team: {
+      clubs: ["Avispa Fukuoka", "Sint-Truiden", "Bologna", "Arsenal", "Ajax", "Japan national team"],
+      clubHonours: ["Arsenal: FA Community Shield 2023", "Arsenal: Premier League title-contending squad era context"],
+      nationalHonours: ["Japan: AFC Asian Cup runner-up 2019", "Japan: FIFA World Cup 2022 last-16 squad", "Japan: AFC Asian Cup 2023 squad context"],
+      verdict: "아직 우승 누적은 적지만 Serie A/Premier League에서의 수비 고점이 중요합니다.",
+    },
+    individual: {
+      awards: ["Bologna/Arsenal defensive-performance recognition", "Japan Pro-Footballers Association Awards Best XI-level recognition"],
+      records: ["One of Japan's most complete modern defenders", "Premier League/Serie A proven Japanese centre-back/fullback"],
+      verdict: "개인상은 적지만 수비 포지션 멀티성과 리그 난이도가 평가를 끌어올립니다.",
+    },
+    prime: {
+      period: "2019-24 Bologna/Arsenal/Japan",
+      evidence: ["Bologna Serie A breakout", "Arsenal Premier League title-race squads", "Japan 2022 World Cup defensive role"],
+      skills: ["One-v-one defending", "two-footed build-up", "centre-back/fullback versatility", "aerial duels", "recovery defending"],
+      verdict: "부상 전 고점은 일본 수비수 중 최고급이지만 지속성 검증이 더 필요합니다.",
+    },
+    importance: {
+      roles: ["Arsenal: tactical defensive rotation across the back line", "Japan: elite defender when fit", "Bologna: development-to-breakout platform"],
+      moments: ["Arsenal 2022-24 title-race seasons", "Japan 2022 World Cup", "Serie A to Premier League progression"],
+      verdict: "클럽 전술 가치가 크지만 부상 때문에 연속 비중은 제한됐습니다.",
+    },
+    legacy: {
+      reasons: ["Arsenal/Premier League profile", "Serie A breakout", "AFC Asian Cup 2019 runner-up", "modern multi-defender archetype"],
+      context: ["active-hold, legacy still forming", "Japan defender ceiling debate with Yoshida/Nakazawa/Ihara"],
+      verdict: "건강과 우승 누적에 따라 일본 수비수 순위가 더 올라갈 수 있습니다.",
+    },
+    sources: [
+      { label: "Ajax - Takehiro Tomiyasu", url: "https://english.ajax.nl/articles/ajax-signs-takehiro-tomiyasu" },
+      { label: "Arsenal - Takehiro Tomiyasu", url: "https://www.arsenal.com/men/players/takehiro-tomiyasu" },
+      { label: "Wikipedia - Takehiro Tomiyasu", url: "https://en.wikipedia.org/wiki/Takehiro_Tomiyasu" },
+    ],
+  }),
+  "가와구치 요시카쓰": makeFocusedProfile({
+    summary:
+      "Yoshikatsu Kawaguchi는 2000/2004 Asian Cup 우승과 2004 Jordan전 승부차기 서사로 남는 일본 대표팀 골키퍼입니다.",
+    team: {
+      clubs: ["Yokohama Marinos/Yokohama F. Marinos", "Portsmouth", "Nordsjaelland", "Jubilo Iwata", "FC Gifu", "SC Sagamihara", "Japan national team"],
+      clubHonours: ["Yokohama Marinos: J1 League 1995", "Yokohama F. Marinos: J.League Cup 2001"],
+      nationalHonours: ["Japan: AFC Asian Cup 2000, 2004", "Japan: FIFA Confederations Cup runner-up 2001", "Japan: FIFA World Cup squads 1998, 2002, 2006, 2010"],
+      verdict: "클럽보다 대표팀 토너먼트 성과와 장기 주전성이 훨씬 강한 골키퍼입니다.",
+    },
+    individual: {
+      awards: ["2000 AFC Asian Cup final Man of the Match", "J.League Best XI/goalkeeper recognition", "Japan 100-cap tier goalkeeper"],
+      records: ["Japan World Cup squad across four editions", "Iconic 2004 Asian Cup penalty-shootout performance vs Jordan"],
+      verdict: "골키퍼 특성상 특정 토너먼트 장면과 대표팀 누적이 평가를 좌우합니다.",
+    },
+    prime: {
+      period: "1997-2006 Japan/Yokohama/Jubilo",
+      evidence: ["1998 World Cup starting era", "2000 Asian Cup final Man of the Match", "2004 Asian Cup penalty-shootout heroics"],
+      skills: ["Shot stopping", "penalty saving", "reaction saves", "big-match aggression", "goal-line presence"],
+      verdict: "토너먼트 승부차기와 단기 반응속도 고점이 강한 골키퍼 프라임입니다.",
+    },
+    importance: {
+      roles: ["Japan: first-choice/major-tournament goalkeeper", "Yokohama: early J.League title-era goalkeeper"],
+      moments: ["2000 Asian Cup final", "2004 Asian Cup quarter-final penalties vs Jordan", "2001 Confederations Cup runner-up"],
+      verdict: "대표팀 대회에서의 장면 비중이 일본 골키퍼 중 최고권입니다.",
+    },
+    legacy: {
+      reasons: ["two Asian Cup titles", "2004 penalty legend", "four World Cup squads", "Japan 100-cap tier"],
+      context: ["Japan all-time goalkeeper debate with Kawashima", "big-tournament memory profile"],
+      verdict: "승부차기와 아시안컵 서사 때문에 오래 회자될 골키퍼입니다.",
+    },
+    sources: [
+      { label: "UEFA - Japan retain Asian crown", url: "https://www.uefa.com/news-media/news/0254-0d7b26412328-f7505a4fad4f-1000--japan-retain-asian-crown/" },
+      { label: "Wikipedia - 2000 AFC Asian Cup final", url: "https://en.wikipedia.org/wiki/2000_AFC_Asian_Cup_final" },
+      { label: "Wikipedia - Yoshikatsu Kawaguchi", url: "https://en.wikipedia.org/wiki/Yoshikatsu_Kawaguchi" },
+    ],
+  }),
+  "가와시마 에이지": makeFocusedProfile({
+    summary:
+      "Eiji Kawashima는 2011 Asian Cup 우승 골키퍼이자 유럽 여러 리그와 Japan 월드컵 4회 사이클을 버틴 장수형 골키퍼입니다.",
+    team: {
+      clubs: ["Omiya Ardija", "Nagoya Grampus Eight", "Kawasaki Frontale", "Lierse", "Standard Liege", "Dundee United", "Metz", "Strasbourg", "Jubilo Iwata", "Japan national team"],
+      clubHonours: ["Kawasaki Frontale: J.League Cup runner-up and title-challenge era context", "European career: Belgium, Scotland and France top-flight/second-tier spells"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: FIFA World Cup squads 2010, 2014, 2018, 2022"],
+      verdict: "클럽 우승 총량은 약하지만 대표팀 주전성과 유럽 장기 커리어가 핵심입니다.",
+    },
+    individual: {
+      awards: ["Japan national-team long-service goalkeeper recognition", "Belgium/France first-choice spells and club-level goalkeeper recognition"],
+      records: ["Japan 95-cap tier goalkeeper", "World Cup squad across four editions"],
+      verdict: "공식 개인상보다 대표팀 주전 누적과 유럽 생존력이 평가 포인트입니다.",
+    },
+    prime: {
+      period: "2010-18 Japan/Lierse/Standard/Metz",
+      evidence: ["2011 Asian Cup title as starting goalkeeper", "2010/2014/2018 World Cup starting eras", "long European goalkeeper career"],
+      skills: ["Reflex saves", "penalty-area command", "shot stopping", "communication", "experience management"],
+      verdict: "최고점보다 장기 안정성과 대표팀 신뢰도가 강한 프라임입니다.",
+    },
+    importance: {
+      roles: ["Japan: long-term tournament goalkeeper", "European clubs: experienced first-choice/rotation goalkeeper", "Jubilo/Nagoya/Kawasaki: domestic career base"],
+      moments: ["2011 Asian Cup", "2018 World Cup Belgium last-16", "four World Cup squads"],
+      verdict: "대표팀 내 누적 비중은 매우 크지만 클럽 타이틀 비중은 제한적입니다.",
+    },
+    legacy: {
+      reasons: ["AFC Asian Cup 2011", "four World Cup squads", "long European goalkeeper career", "Japan 95-cap tier"],
+      context: ["Japan all-time goalkeeper debate with Kawaguchi", "longevity and Europe-path goalkeeper profile"],
+      verdict: "대표팀 장수성과 월드컵 반복 출전으로 일본 골키퍼 계보에 남습니다.",
+    },
+    sources: [
+      { label: "MLS - Eiji Kawashima profile", url: "https://www.mlssoccer.com/players/eiji-kawashima/" },
+      { label: "Wikipedia - Eiji Kawashima", url: "https://en.wikipedia.org/wiki/Eiji_Kawashima" },
     ],
   }),
   "나카타 히데토시": makeFocusedProfile({
