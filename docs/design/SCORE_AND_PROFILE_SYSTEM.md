@@ -443,13 +443,20 @@ type PlayerEvidenceProfile = {
 
 - Africa 21명: 모두 개별 큐레이션 프로필 보유
 - Africa 상위 8명: 상세 fact group, 소속팀, 팀 우승, 개인 수상, 프라임 근거, 팀 비중, 레거시 근거 보유
-- Asia/America: 유럽 제외 전체 선수에 baseline profile 적용
+- Asia 핵심 10명: focused profile 적용
+- America 앵커 10명: focused profile 적용
+- Asia/America 나머지 선수: baseline profile 적용
 - Europe: 기존 generic profile 유지
 
 Baseline profile은 빈 정보가 아니라 다음 큐레이션을 위한 구조화된 입력 틀이다. 팀 커리어, 개인 수상, 프라임 실력, 팀 내 비중, 100년 뒤 존재감 섹션이 모두 같은 배열로 나오며, 아직 선수별 exact honours가 들어가지 않은 경우 caveat로 명시한다.
 
-다음 데이터 입력 우선순위:
+Focused profile 적용 완료:
 
 1. Asia 핵심: Son Heung-min, Cha Bum-kun, Park Ji-sung, Hong Myung-bo, Hidetoshi Nakata, Keisuke Honda, Shunsuke Nakamura, Shinji Kagawa, Ali Daei, Tim Cahill
 2. America 앵커: Lionel Messi, Diego Maradona, Pele, Ronaldo, Garrincha, Zico, Ronaldinho, Romario, Neymar, Alfredo Di Stefano
-3. America 확장: Argentina/Brazil 포지션별 상위권, Uruguay/Chile/Colombia/Mexico 핵심 선수
+
+다음 데이터 입력 우선순위:
+
+1. Asia 확장: South Korea/Japan/Iran/Australia 남은 선수
+2. America 확장 1: Argentina/Brazil 포지션별 상위권
+3. America 확장 2: Uruguay/Chile/Colombia/Mexico/기타 America 핵심 선수

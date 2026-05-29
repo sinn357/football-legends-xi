@@ -210,8 +210,86 @@ const scoreOverrides: Record<string, ScoreOverride> = {
   "andres iniesta": { teamCareer: 100, individualCareer: 96, primeSkill: 99, teamImportance: 98, legacy: 99 },
   "lothar matthaus": { teamCareer: 98, individualCareer: 98, primeSkill: 98, teamImportance: 99, legacy: 99 },
   "marco van basten": { teamCareer: 94, individualCareer: 98, primeSkill: 100, teamImportance: 97, legacy: 98 },
-  "차범근": { teamCareer: 94, individualCareer: 91, primeSkill: 95, teamImportance: 96, legacy: 97 },
-  "손흥민": { teamCareer: 93, individualCareer: 92, primeSkill: 96, teamImportance: 96, legacy: 97 },
+  "alfredo di stefano": {
+    overallScore: 96,
+    scoreMode: "anchor",
+    scores: { teamCareer: 97, individualCareer: 97, primeSkill: 98, teamImportance: 98, legacy: 99 },
+  },
+  garrincha: {
+    overallScore: 95,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 96, individualCareer: 94, primeSkill: 98, teamImportance: 96, legacy: 98 },
+  },
+  zico: {
+    overallScore: 95,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 95, primeSkill: 98, teamImportance: 98, legacy: 97 },
+  },
+  ronaldinho: {
+    overallScore: 95,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 95, individualCareer: 97, primeSkill: 98, teamImportance: 94, legacy: 98 },
+  },
+  romario: {
+    overallScore: 95,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 96, primeSkill: 97, teamImportance: 95, legacy: 96 },
+  },
+  neymar: {
+    overallScore: 94,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 94, primeSkill: 97, teamImportance: 96, legacy: 95 },
+  },
+  "차범근": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 89, individualCareer: 88, primeSkill: 91, teamImportance: 92, legacy: 94 },
+  },
+  "손흥민": {
+    overallScore: 92,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 92, primeSkill: 94, teamImportance: 94, legacy: 94 },
+  },
+  "박지성": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 82, primeSkill: 88, teamImportance: 90, legacy: 91 },
+  },
+  "홍명보": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 88, primeSkill: 88, teamImportance: 94, legacy: 93 },
+  },
+  "나카타 히데토시": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 85, individualCareer: 89, primeSkill: 90, teamImportance: 90, legacy: 92 },
+  },
+  "혼다 케이스케": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 84, individualCareer: 87, primeSkill: 88, teamImportance: 91, legacy: 90 },
+  },
+  "나카무라 슌스케": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 88, primeSkill: 89, teamImportance: 88, legacy: 89 },
+  },
+  "카가와 신지": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 85, primeSkill: 88, teamImportance: 85, legacy: 86 },
+  },
+  "ali daei": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 82, individualCareer: 91, primeSkill: 90, teamImportance: 94, legacy: 95 },
+  },
+  "tim cahill": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 84, individualCareer: 84, primeSkill: 86, teamImportance: 91, legacy: 89 },
+  },
   "abedi pele": {
     overallScore: 92,
     scoreMode: "adjusted",
@@ -340,6 +418,809 @@ type CuratedProfileEntry = {
 const commonAfricaSources: PlayerProfileSource[] = [
   { label: "RSSSF African Player of the Year", url: "https://www.rsssf.org/miscellaneous/afr-poy.html" },
 ];
+
+type FocusedProfileInput = {
+  summary: string;
+  team: {
+    clubs: string[];
+    clubHonours: string[];
+    nationalHonours: string[];
+    verdict: string;
+  };
+  individual: {
+    awards: string[];
+    records: string[];
+    verdict: string;
+  };
+  prime: {
+    period: string;
+    evidence: string[];
+    skills: string[];
+    verdict: string;
+  };
+  importance: {
+    roles: string[];
+    moments: string[];
+    verdict: string;
+  };
+  legacy: {
+    reasons: string[];
+    context: string[];
+    verdict: string;
+  };
+  sources: PlayerProfileSource[];
+};
+
+function makeFocusedProfile(input: FocusedProfileInput): CuratedProfileEntry {
+  return {
+    summary: input.summary,
+    sections: {
+      teamCareer: {
+        explanation: "소속팀 전체와 팀 우승, 대표팀 성과를 분리해 정리한 프로필입니다.",
+        verdict: input.team.verdict,
+        facts: [
+          { label: "소속팀", items: input.team.clubs },
+          { label: "클럽 우승", items: input.team.clubHonours },
+          { label: "대표팀 성과", items: input.team.nationalHonours },
+        ],
+        bullets: ["클럽 우승 총량과 대표팀 역사적 성과를 분리해서 봅니다.", "우승팀에서의 역할은 팀 내 비중 섹션에서 다시 판단합니다."],
+      },
+      individualCareer: {
+        explanation: "개인상, 득점/선정 기록, 세계/대륙 단위 평가를 분리해 정리한 프로필입니다.",
+        verdict: input.individual.verdict,
+        facts: [
+          { label: "주요 개인 수상/선정", items: input.individual.awards },
+          { label: "득점/기록/순위", items: input.individual.records },
+        ],
+        bullets: ["수상, 후보, 베스트 XI, 기록은 서로 다른 무게로 반영합니다.", "포지션과 시대에 따른 개인상 불균형을 감안합니다."],
+      },
+      primeSkill: {
+        explanation: "전성기 기간과 그 시기의 경기력 근거, 반복된 기술 프로필을 분리해 정리한 프로필입니다.",
+        verdict: input.prime.verdict,
+        facts: [
+          { label: "프라임 기간", items: [input.prime.period] },
+          { label: "프라임 근거", items: input.prime.evidence },
+          { label: "스킬 프로필", items: input.prime.skills },
+        ],
+        bullets: ["프라임 실력은 누적 커리어와 별도로 봅니다.", "큰 경기에서 반복된 영향력을 중요하게 반영합니다."],
+      },
+      teamImportance: {
+        explanation: "클럽과 대표팀에서 전술적 중심이었는지, 역사적 장면을 직접 만든 선수였는지 정리한 프로필입니다.",
+        verdict: input.importance.verdict,
+        facts: [
+          { label: "팀별 역할", items: input.importance.roles },
+          { label: "결정적 장면", items: input.importance.moments },
+        ],
+        bullets: ["빅클럽 소속과 대체 불가능성은 구분합니다.", "국가대표 전력 차이가 큰 선수는 대표팀 비중을 별도로 높게 봅니다."],
+      },
+      legacy: {
+        explanation: "100년 뒤에도 반복 소환될 기록, 상징성, 비교 기준을 정리한 프로필입니다.",
+        verdict: input.legacy.verdict,
+        facts: [
+          { label: "장기 보존 근거", items: input.legacy.reasons },
+          { label: "비교 맥락", items: input.legacy.context },
+        ],
+        bullets: ["레거시는 인기보다 반복 소환 가능한 역사적 근거를 우선합니다.", "국가, 대륙, 포지션 기준점을 함께 봅니다."],
+      },
+    },
+    sources: input.sources,
+  };
+}
+
+const focusedNonEuropeProfileOverrides: Record<string, CuratedProfileEntry> = {
+  "손흥민": makeFocusedProfile({
+    summary:
+      "Son Heung-min은 Premier League Golden Boot, FIFA Puskas Award, Tottenham 주장 커리어를 가진 한국 축구의 현대 기준점입니다.",
+    team: {
+      clubs: ["Hamburger SV", "Bayer Leverkusen", "Tottenham Hotspur", "South Korea U23", "South Korea national team"],
+      clubHonours: ["Tottenham Hotspur: UEFA Europa League 2024-25; runner-up UEFA Champions League 2018-19"],
+      nationalHonours: ["South Korea U23: Asian Games gold medal 2018", "South Korea: AFC Asian Cup runner-up 2015", "South Korea: FIFA World Cup appearances 2014, 2018, 2022"],
+      verdict: "팀 커리어 우승 총량은 제한적이지만, 유럽 최상위 리그에서의 장기 핵심성과 대표팀 상징성이 매우 큽니다.",
+    },
+    individual: {
+      awards: ["Premier League Golden Boot: 2021-22 shared", "FIFA Puskas Award: 2020", "AFC Asian International Player of the Year: 2015, 2017, 2019, 2023"],
+      records: ["First Asian player to win the Premier League Golden Boot", "First Asian player in the Premier League 100-goal club", "Tottenham all-time leading non-British goalscorer"],
+      verdict: "아시아 선수 개인 커리어 기준으로는 최상위권입니다.",
+    },
+    prime: {
+      period: "2018-19 to 2021-22 Tottenham, plus Korea captaincy peak",
+      evidence: ["2018-19 Champions League final run", "2021-22 Premier League 23 non-penalty goals, Golden Boot shared", "2020 Puskas-winning Burnley solo goal"],
+      skills: ["Two-footed finishing", "elite transition speed", "off-ball runs behind the line", "wide forward pressing", "captain-level responsibility for Korea"],
+      verdict: "아시아 공격수 프라임으로는 역대 최고 논쟁권입니다.",
+    },
+    importance: {
+      roles: ["Tottenham: Kane-Son era final-third production axis", "South Korea: long-term captain and attacking focal point"],
+      moments: ["2018 Asian Games title as senior star", "2019 Champions League knockout contributions", "2022 World Cup assist vs Portugal to reach last 16"],
+      verdict: "클럽과 대표팀 양쪽에서 공격 생산과 상징성을 동시에 짊어진 선수입니다.",
+    },
+    legacy: {
+      reasons: ["Premier League Golden Boot as an Asian first", "Puskas Award", "Premier League 100 Club", "South Korea captaincy across multiple World Cups"],
+      context: ["Asia all-time best player debate with Cha Bum-kun", "Modern Premier League Asian benchmark"],
+      verdict: "100년 뒤에도 아시아 축구의 글로벌 성공 사례로 반복 소환될 이름입니다.",
+    },
+    sources: [
+      { label: "FIFA - Son Heung-min records", url: "https://www.fifa.com/en/articles/fifa.com/en/articles/son-heungmin-stats-quotes-records" },
+      { label: "Premier League - Son legacy", url: "https://www.premierleague.com/en/news/4365044/son-heung-min-legacy-at-tottenham-hotspur-records-awards-goals-assists-trophy" },
+      { label: "Wikipedia - Son Heung-min", url: "https://en.wikipedia.org/wiki/Son_Heung-min" },
+    ],
+  }),
+  "차범근": makeFocusedProfile({
+    summary:
+      "Cha Bum-kun은 Bundesliga와 UEFA Cup에서 성공한 한국 축구의 원형적 유럽파 스타입니다. 1970-80년대 아시아 공격수 기준을 유럽에서 직접 올린 선수입니다.",
+    team: {
+      clubs: ["Korea Trust Bank", "Air Force", "Darmstadt 98", "Eintracht Frankfurt", "Bayer Leverkusen", "South Korea national team"],
+      clubHonours: ["Eintracht Frankfurt: UEFA Cup 1979-80, DFB-Pokal 1980-81", "Bayer Leverkusen: UEFA Cup 1987-88"],
+      nationalHonours: ["South Korea: AFC Asian Cup runner-up 1972", "South Korea: FIFA World Cup 1986 participant"],
+      verdict: "UEFA Cup 2회 우승은 아시아 선수 팀 커리어 역사에서 매우 강한 근거입니다.",
+    },
+    individual: {
+      awards: ["Bundesliga Team of the Season by kicker: 1979-80", "South Korean Footballer of the Year: 1973", "IFFHS Asian Player of the 20th Century high ranking"],
+      records: ["Former highest-scoring foreign player in Bundesliga history", "South Korea all-time top scorer for decades"],
+      verdict: "공식 개인상 총량보다 독일 무대 장기 득점 기록과 시대 보정이 중요합니다.",
+    },
+    prime: {
+      period: "1979-80 Eintracht Frankfurt to 1987-88 Bayer Leverkusen",
+      evidence: ["UEFA Cup 1979-80 with Frankfurt", "DFB-Pokal 1980-81 scoring run", "UEFA Cup 1987-88 with Leverkusen"],
+      skills: ["Explosive acceleration", "direct ball carrying", "two-footed shooting", "wide striker movement", "counter-attacking finishing"],
+      verdict: "동시대 유럽 리그에서 검증된 아시아 최고급 프라임입니다.",
+    },
+    importance: {
+      roles: ["Eintracht Frankfurt: direct attacking outlet", "Bayer Leverkusen: veteran attacking leader", "South Korea: national-team scoring icon"],
+      moments: ["1979-80 UEFA Cup run", "1987-88 UEFA Cup success with Leverkusen"],
+      verdict: "한국 축구가 유럽 정상권에서도 통할 수 있다는 선례를 만든 선수입니다.",
+    },
+    legacy: {
+      reasons: ["Two UEFA Cups", "Bundesliga Asian pioneer status", "South Korea scoring icon before the modern global era"],
+      context: ["Asia all-time best player debate with Son Heung-min", "Bundesliga Asian pioneer benchmark"],
+      verdict: "장기 레거시는 팀 우승과 선구자성 때문에 매우 강합니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Cha Bum-kun", url: "https://en.wikipedia.org/wiki/Cha_Bum-kun" },
+      { label: "kicker - Bum-kun Cha", url: "https://www.kicker.de/bum-kun-cha/laufbahn" },
+    ],
+  }),
+  "박지성": makeFocusedProfile({
+    summary:
+      "Park Ji-sung은 PSV와 Manchester United에서 유럽 정상권 팀의 전술적 핵심 역할을 수행한 한국 미드필더입니다.",
+    team: {
+      clubs: ["Myongji University", "Kyoto Purple Sanga", "PSV Eindhoven", "Manchester United", "Queens Park Rangers", "PSV Eindhoven loan", "South Korea national team"],
+      clubHonours: ["PSV Eindhoven: Eredivisie 2002-03, 2004-05; KNVB Cup 2004-05", "Manchester United: Premier League 2006-07, 2007-08, 2008-09, 2010-11; UEFA Champions League 2007-08; FIFA Club World Cup 2008; League Cup 2005-06, 2008-09, 2009-10"],
+      nationalHonours: ["South Korea: FIFA World Cup fourth place 2002", "South Korea: AFC Asian Cup third place 2000, 2011"],
+      verdict: "팀 커리어 우승 총량은 아시아 선수 중 최상위권입니다.",
+    },
+    individual: {
+      awards: ["AFC Asian Cup Team of the Tournament: 2011", "Manchester United Players' Player of the Month and multiple club recognitions"],
+      records: ["First Asian player to win the UEFA Champions League", "First Asian player to play in a UEFA Champions League final squad context", "100 caps for South Korea"],
+      verdict: "개인상보다 팀 성공과 전술적 신뢰가 핵심인 선수입니다.",
+    },
+    prime: {
+      period: "2004-05 PSV to 2010-11 Manchester United",
+      evidence: ["2004-05 PSV Champions League semi-final run", "Manchester United Champions League knockout assignments", "Premier League title seasons as trusted rotation/core midfielder"],
+      skills: ["Elite stamina", "pressing", "man-marking", "third-man runs", "big-game tactical discipline"],
+      verdict: "화려한 프라임보다 전술 수행력과 큰 경기 신뢰가 높은 유형입니다.",
+    },
+    importance: {
+      roles: ["Manchester United: big-match tactical midfielder under Ferguson", "South Korea: 2000s national-team leader"],
+      moments: ["2002 World Cup Portugal goal", "Champions League knockout man-marking roles", "PSV 2005 Milan semi-final performance"],
+      verdict: "우승팀의 스타보다 감독이 신뢰한 전술적 해결책에 가까운 선수입니다.",
+    },
+    legacy: {
+      reasons: ["UEFA Champions League winner", "Four Premier League titles", "Asian pioneer at Manchester United", "2002 Korea World Cup icon"],
+      context: ["Asia's most successful team-career midfielder", "Korean European pathway model before the Son era"],
+      verdict: "아시아 선수의 유럽 빅클럽 팀 커리어를 설명할 때 빠질 수 없습니다.",
+    },
+    sources: [
+      { label: "BBC - Park Ji-sung retires", url: "https://www.bbc.co.uk/sport/football/27404603" },
+      { label: "Premier League - Park Ji-sung", url: "https://www.premierleague.com/players/2940/" },
+      { label: "Wikipedia - Park Ji-sung", url: "https://en.wikipedia.org/wiki/Park_Ji-sung" },
+    ],
+  }),
+  "홍명보": makeFocusedProfile({
+    summary:
+      "Hong Myung-bo는 2002년 월드컵 4강과 Bronze Ball로 대표되는 한국 축구의 수비 리더입니다.",
+    team: {
+      clubs: ["Pohang Steelers", "Bellmare Hiratsuka", "Kashiwa Reysol", "LA Galaxy", "South Korea national team"],
+      clubHonours: ["Pohang Steelers: Korean League/K League titles and Asian Club Championship-era success", "Kashiwa Reysol: J.League Cup 1999"],
+      nationalHonours: ["South Korea: FIFA World Cup fourth place 2002", "South Korea: AFC Asian Cup third place 2000"],
+      verdict: "클럽보다 대표팀 팀 커리어와 월드컵 성과가 압도적으로 큰 선수입니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup Bronze Ball: 2002", "FIFA World Cup All-Star Team: 2002", "AFC Asian Cup All-Star Team: 2000"],
+      records: ["First Asian player to receive a World Cup top-three individual award", "Four FIFA World Cup appearances as player"],
+      verdict: "수비수로 월드컵 Bronze Ball을 받은 희소성이 매우 큽니다.",
+    },
+    prime: {
+      period: "1994-2002 South Korea and club career peak",
+      evidence: ["2002 World Cup defensive leadership", "Quarter-final penalty vs Spain", "FIFA World Cup Bronze Ball"],
+      skills: ["Sweeper reading", "cover defense", "long passing", "penalty composure", "back-line leadership"],
+      verdict: "아시아 수비수 프라임 기준점 중 하나입니다.",
+    },
+    importance: {
+      roles: ["South Korea: captain and defensive organizer", "Pohang/Kashiwa: veteran libero and build-up leader"],
+      moments: ["2002 World Cup Spain shootout winning penalty", "2002 World Cup semi-final run"],
+      verdict: "대표팀 내 비중은 아시아 축구사 전체에서도 최상위입니다.",
+    },
+    legacy: {
+      reasons: ["2002 World Cup Bronze Ball", "Korea 2002 captain", "first Asian top-three World Cup individual award"],
+      context: ["Asia all-time defender benchmark", "Korean football leadership archetype"],
+      verdict: "수비수 레거리 기준으로 한국과 아시아 모두에서 장기 보존됩니다.",
+    },
+    sources: [
+      { label: "FIFA - Hong Myung-bo Bronze Ball", url: "https://www.plus.fifa.com/en/content/hong-myung-bo-bronze-ball-award-2002-fifa-world-cup-korea-japan/f60e1899-3383-4880-b367-47d94daf4832" },
+      { label: "AFC - Hong Myung-bo profile", url: "https://www.the-afc.com/en/more/news/asian_cup_now_a_priority_says_korean_legend_hong.html" },
+      { label: "Wikipedia - Hong Myung-bo", url: "https://en.wikipedia.org/wiki/Hong_Myung-bo" },
+    ],
+  }),
+  "나카타 히데토시": makeFocusedProfile({
+    summary:
+      "Hidetoshi Nakata는 Serie A에서 Scudetto를 경험하고 AFC Player of the Year를 2회 수상한 일본 축구의 글로벌 선구자입니다.",
+    team: {
+      clubs: ["Bellmare Hiratsuka", "Perugia", "Roma", "Parma", "Bologna loan", "Fiorentina", "Bolton Wanderers loan", "Japan U23", "Japan national team"],
+      clubHonours: ["Roma: Serie A 2000-01", "Parma: Coppa Italia 2001-02"],
+      nationalHonours: ["Japan: AFC Asian Cup 2000", "Japan: FIFA World Cup appearances 1998, 2002, 2006"],
+      verdict: "일본 선수의 유럽 빅리그 개척사에서 팀 커리어와 상징성이 모두 큽니다.",
+    },
+    individual: {
+      awards: ["AFC Player of the Year: 1997, 1998", "Japanese Footballer of the Year: 1997", "FIFA 100"],
+      records: ["One of the first Japanese players to make a major Serie A impact", "Three FIFA World Cups for Japan"],
+      verdict: "아시아 올해의 선수 2회와 Serie A 개척성이 개인 평가의 핵심입니다.",
+    },
+    prime: {
+      period: "1998-99 Perugia to 2001-02 Roma/Parma",
+      evidence: ["Serie A impact immediately after 1998 World Cup", "Roma Scudetto season contribution", "Parma Coppa Italia 2001-02"],
+      skills: ["Ball carrying from midfield", "long shooting", "press resistance", "creative passing", "tactical versatility"],
+      verdict: "일본 선수의 유럽 중앙 미드필더 프라임 기준점입니다.",
+    },
+    importance: {
+      roles: ["Japan: late-1990s/early-2000s global face", "Roma/Parma: high-value creative midfielder"],
+      moments: ["Japan's first World Cup generation", "Roma title season squad role", "Parma Coppa Italia final contribution"],
+      verdict: "대표팀과 일본 축구 세계화에서 상징 비중이 매우 큽니다.",
+    },
+    legacy: {
+      reasons: ["AFC Player of the Year twice", "Serie A Scudetto with Roma", "FIFA 100", "Japan global football pioneer"],
+      context: ["Japanese all-time best debate", "Asian Serie A benchmark"],
+      verdict: "일본 축구의 세계화 서사에서 반드시 남을 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Hidetoshi Nakata", url: "https://en.wikipedia.org/wiki/Hidetoshi_Nakata" },
+      { label: "AFC Player of the Year list", url: "https://en.wikipedia.org/wiki/Asian_Footballer_of_the_Year" },
+    ],
+  }),
+  "혼다 케이스케": makeFocusedProfile({
+    summary:
+      "Keisuke Honda는 Japan 대표팀의 월드컵/아시안컵 해결사이자 CSKA Moscow와 AC Milan을 거친 왼발 공격형 미드필더입니다.",
+    team: {
+      clubs: ["Nagoya Grampus", "VVV-Venlo", "CSKA Moscow", "AC Milan", "Pachuca", "Melbourne Victory", "Vitesse", "Botafogo", "Neftci", "Suduva", "Japan national team"],
+      clubHonours: ["CSKA Moscow: Russian Premier League 2012-13; Russian Cup 2010-11, 2012-13; Russian Super Cup 2013"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: FIFA World Cup appearances 2010, 2014, 2018"],
+      verdict: "클럽 우승보다 대표팀 토너먼트 비중과 월드컵 득점 기록이 큰 선수입니다.",
+    },
+    individual: {
+      awards: ["AFC Asian Cup Most Valuable Player: 2011", "AFC Asian International Player of the Year shortlist/recognition era", "VVV-Venlo Player of the Year: 2008-09"],
+      records: ["Japan joint/leading World Cup scoring icon across multiple tournaments", "Goals and assists in three different World Cups"],
+      verdict: "아시안컵 MVP와 월드컵 반복 생산성이 핵심입니다.",
+    },
+    prime: {
+      period: "2010 World Cup to 2014 CSKA/AC Milan period",
+      evidence: ["2010 World Cup free-kick and knockout run", "2011 Asian Cup MVP", "CSKA Champions League-level experience"],
+      skills: ["Left-foot free kicks", "central playmaking", "long passing", "set-piece delivery", "big-game shooting"],
+      verdict: "대표팀 토너먼트 기준으로 일본 최고급 프라임입니다.",
+    },
+    importance: {
+      roles: ["Japan: attacking hub and set-piece leader", "CSKA Moscow: creative midfielder in title-winning squad"],
+      moments: ["2010 World Cup Denmark free-kick", "2011 Asian Cup MVP run", "2018 World Cup late impact vs Senegal"],
+      verdict: "일본 대표팀에서는 골과 리더십 모두에서 핵심이었습니다.",
+    },
+    legacy: {
+      reasons: ["2011 Asian Cup MVP", "World Cup goals across three tournaments", "AC Milan number 10 symbolism"],
+      context: ["Japan modern attacking midfielder benchmark with Nakata/Kagawa/Nakamura"],
+      verdict: "국가대표 토너먼트 서사 때문에 장기 기억이 강합니다.",
+    },
+    sources: [
+      { label: "AFC - Keisuke Honda profile", url: "https://www.the-afc.com/en/national/fifa_world_cup/news/one_to_watch_keisuke_honda_jpn.html" },
+      { label: "CSKA - Honda Asian Cup MVP", url: "https://en.pfc-cska.com/news/team-news/Congratulations-to-Honda-2/" },
+      { label: "Wikipedia - Keisuke Honda", url: "https://en.wikipedia.org/wiki/Keisuke_Honda" },
+    ],
+  }),
+  "나카무라 슌스케": makeFocusedProfile({
+    summary:
+      "Shunsuke Nakamura는 Celtic의 우승기와 Japan 대표팀의 아시안컵 세대를 대표하는 왼발 플레이메이커입니다.",
+    team: {
+      clubs: ["Yokohama Marinos", "Reggina", "Celtic", "Espanyol", "Yokohama F. Marinos", "Jubilo Iwata", "Yokohama FC", "Japan national team"],
+      clubHonours: ["Celtic: Scottish Premier League 2005-06, 2006-07, 2007-08; Scottish Cup 2006-07; Scottish League Cup 2005-06, 2008-09", "Yokohama F. Marinos: J1 League 1995, 2000 stages/context and later domestic honours context"],
+      nationalHonours: ["Japan: AFC Asian Cup 2000, 2004", "Japan: FIFA World Cup appearances 2006, 2010"],
+      verdict: "Celtic 팀 커리어와 Japan 아시안컵 성과가 모두 탄탄합니다.",
+    },
+    individual: {
+      awards: ["AFC Asian Cup Most Valuable Player: 2004", "SPFA Players' Player of the Year: 2006-07", "Scottish Football Writers' Player of the Year: 2006-07", "J.League MVP: 2000, 2013"],
+      records: ["Famous Champions League free-kicks against Manchester United", "Japan set-piece icon"],
+      verdict: "리그 MVP와 아시안컵 MVP를 모두 가진 창조형 미드필더입니다.",
+    },
+    prime: {
+      period: "2004 Asian Cup to 2006-07 Celtic",
+      evidence: ["2004 Asian Cup MVP", "2006-07 Celtic league title and player awards", "Champions League free-kick vs Manchester United"],
+      skills: ["Free kicks", "left-foot passing", "crossing", "tempo control", "set-piece chance creation"],
+      verdict: "왼발 킥과 세트피스 프라임은 아시아 역대 최고권입니다.",
+    },
+    importance: {
+      roles: ["Celtic: creative and set-piece centre", "Japan: left-foot playmaking and dead-ball specialist"],
+      moments: ["Title-clinching free-kick for Celtic", "Manchester United Champions League goals", "2004 Asian Cup MVP run"],
+      verdict: "Celtic와 Japan 모두에서 창의성의 중심이었습니다.",
+    },
+    legacy: {
+      reasons: ["Asian Cup MVP", "Scottish player awards", "Champions League free-kick legacy", "J.League long-term greatness"],
+      context: ["Japan technical midfielder lineage", "Asia's set-piece specialist benchmark"],
+      verdict: "기술형 플레이메이커 계보에서 장기 보존될 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Shunsuke Nakamura", url: "https://en.wikipedia.org/wiki/Shunsuke_Nakamura" },
+      { label: "Celtic Wiki - Nakamura SPFA award", url: "https://www.thecelticwiki.com/nakamura-prize-asset-spfa-player-of-the-year-apr-2007/" },
+    ],
+  }),
+  "카가와 신지": makeFocusedProfile({
+    summary:
+      "Shinji Kagawa는 Klopp Dortmund의 2연속 Bundesliga 우승과 Manchester United Premier League 우승을 모두 경험한 일본 공격형 미드필더입니다.",
+    team: {
+      clubs: ["Cerezo Osaka", "Borussia Dortmund", "Manchester United", "Borussia Dortmund second spell", "Besiktas loan", "Real Zaragoza", "PAOK", "Sint-Truiden", "Cerezo Osaka second spell", "Japan national team"],
+      clubHonours: ["Borussia Dortmund: Bundesliga 2010-11, 2011-12; DFB-Pokal 2011-12", "Manchester United: Premier League 2012-13; FA Community Shield 2013"],
+      nationalHonours: ["Japan: AFC Asian Cup 2011", "Japan: FIFA World Cup appearances 2014, 2018"],
+      verdict: "팀 커리어는 아시아 공격형 미드필더 중 매우 강합니다.",
+    },
+    individual: {
+      awards: ["AFC Asian International Player of the Year: 2012", "Bundesliga Team/season recognitions in Dortmund peak era", "First Asian player to score a Premier League hat-trick"],
+      records: ["First Japanese player to play for Manchester United and win Premier League", "Key Asian star of Klopp Dortmund"],
+      verdict: "개인상보다 Dortmund 프라임과 Premier League 선구성이 중요합니다.",
+    },
+    prime: {
+      period: "2010-11 to 2011-12 Borussia Dortmund",
+      evidence: ["Two Bundesliga titles with Dortmund", "2011-12 domestic double", "High creative output in Klopp pressing system"],
+      skills: ["Half-space receiving", "quick combinations", "late box runs", "pressing", "one-touch play"],
+      verdict: "Dortmund 시절 프라임은 아시아 공격형 미드필더 최고권입니다.",
+    },
+    importance: {
+      roles: ["Borussia Dortmund: central attacking midfielder in Klopp system", "Japan: attacking midfield option in 2010s generation"],
+      moments: ["Dortmund title-winning seasons", "Manchester United hat-trick vs Norwich", "AFC Asian International Player recognition"],
+      verdict: "클럽 프라임의 전술적 비중이 대표팀 비중보다 더 강합니다.",
+    },
+    legacy: {
+      reasons: ["Two Bundesliga titles", "Premier League title", "AFC International Player of the Year", "Japanese Manchester United pioneer"],
+      context: ["Japan European attacking-midfielder benchmark with Nakata/Honda/Nakamura"],
+      verdict: "Dortmund 프라임 때문에 일본 유럽파 역사에서 계속 남습니다.",
+    },
+    sources: [
+      { label: "Bundesliga - Shinji Kagawa", url: "https://www.bundesliga.com/en/bundesliga/news/shinji-kagawa-10-things-about-borussia-dortmund-s-japanese-samurai-2738-1197" },
+      { label: "Premier League - Kagawa", url: "https://www.premierleague.com/en/news/760375" },
+      { label: "AFC - Asian Icons Shinji Kagawa", url: "https://www.the-afc.com/en/more/news/asian_icons_shinji_kagawa.html" },
+    ],
+  }),
+  "ali daei": makeFocusedProfile({
+    summary:
+      "Ali Daei는 108골 이상의 A매치 득점 기록과 AFC Asian Cup 득점 기록으로 남는 이란의 역사적 스트라이커입니다.",
+    team: {
+      clubs: ["Esteghlal Ardabil", "Taxirani", "Bank Tejarat", "Persepolis", "Al Sadd", "Arminia Bielefeld", "Bayern Munich", "Hertha BSC", "Al Shabab", "Saba Battery", "Saipa", "Iran national team"],
+      clubHonours: ["Bayern Munich: Bundesliga 1998-99", "Persepolis/Saba/Saipa: Iranian domestic titles and cups across career"],
+      nationalHonours: ["Iran: Asian Games gold medal 1998", "Iran: FIFA World Cup appearances 1998, 2006"],
+      verdict: "클럽 커리어보다 대표팀 득점과 아시아 대회 기록이 핵심입니다.",
+    },
+    individual: {
+      awards: ["AFC Asian Footballer of the Year: 1999", "AFC Asian Cup top scorer: 1996", "IFFHS world's top international goal scorer recognition"],
+      records: ["Iran all-time top scorer", "Former world record men's international goalscorer", "AFC Asian Cup all-time top scorer"],
+      verdict: "기록형 개인 커리어는 아시아 공격수 중 최상위입니다.",
+    },
+    prime: {
+      period: "1996 Asian Cup to early-2000s Iran/Bundesliga period",
+      evidence: ["1996 Asian Cup 8 goals", "1998 Asian Games gold", "international scoring record ascent"],
+      skills: ["Box finishing", "aerial power", "penalty-area positioning", "physical target play", "international scoring consistency"],
+      verdict: "대표팀 득점 프라임은 아시아 역사적 기준점입니다.",
+    },
+    importance: {
+      roles: ["Iran: absolute scoring reference", "Club career: first Iranian profile in Bundesliga elite context"],
+      moments: ["Four goals vs South Korea at Asian Cup 1996", "breaking Puskas international scoring record", "Iran 1998 World Cup era"],
+      verdict: "대표팀 내 비중은 아시아 축구사 전체에서도 최상위권입니다.",
+    },
+    legacy: {
+      reasons: ["Former world men's international goals record", "AFC Asian Cup all-time top scorer", "AFC Player of the Year 1999"],
+      context: ["Asia's record striker benchmark", "Iran all-time great debate"],
+      verdict: "득점 기록 때문에 100년 뒤에도 반복 소환될 가능성이 큽니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Ali Daei", url: "https://en.wikipedia.org/wiki/Ali_Daei" },
+      { label: "Tehran Times - IFFHS Asia Team", url: "https://www.tehrantimes.com/news/460705/Parvin-Daei-at-IFFHS-Asia-Team-of-the-XXth-Century" },
+      { label: "AFC Asian Cup records", url: "https://en.wikipedia.org/wiki/AFC_Asian_Cup_records_and_statistics" },
+    ],
+  }),
+  "tim cahill": makeFocusedProfile({
+    summary:
+      "Tim Cahill은 Everton과 Australia 대표팀의 역사적 득점 장면으로 남는 공격형 미드필더/세컨드 스트라이커입니다.",
+    team: {
+      clubs: ["Millwall", "Everton", "New York Red Bulls", "Shanghai Shenhua", "Hangzhou Greentown", "Melbourne City", "Millwall second spell", "Jamshedpur", "Australia national team"],
+      clubHonours: ["Millwall: Football League Trophy 1998-99; FA Cup runner-up 2003-04", "New York Red Bulls: MLS Supporters' Shield 2013"],
+      nationalHonours: ["Australia: AFC Asian Cup 2015", "Australia: FIFA World Cup appearances 2006, 2010, 2014, 2018"],
+      verdict: "클럽 우승보다 Australia 대표팀 기록과 Everton 상징성이 큽니다.",
+    },
+    individual: {
+      awards: ["AFC Asian Cup Team of the Tournament: 2015", "Oceania Footballer of the Year: 2004", "Australian football hall-of-fame level recognition"],
+      records: ["Australia all-time top scorer", "First Australian to score at a FIFA World Cup", "Goals in three FIFA World Cups"],
+      verdict: "국가대표 기록형 개인 커리어가 강합니다.",
+    },
+    prime: {
+      period: "2004-12 Everton and Australia peak",
+      evidence: ["Everton Premier League attacking output", "2006 World Cup goals", "2010/2014 World Cup scoring continuation", "2015 Asian Cup title"],
+      skills: ["Late box runs", "heading despite size", "second-ball finishing", "set-piece threat", "big-game mentality"],
+      verdict: "국제대회 득점 감각과 박스 침투는 아시아/오세아니아 기준 최고권입니다.",
+    },
+    importance: {
+      roles: ["Australia: all-time scoring face", "Everton: long-term Premier League goal threat"],
+      moments: ["2006 World Cup Japan comeback goals", "2014 World Cup volley vs Netherlands", "2015 Asian Cup home title"],
+      verdict: "대표팀 서사에서 대체 불가능한 장면을 여러 번 만든 선수입니다.",
+    },
+    legacy: {
+      reasons: ["Australia all-time top scorer", "World Cup goals across three editions", "2015 Asian Cup title", "Everton cult hero status"],
+      context: ["Australia's greatest player debate", "AFC/Oceania crossover legend"],
+      verdict: "월드컵 장면과 대표팀 기록 때문에 오래 남습니다.",
+    },
+    sources: [
+      { label: "Football Australia - Socceroos honours", url: "https://www.footballaustralia.com.au/socceroos-honours-board" },
+      { label: "ESPN - Tim Cahill career", url: "https://www.espn.com/football/story/_/id/21681159/tim-cahill-career-glance" },
+      { label: "Wikipedia - Tim Cahill", url: "https://en.wikipedia.org/wiki/Tim_Cahill" },
+    ],
+  }),
+  "lionel messi": makeFocusedProfile({
+    summary:
+      "Lionel Messi는 Ballon d'Or 8회, World Cup, Copa America, Champions League, Barcelona 시대 지배를 모두 가진 축구사 최고 앵커입니다.",
+    team: {
+      clubs: ["Barcelona", "Paris Saint-Germain", "Inter Miami", "Argentina U20", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["Barcelona: La Liga 10회, Copa del Rey 7회, Supercopa de Espana 8회", "Barcelona: UEFA Champions League 2005-06, 2008-09, 2010-11, 2014-15; UEFA Super Cup 3회; FIFA Club World Cup 3회", "Paris Saint-Germain: Ligue 1 2021-22, 2022-23", "Inter Miami: Leagues Cup 2023, Supporters' Shield 2024"],
+      nationalHonours: ["Argentina: FIFA World Cup 2022", "Argentina: Copa America 2021, 2024; runner-up 2007, 2015, 2016", "Argentina: Finalissima 2022", "Argentina U20: FIFA World Youth Championship 2005", "Argentina Olympic: Olympic gold medal 2008"],
+      verdict: "클럽/대표팀 최고 대회 우승과 장기 지배력을 모두 가진 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["Ballon d'Or: 8회", "FIFA World Player/The Best/FIFA Ballon d'Or 계열 최고 개인상 다수", "European Golden Shoe: 6회", "FIFA World Cup Golden Ball: 2014, 2022"],
+      records: ["Barcelona all-time top scorer", "Argentina all-time top scorer", "La Liga all-time top scorer", "Most Ballon d'Or wins"],
+      verdict: "개인 수상과 기록 누적 모두 축구사 최고 기준입니다.",
+    },
+    prime: {
+      period: "2008-09 to 2014-15 Barcelona, with 2021-22 Argentina legacy peak",
+      evidence: ["2008-09 and 2014-15 trebles", "2011 Champions League final performance", "2012 calendar-year scoring record", "2022 World Cup Golden Ball and title"],
+      skills: ["All-time dribbling", "chance creation", "left-foot finishing", "false nine playmaking", "set pieces", "final pass"],
+      verdict: "프라임 실력은 축구사 최고 논쟁의 중심입니다.",
+    },
+    importance: {
+      roles: ["Barcelona: system-defining attacking core", "Argentina: captain and final-third creator/scorer", "Inter Miami: franchise-level transformation figure"],
+      moments: ["2011 Champions League final", "2021 Copa America title run", "2022 World Cup knockout run and final"],
+      verdict: "팀 자체가 Messi 중심으로 정의될 정도의 비중입니다.",
+    },
+    legacy: {
+      reasons: ["World Cup + Copa America + Champions League + Ballon d'Or 8회", "Barcelona/Argentina all-time records", "global GOAT debate top reference"],
+      context: ["Direct comparison with Pele and Maradona", "Modern football's statistical and creative ceiling"],
+      verdict: "100년 뒤에도 축구사 최고 논쟁의 1번 기준으로 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Lionel Messi", url: "https://en.wikipedia.org/wiki/Lionel_Messi" },
+      { label: "FIFA - Lionel Messi", url: "https://www.fifa.com/" },
+      { label: "FC Barcelona - Lionel Messi", url: "https://www.fcbarcelona.com/en/football/first-team/players/4974/lionel-messi" },
+    ],
+  }),
+  pele: makeFocusedProfile({
+    summary:
+      "Pele는 World Cup 3회 우승, Santos 왕조, 축구의 세계적 아이콘성을 모두 가진 역사적 앵커입니다.",
+    team: {
+      clubs: ["Santos", "New York Cosmos", "Brazil national team"],
+      clubHonours: ["Santos: Copa Libertadores 1962, 1963; Intercontinental Cup 1962, 1963", "Santos: Campeonato Brasileiro/Taca Brasil-era national titles and Campeonato Paulista titles", "New York Cosmos: NASL Soccer Bowl 1977"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962, 1970"],
+      verdict: "월드컵 3회 우승과 Santos의 대륙/세계 정상 커리어가 결합된 최고권 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["FIFA Player of the Century co-winner", "IOC Athlete of the Century recognition", "Ballon d'Or Prix d'Honneur 2013", "World Cup Best Young Player 1958"],
+      records: ["Brazil all-time historical icon", "Official and unofficial scoring records across Santos/Brazil career", "Only player with three FIFA World Cup winner medals"],
+      verdict: "현대 개인상 제도 이전 시대라 수상 총량보다 월드컵/세기의 선수 평가가 핵심입니다.",
+    },
+    prime: {
+      period: "1958 World Cup to early/mid-1960s Santos peak, plus 1970 Brazil",
+      evidence: ["1958 World Cup teenage breakthrough", "1962-63 Santos Libertadores/Intercontinental titles", "1970 World Cup all-time great team"],
+      skills: ["Two-footed finishing", "heading", "dribbling", "creative passing", "athleticism", "big-game scoring"],
+      verdict: "시대 지배력과 월드컵 고점 모두 최고권입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1958 and 1970 attacking symbol", "Santos: global touring superclub face"],
+      moments: ["1958 World Cup final", "1970 World Cup final assist and tournament leadership", "Intercontinental Cup performances"],
+      verdict: "국가와 클럽 모두를 세계적 브랜드로 만든 선수입니다.",
+    },
+    legacy: {
+      reasons: ["Three World Cups", "Brazil 1970 symbol", "global football ambassador", "Santos golden era"],
+      context: ["GOAT debate with Messi and Maradona", "Football's first truly global superstar"],
+      verdict: "축구사를 설명할 때 반드시 등장하는 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Pele", url: "https://en.wikipedia.org/wiki/Pel%C3%A9" },
+      { label: "FIFA - Pele", url: "https://www.fifa.com/" },
+      { label: "Britannica - Pele", url: "https://www.britannica.com/biography/Pele-Brazilian-athlete" },
+    ],
+  }),
+  "diego maradona": makeFocusedProfile({
+    summary:
+      "Diego Maradona는 1986 World Cup과 Napoli 우승 서사로 대표되는 프라임·팀 내 비중형 최고 앵커입니다.",
+    team: {
+      clubs: ["Argentinos Juniors", "Boca Juniors", "Barcelona", "Napoli", "Sevilla", "Newell's Old Boys", "Boca Juniors second spell", "Argentina national team"],
+      clubHonours: ["Boca Juniors: Argentine Primera Division 1981 Metropolitano", "Barcelona: Copa del Rey 1982-83, Copa de la Liga 1983", "Napoli: Serie A 1986-87, 1989-90; Coppa Italia 1986-87; UEFA Cup 1988-89; Supercoppa Italiana 1990"],
+      nationalHonours: ["Argentina: FIFA World Cup 1986; runner-up 1990", "Argentina U20: FIFA World Youth Championship 1979"],
+      verdict: "팀 커리어 총량보다 Napoli와 Argentina를 직접 끌어올린 질적 임팩트가 핵심입니다.",
+    },
+    individual: {
+      awards: ["FIFA Player of the Century co-winner", "FIFA World Cup Golden Ball: 1986", "South American Footballer of the Year: 1979, 1980", "Serie A top assist/provider-era elite recognition"],
+      records: ["1986 World Cup all-time tournament peak candidate", "Napoli all-time icon", "Goal of the Century and Hand of God match"],
+      verdict: "1986 월드컵 개인 지배력은 개인 수상 이상의 역사적 무게를 가집니다.",
+    },
+    prime: {
+      period: "1984-90 Napoli and Argentina",
+      evidence: ["1986 World Cup Golden Ball and title", "Napoli's first Serie A title 1986-87", "UEFA Cup 1988-89"],
+      skills: ["Close-control dribbling", "press resistance", "final pass", "free kicks", "carrying under fouls", "solo chance creation"],
+      verdict: "프라임 실력과 팀 내 비중은 축구사 최고권입니다.",
+    },
+    importance: {
+      roles: ["Argentina: 1986 team-defining captain", "Napoli: club history-transforming attacking core"],
+      moments: ["1986 England quarter-final", "1986 World Cup final", "Napoli Scudetto seasons"],
+      verdict: "선수 한 명이 팀의 역사적 위치를 바꾼 대표 사례입니다.",
+    },
+    legacy: {
+      reasons: ["1986 World Cup", "Napoli transformation", "Argentina national myth", "two most famous goals in one match"],
+      context: ["GOAT debate with Messi and Pele", "Prime/importance model for high score despite lower trophy total"],
+      verdict: "100년 뒤에도 축구사 프라임과 신화성을 설명하는 핵심 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Diego Maradona", url: "https://en.wikipedia.org/wiki/Diego_Maradona" },
+      { label: "FIFA - Diego Maradona", url: "https://www.fifa.com/" },
+      { label: "Britannica - Diego Maradona", url: "https://www.britannica.com/biography/Diego-Maradona" },
+    ],
+  }),
+  ronaldo: makeFocusedProfile({
+    summary:
+      "Ronaldo Nazario는 부상에도 불구하고 1990년대 후반과 2002 World Cup에서 순수 스트라이커 프라임의 최고 기준을 만든 선수입니다.",
+    team: {
+      clubs: ["Cruzeiro", "PSV Eindhoven", "Barcelona", "Inter", "Real Madrid", "AC Milan", "Corinthians", "Brazil national team"],
+      clubHonours: ["Barcelona: Copa del Rey 1996-97, UEFA Cup Winners' Cup 1996-97", "Real Madrid: La Liga 2002-03, 2006-07; Intercontinental Cup 2002", "Corinthians: Campeonato Paulista 2009, Copa do Brasil 2009"],
+      nationalHonours: ["Brazil: FIFA World Cup 1994, 2002; runner-up 1998", "Brazil: Copa America 1997, 1999", "Brazil: FIFA Confederations Cup 1997"],
+      verdict: "클럽 우승 총량은 GOAT 앵커보다 낮지만 대표팀 성과와 월드컵 커리어가 강합니다.",
+    },
+    individual: {
+      awards: ["Ballon d'Or: 1997, 2002", "FIFA World Player of the Year: 1996, 1997, 2002", "FIFA World Cup Golden Ball 1998; Golden Shoe 2002"],
+      records: ["World Cup 15 goals", "Youngest FIFA World Player winner era", "Barcelona 1996-97 single-season phenomenon"],
+      verdict: "프라임과 월드컵 개인상은 역대 스트라이커 최상위권입니다.",
+    },
+    prime: {
+      period: "1996-98 Barcelona/Inter and 2002 Brazil comeback",
+      evidence: ["1996-97 Barcelona explosive scoring", "1997 Ballon d'Or/FIFA World Player", "2002 World Cup Golden Shoe and final brace"],
+      skills: ["Explosive acceleration", "one-v-one dribbling", "rounding goalkeepers", "two-foot finishing", "power at speed"],
+      verdict: "순수 9번 프라임으로는 축구사 최고 논쟁권입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 2002 title-winning finishing core", "Barcelona/Inter: attack built around individual rupture"],
+      moments: ["2002 World Cup final two goals", "1998 World Cup Golden Ball run", "1996-97 Compostela goal"],
+      verdict: "부상이 아니었다면 더 높은 커리어 총량을 기대할 정도의 중심성이 있었습니다.",
+    },
+    legacy: {
+      reasons: ["Two Ballons d'Or", "Three FIFA World Player awards", "2002 World Cup redemption", "striker prototype influence"],
+      context: ["All-time striker debate with Pele, Muller, Van Basten, Cristiano", "Highest pure striker peak candidate"],
+      verdict: "프라임 기준 스트라이커 평가에서 계속 기준점으로 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Ronaldo", url: "https://en.wikipedia.org/wiki/Ronaldo_(Brazilian_footballer)" },
+      { label: "FIFA - Ronaldo", url: "https://www.fifa.com/" },
+    ],
+  }),
+  garrincha: makeFocusedProfile({
+    summary:
+      "Garrincha는 Brazil의 1958/1962 World Cup 우승과 드리블 윙어의 원형으로 남은 역사적 오른쪽 윙입니다.",
+    team: {
+      clubs: ["Botafogo", "Corinthians", "Portuguesa Carioca", "Atletico Junior", "Flamengo", "Olaria", "Brazil national team"],
+      clubHonours: ["Botafogo: Campeonato Carioca 1957, 1961, 1962", "Botafogo: Rio-Sao Paulo Tournament 1962, 1964"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962"],
+      verdict: "대표팀 월드컵 임팩트가 클럽 우승 총량보다 훨씬 큽니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup Golden Ball: 1962", "FIFA World Cup Golden Boot: 1962 shared", "FIFA World Cup All-Star Team: 1958, 1962"],
+      records: ["1962 World Cup carried Brazil after Pele injury", "Botafogo and Brazil all-time icon"],
+      verdict: "1962 월드컵 개인 지배력 하나만으로도 최상위 개인 근거입니다.",
+    },
+    prime: {
+      period: "1958-62 Brazil and Botafogo",
+      evidence: ["1958 World Cup title", "1962 World Cup Golden Ball/Golden Boot/title", "Botafogo peak years"],
+      skills: ["Unrepeatable dribbling", "right-wing isolation", "crossing", "change of direction", "crowd-pulling flair"],
+      verdict: "드리블 윙어 프라임의 역사적 최고 기준 중 하나입니다.",
+    },
+    importance: {
+      roles: ["Brazil: decisive attacker in 1962 after Pele injury", "Botafogo: era-defining right winger"],
+      moments: ["1962 World Cup knockout performances", "Brazil's back-to-back World Cups"],
+      verdict: "1962 Brazil에서의 비중은 절대적이었습니다.",
+    },
+    legacy: {
+      reasons: ["Two World Cups", "1962 Golden Ball", "mythic dribbler identity", "Brazilian joy/futebol arte symbol"],
+      context: ["All-time right-wing debate", "Brazilian genius archetype"],
+      verdict: "숫자보다 스타일과 월드컵 서사로 영구 보존될 선수입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Garrincha", url: "https://en.wikipedia.org/wiki/Garrincha" },
+      { label: "FIFA - Garrincha", url: "https://www.fifa.com/" },
+    ],
+  }),
+  zico: makeFocusedProfile({
+    summary:
+      "Zico는 1980년대 Brazil과 Flamengo를 대표한 공격형 미드필더로, 월드컵 우승 없이도 프라임 실력과 기술로 최고권에 남은 선수입니다.",
+    team: {
+      clubs: ["Flamengo", "Udinese", "Flamengo second spell", "Sumitomo Metals/Kashima Antlers", "Brazil national team"],
+      clubHonours: ["Flamengo: Copa Libertadores 1981; Intercontinental Cup 1981", "Flamengo: Campeonato Brasileiro titles 1980, 1982, 1983, Copa Uniao 1987"],
+      nationalHonours: ["Brazil: FIFA World Cup appearances 1978, 1982, 1986"],
+      verdict: "Flamengo의 남미/세계 정상 커리어는 강하지만 대표팀 우승 부재가 총점 상한입니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 1977, 1981, 1982", "World Soccer Player of the Year: 1983", "Brazilian Bola de Ouro/Placar awards multiple"],
+      records: ["Flamengo all-time top scorer", "1982 Brazil all-time great team symbol", "Udinese Serie A impact"],
+      verdict: "월드컵 우승 없이도 개인 평가와 클럽 상징성이 매우 강합니다.",
+    },
+    prime: {
+      period: "1977-83 Flamengo/Brazil",
+      evidence: ["1981 Libertadores and Intercontinental Cup", "1982 Brazil creative peak", "1983 World Soccer Player of the Year"],
+      skills: ["Free kicks", "through balls", "late box finishing", "two-foot technique", "attacking-midfield scoring"],
+      verdict: "10번 프라임 기준으로 축구사 최고권입니다.",
+    },
+    importance: {
+      roles: ["Flamengo: all-time greatest player and attacking core", "Brazil: 1982 creative symbol"],
+      moments: ["1981 Intercontinental Cup vs Liverpool", "1982 World Cup team legacy"],
+      verdict: "클럽에서는 절대 중심, 대표팀에서는 미완의 천재 서사입니다.",
+    },
+    legacy: {
+      reasons: ["Flamengo all-time icon", "1982 Brazil symbol", "South American POTY 3회", "free-kick/playmaker archetype"],
+      context: ["Best player never to win World Cup debate", "Brazil number 10 lineage"],
+      verdict: "우승 부재에도 기술적 최고점 때문에 장기 보존됩니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Zico", url: "https://en.wikipedia.org/wiki/Zico_(footballer)" },
+      { label: "Britannica - Zico", url: "https://www.britannica.com/biography/Zico" },
+    ],
+  }),
+  ronaldinho: makeFocusedProfile({
+    summary:
+      "Ronaldinho는 Barcelona 부활, Brazil 2002 World Cup, Ballon d'Or, 놀이 같은 창조성으로 축구 문화에 남은 2000년대 최고 스타입니다.",
+    team: {
+      clubs: ["Gremio", "Paris Saint-Germain", "Barcelona", "AC Milan", "Flamengo", "Atletico Mineiro", "Queretaro", "Fluminense", "Brazil national team"],
+      clubHonours: ["Barcelona: La Liga 2004-05, 2005-06; UEFA Champions League 2005-06", "AC Milan: Serie A 2010-11", "Atletico Mineiro: Copa Libertadores 2013"],
+      nationalHonours: ["Brazil: FIFA World Cup 2002", "Brazil: Copa America 1999", "Brazil: FIFA Confederations Cup 2005"],
+      verdict: "팀 커리어는 짧은 Barcelona 피크와 Brazil 2002, Libertadores까지 균형이 좋습니다.",
+    },
+    individual: {
+      awards: ["Ballon d'Or: 2005", "FIFA World Player of the Year: 2004, 2005", "UEFA Club Footballer of the Year: 2005-06"],
+      records: ["2005-06 Barcelona global face", "Bernabeu standing ovation 2005", "FIFA 100"],
+      verdict: "개인상과 문화적 스타성이 동시에 최고급입니다.",
+    },
+    prime: {
+      period: "2003-06 Barcelona",
+      evidence: ["2004 and 2005 FIFA World Player", "2005 Ballon d'Or", "2005-06 Champions League title"],
+      skills: ["Elastic dribbling", "no-look passing", "free kicks", "one-v-one creation", "improvisation", "wide playmaking"],
+      verdict: "짧지만 압도적인 프라임으로 축구사 최고 재능 논쟁권입니다.",
+    },
+    importance: {
+      roles: ["Barcelona: pre-Messi revival face", "Brazil: creative star in 2002/2005 title teams"],
+      moments: ["2002 World Cup England free-kick", "2005 Bernabeu performance", "2006 Champions League run"],
+      verdict: "Barcelona의 글로벌 매력을 되살린 중심 인물이었습니다.",
+    },
+    legacy: {
+      reasons: ["Ballon d'Or", "World Cup", "Champions League", "football joy/flair icon", "influence on later creative players"],
+      context: ["All-time entertainer and peak talent debate", "Brazilian flair lineage after Ronaldo/Rivaldo"],
+      verdict: "기록보다 스타일과 문화적 기억으로도 오래 남을 선수입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Ronaldinho", url: "https://en.wikipedia.org/wiki/Ronaldinho" },
+      { label: "FC Barcelona - Ronaldinho", url: "https://www.fcbarcelona.com/" },
+    ],
+  }),
+  romario: makeFocusedProfile({
+    summary:
+      "Romario는 1994 World Cup 우승과 Barcelona/PSV/브라질 리그 득점력을 결합한 박스 안 마무리의 역사적 기준점입니다.",
+    team: {
+      clubs: ["Vasco da Gama", "PSV Eindhoven", "Barcelona", "Flamengo", "Valencia", "Vasco da Gama returns", "Fluminense", "Al Sadd", "Miami FC", "Adelaide United", "America-RJ", "Brazil national team"],
+      clubHonours: ["PSV Eindhoven: Eredivisie 1988-89, 1990-91, 1991-92", "Barcelona: La Liga 1993-94", "Vasco/Flamengo: Brazilian and Rio state honours across career"],
+      nationalHonours: ["Brazil: FIFA World Cup 1994", "Brazil: Copa America 1989, 1997", "Brazil: FIFA Confederations Cup 1997"],
+      verdict: "대표팀 월드컵 우승과 클럽 득점 커리어가 강하게 결합돼 있습니다.",
+    },
+    individual: {
+      awards: ["FIFA World Player of the Year: 1994", "FIFA World Cup Golden Ball: 1994", "La Liga top scorer/Pichichi: 1993-94", "Multiple league top-scorer awards"],
+      records: ["Brazil all-time scoring icon", "1000-goal claim context", "One of the greatest penalty-box scorers"],
+      verdict: "1994년 개인 지배력과 득점왕 커리어가 핵심입니다.",
+    },
+    prime: {
+      period: "1993-94 Barcelona and Brazil 1994",
+      evidence: ["1993-94 La Liga top scorer", "1994 World Cup Golden Ball and title", "Barcelona Dream Team striker role"],
+      skills: ["Short-area finishing", "first touch", "toe-poke finishes", "offside-line timing", "low-centre agility"],
+      verdict: "박스 안 순수 마무리 프라임은 축구사 최고권입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1994 title-winning attacking reference", "Barcelona: Cruyff Dream Team striker peak", "Vasco/Flamengo: domestic icon"],
+      moments: ["1994 World Cup knockout goals and final run", "Barcelona 1993-94 scoring peak"],
+      verdict: "1994 Brazil의 공격 정체성을 만든 선수입니다.",
+    },
+    legacy: {
+      reasons: ["World Cup Golden Ball", "FIFA World Player 1994", "1994 World Cup champion", "penalty-box striker archetype"],
+      context: ["All-time striker debate with Ronaldo, Muller, Van Basten", "Brazil number 9 lineage"],
+      verdict: "득점 감각의 순수성 때문에 오래 비교될 선수입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Romario", url: "https://en.wikipedia.org/wiki/Rom%C3%A1rio" },
+      { label: "FIFA - Romario", url: "https://www.fifa.com/" },
+    ],
+  }),
+  neymar: makeFocusedProfile({
+    summary:
+      "Neymar는 Santos, Barcelona, PSG, Brazil 대표팀을 거친 현대 브라질의 최고 공격 재능입니다. 팀 커리어와 개인 고점은 강하지만 월드컵 우승 부재가 상한입니다.",
+    team: {
+      clubs: ["Santos", "Barcelona", "Paris Saint-Germain", "Al Hilal", "Brazil U20", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Santos: Copa Libertadores 2011, Copa do Brasil 2010", "Barcelona: La Liga 2014-15, 2015-16; Copa del Rey 2014-15, 2015-16, 2016-17; UEFA Champions League 2014-15", "Paris Saint-Germain: Ligue 1 titles and domestic cups"],
+      nationalHonours: ["Brazil Olympic: Olympic gold medal 2016; silver medal 2012", "Brazil: FIFA Confederations Cup 2013"],
+      verdict: "클럽 우승은 매우 강하지만 Brazil 월드컵/코파 우승 핵심 서사가 빠져 있습니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 2011, 2012", "FIFA Confederations Cup Golden Ball: 2013", "UEFA Champions League top scorer: 2014-15 shared", "Samba Gold and domestic awards"],
+      records: ["Brazil all-time top scorer", "Most expensive transfer in football history", "MSN era attacking records"],
+      verdict: "개인 기록과 재능 평가는 최고권이나 Ballon d'Or 수상 부재가 남습니다.",
+    },
+    prime: {
+      period: "2014-17 Barcelona and Brazil, plus 2019-20 PSG Champions League run",
+      evidence: ["2014-15 Champions League title and scoring", "MSN treble season", "2016 Olympic gold winning penalty", "2020 PSG Champions League final run"],
+      skills: ["One-v-one dribbling", "creative passing", "left-side playmaking", "set pieces", "fouls won", "transition creation"],
+      verdict: "순수 공격 재능 프라임은 브라질 역사 최고권이지만 지속성/부상이 감점입니다.",
+    },
+    importance: {
+      roles: ["Brazil: post-2010s attacking face", "Barcelona: MSN left creator/scorer", "PSG: Champions League project star"],
+      moments: ["La Remontada vs PSG", "2016 Olympic final penalty", "2014-15 Champions League knockout scoring"],
+      verdict: "대표팀과 클럽 모두에서 공격의 중심이었지만 우승 완결성은 Messi/Pele급보다 낮습니다.",
+    },
+    legacy: {
+      reasons: ["Brazil all-time top scorer", "Olympic gold icon", "MSN treble", "world-record transfer", "modern flair star"],
+      context: ["Brazil's greatest talent after Ronaldo/Ronaldinho debate", "High peak but unfinished international legacy"],
+      verdict: "기술과 기록으로 남지만 월드컵 우승 부재가 최상위 앵커 진입을 막습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Neymar", url: "https://en.wikipedia.org/wiki/Neymar" },
+      { label: "FC Barcelona - Neymar", url: "https://www.fcbarcelona.com/" },
+      { label: "FIFA - Neymar", url: "https://www.fifa.com/" },
+    ],
+  }),
+  "alfredo di stefano": makeFocusedProfile({
+    summary:
+      "Alfredo Di Stefano는 Real Madrid의 유러피언컵 5연패를 만든 전방위 공격수이자 축구사 초기 슈퍼클럽 시대의 기준점입니다.",
+    team: {
+      clubs: ["River Plate", "Huracan loan", "Millonarios", "Real Madrid", "Espanyol", "Argentina national team", "Colombia national team", "Spain national team"],
+      clubHonours: ["Real Madrid: European Cup 1955-56, 1956-57, 1957-58, 1958-59, 1959-60", "Real Madrid: La Liga 8회, Copa del Rey 1961-62, Intercontinental Cup 1960", "River Plate/Millonarios: Argentine and Colombian league titles"],
+      nationalHonours: ["Argentina: South American Championship 1947"],
+      verdict: "클럽 팀 커리어는 축구사 최고권이며 대표팀 월드컵 서사가 없는 점만 한계입니다.",
+    },
+    individual: {
+      awards: ["Ballon d'Or: 1957, 1959", "Super Ballon d'Or: 1989", "European Cup final scorer across five consecutive finals"],
+      records: ["Real Madrid all-time foundational icon", "One of European Cup's defining early scorers", "Total football before Total Football archetype"],
+      verdict: "초기 유럽 클럽 축구 개인상과 결승 지배력은 최상위입니다.",
+    },
+    prime: {
+      period: "1955-60 Real Madrid European Cup dynasty",
+      evidence: ["Five straight European Cups", "Goals in each European Cup final run/finals", "Two Ballons d'Or"],
+      skills: ["All-phase attacking", "deep playmaking", "pressing before its era", "finishing", "tempo control", "leadership"],
+      verdict: "포지션을 초월한 전방위 프라임의 역사적 원형입니다.",
+    },
+    importance: {
+      roles: ["Real Madrid: dynasty-defining central player", "River/Millonarios: pre-Madrid continental star"],
+      moments: ["European Cup finals 1956-60", "Real Madrid global rise"],
+      verdict: "Real Madrid라는 클럽의 세계사적 위상을 만든 핵심입니다.",
+    },
+    legacy: {
+      reasons: ["European Cup five-peat", "two Ballons d'Or", "Super Ballon d'Or", "Real Madrid founding myth"],
+      context: ["All-time top 10-15 debate", "Club football dominance archetype"],
+      verdict: "월드컵 부재에도 클럽 축구사에서는 반드시 남는 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Alfredo Di Stefano", url: "https://en.wikipedia.org/wiki/Alfredo_Di_St%C3%A9fano" },
+      { label: "Real Madrid - Alfredo Di Stefano", url: "https://www.realmadrid.com/" },
+      { label: "UEFA - Di Stefano", url: "https://www.uefa.com/" },
+    ],
+  }),
+};
 
 const curatedProfileOverrides: Record<string, CuratedProfileEntry> = {
   "abedi pele": {
@@ -2589,7 +3470,10 @@ function makePlayerProfile(
   status: PlayerStatus,
   scores: PlayerScores,
 ): PlayerProfile {
-  const curatedProfile = detailedAfricanProfileOverrides[normalizedName(name)] ?? curatedProfileOverrides[normalizedName(name)];
+  const curatedProfile =
+    detailedAfricanProfileOverrides[normalizedName(name)] ??
+    focusedNonEuropeProfileOverrides[normalizedName(name)] ??
+    curatedProfileOverrides[normalizedName(name)];
   if (curatedProfile) {
     return {
       isCurated: true,
