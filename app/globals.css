@@ -1220,6 +1220,23 @@ td strong {
   line-height: 1.65;
 }
 
+.drawer-meta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.drawer-meta-chips span {
+  background: rgba(11, 61, 46, 0.08);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 9px;
+}
+
 .official-score-panel {
   align-items: center;
   background:
@@ -1261,9 +1278,80 @@ td strong {
   margin-bottom: 14px;
 }
 
+.inspector-score-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 14px 0;
+}
+
+.score-tile {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 6px;
+  min-height: 76px;
+  padding: 10px;
+  text-align: left;
+}
+
+.score-tile.active {
+  border-color: var(--gold);
+  box-shadow: inset 3px 0 0 var(--gold), 0 8px 18px rgba(4, 25, 19, 0.08);
+}
+
+.score-tile span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.score-tile strong {
+  color: var(--main);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.score-tile i {
+  background: #e1d3ba;
+  border-radius: 999px;
+  display: block;
+  height: 5px;
+  overflow: hidden;
+}
+
+.score-tile b {
+  background: linear-gradient(90deg, var(--main-soft), var(--gold));
+  display: block;
+  height: 100%;
+}
+
+.profile-tools {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.profile-tools button {
+  background: rgba(255, 250, 240, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 34px;
+  padding: 0 10px;
+}
+
 .profile-section {
   border-top: 1px solid var(--line);
   padding-top: 14px;
+}
+
+.profile-section.active {
+  border-top-color: rgba(200, 162, 74, 0.9);
 }
 
 .profile-section-header {
@@ -1279,6 +1367,51 @@ td strong {
 
 .profile-section-header strong {
   flex: 0 0 auto;
+}
+
+.profile-section-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.profile-section-toggle span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.profile-section-toggle em {
+  color: var(--gold);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.profile-section-toggle strong {
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.profile-section-toggle b {
+  background: rgba(200, 162, 74, 0.16);
+  border-radius: 999px;
+  color: var(--main);
+  flex: 0 0 auto;
+  font-size: 12px;
+  padding: 6px 9px;
+}
+
+.profile-section-body {
+  margin-top: 12px;
 }
 
 .profile-section p,
@@ -1332,14 +1465,29 @@ td strong {
   margin-top: 14px;
 }
 
+.source-link-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.source-link-grid a,
 .source-section a {
+  background: rgba(11, 61, 46, 0.06);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 6px;
   color: var(--main-soft);
   font-weight: 800;
+  overflow-wrap: anywhere;
+  padding: 8px 10px;
   text-decoration: none;
 }
 
+.source-link-grid a:hover,
+.source-link-grid a:focus-visible,
 .source-section a:hover,
 .source-section a:focus-visible {
+  border-color: var(--gold);
   text-decoration: underline;
 }
 
@@ -1569,6 +1717,10 @@ td strong {
 
   .pitch {
     min-height: 560px;
+  }
+
+  .inspector-score-grid {
+    grid-template-columns: 1fr;
   }
 
   .player-token {

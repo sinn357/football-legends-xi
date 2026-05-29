@@ -1610,6 +1610,15 @@ function PlayerDetailDrawer({
   onToggleCompare: (playerId: string) => void;
   player: LegendPlayer | null;
 }) {
+  const profileKeys = Object.keys(scoreLabels) as ScoreKey[];
+  const [activeSection, setActiveSection] = useState<ScoreKey>("teamCareer");
+  const [openSections, setOpenSections] = useState<Record<ScoreKey, boolean>>(getOpenProfileSections(true));
+
+  useEffect(() => {
+    setActiveSection("teamCareer");
+    setOpenSections(getOpenProfileSections(true));
+  }, [player?.id]);
+
   if (!player) {
     return (
       <aside className="player-drawer inspector-empty" aria-label="선수 상세">
@@ -1636,6 +1645,12 @@ function PlayerDetailDrawer({
         </button>
       </div>
       <p className="drawer-summary">{player.profile.summary}</p>
+      <div className="drawer-meta-chips" aria-label="선수 메타 정보">
+        <span>{player.continent}</span>
+        <span>{player.country}</span>
+        <span>{player.primaryPosition}</span>
+        <span>{statusLabels[player.status]}</span>
+      </div>
       <div className="official-score-panel">
         <span>공식 총점</span>
         <strong>{player.overallScore}</strong>
@@ -1647,40 +1662,82 @@ function PlayerDetailDrawer({
         </button>
         <span className={`status ${player.status}`}>{statusLabels[player.status]}</span>
       </div>
-      <ScoreBars player={player} />
+      <div className="inspector-score-grid" aria-label="세부 점수">
+        {profileKeys.map((key) => (
+          <button
+            className={activeSection === key ? "score-tile active" : "score-tile"}
+            key={key}
+            onClick={() => {
+              setActiveSection(key);
+              setOpenSections((current) => ({ ...current, [key]: true }));
+            }}
+            type="button"
+          >
+            <span>{scoreLabels[key]}</span>
+            <strong>{player.scores[key]}</strong>
+            <i aria-hidden="true">
+              <b style={{ width: `${player.scores[key]}%` }} />
+            </i>
+          </button>
+        ))}
+      </div>
+      <div className="profile-tools" aria-label="프로필 섹션 제어">
+        <button onClick={() => setOpenSections(getOpenProfileSections(true))} type="button">
+          전체 열기
+        </button>
+        <button onClick={() => setOpenSections(getOpenProfileSections(false))} type="button">
+          전체 접기
+        </button>
+      </div>
       <div className="profile-section-stack">
-        {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => {
+        {profileKeys.map((key) => {
           const section = player.profile.sections[key];
+          const isOpen = openSections[key];
           return (
-            <section className="profile-section" key={key}>
-              <div className="profile-section-header">
-                <h3>{section.title}</h3>
-                <strong>
+            <section className={activeSection === key ? "profile-section active" : "profile-section"} key={key}>
+              <button
+                aria-expanded={isOpen}
+                className="profile-section-toggle"
+                onClick={() => {
+                  setActiveSection(key);
+                  setOpenSections((current) => ({ ...current, [key]: !current[key] }));
+                }}
+                type="button"
+              >
+                <span>
+                  <em>{scoreLabels[key]}</em>
+                  <strong>{section.title}</strong>
+                </span>
+                <b>
                   {section.score} · {section.grade}
-                </strong>
-              </div>
-              <p>{section.explanation}</p>
-              {section.verdict ? <p className="profile-verdict">{section.verdict}</p> : null}
-              {section.facts?.length ? (
-                <div className="fact-group-stack">
-                  {section.facts.map((fact) => (
-                    <article className="fact-group" key={fact.label}>
-                      <h4>{fact.label}</h4>
-                      <ul>
-                        {fact.items.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </article>
-                  ))}
+                </b>
+              </button>
+              {isOpen ? (
+                <div className="profile-section-body">
+                  <p>{section.explanation}</p>
+                  {section.verdict ? <p className="profile-verdict">{section.verdict}</p> : null}
+                  {section.facts?.length ? (
+                    <div className="fact-group-stack">
+                      {section.facts.map((fact) => (
+                        <article className="fact-group" key={fact.label}>
+                          <h4>{fact.label}</h4>
+                          <ul>
+                            {fact.items.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </article>
+                      ))}
+                    </div>
+                  ) : null}
+                  <ul>
+                    {section.bullets.map((bullet) => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
+                  {section.caveat ? <p className="profile-caveat">{section.caveat}</p> : null}
                 </div>
               ) : null}
-              <ul>
-                {section.bullets.map((bullet) => (
-                  <li key={bullet}>{bullet}</li>
-                ))}
-              </ul>
-              {section.caveat ? <p className="profile-caveat">{section.caveat}</p> : null}
             </section>
           );
         })}
@@ -1690,15 +1747,13 @@ function PlayerDetailDrawer({
           <div className="profile-section-header">
             <h3>출처</h3>
           </div>
-          <ul>
+          <div className="source-link-grid">
             {player.profile.sources.map((source) => (
-              <li key={source.url}>
-                <a href={source.url} rel="noreferrer" target="_blank">
-                  {source.label}
-                </a>
-              </li>
+              <a href={source.url} key={source.url} rel="noreferrer" target="_blank">
+                {source.label}
+              </a>
             ))}
-          </ul>
+          </div>
         </section>
       ) : null}
     </aside>
@@ -1762,6 +1817,16 @@ function ScoreBars({ player }: { player: LegendPlayer }) {
       ))}
     </div>
   );
+}
+
+function getOpenProfileSections(value: boolean): Record<ScoreKey, boolean> {
+  return {
+    teamCareer: value,
+    individualCareer: value,
+    primeSkill: value,
+    teamImportance: value,
+    legacy: value,
+  };
 }
 
 function matchesPlayerSearch(player: LegendPlayer, normalizedQuery: string) {
