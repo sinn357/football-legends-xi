@@ -540,6 +540,116 @@ const scoreOverrides: Record<string, ScoreOverride> = {
     scoreMode: "adjusted",
     scores: { teamCareer: 94, individualCareer: 90, primeSkill: 91, teamImportance: 91, legacy: 90 },
   },
+  "julian alvarez": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 96, individualCareer: 86, primeSkill: 89, teamImportance: 87, legacy: 88 },
+  },
+  "pablo aimar": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 87, individualCareer: 86, primeSkill: 89, teamImportance: 87, legacy: 88 },
+  },
+  "roberto perfumo": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 87, primeSkill: 89, teamImportance: 91, legacy: 90 },
+  },
+  "juan pablo sorin": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 84, primeSkill: 86, teamImportance: 88, legacy: 85 },
+  },
+  elber: {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 85, primeSkill: 87, teamImportance: 86, legacy: 85 },
+  },
+  "jose altafini": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 89, primeSkill: 90, teamImportance: 88, legacy: 90 },
+  },
+  "juninho pernambucano": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 88, primeSkill: 90, teamImportance: 93, legacy: 91 },
+  },
+  "ze roberto": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 84, primeSkill: 87, teamImportance: 87, legacy: 86 },
+  },
+  "gilberto silva": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 84, primeSkill: 87, teamImportance: 90, legacy: 88 },
+  },
+  emerson: {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 86, primeSkill: 88, teamImportance: 87, legacy: 86 },
+  },
+  fernandinho: {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 84, primeSkill: 88, teamImportance: 88, legacy: 87 },
+  },
+  "hilderaldo bellini": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 86, primeSkill: 88, teamImportance: 93, legacy: 91 },
+  },
+  aldair: {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 86, primeSkill: 88, teamImportance: 90, legacy: 88 },
+  },
+  "domingos da guia": {
+    overallScore: 89,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 87, individualCareer: 90, primeSkill: 92, teamImportance: 92, legacy: 94 },
+  },
+  marquinhos: {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 95, individualCareer: 86, primeSkill: 89, teamImportance: 90, legacy: 88 },
+  },
+  maicon: {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 86, primeSkill: 89, teamImportance: 87, legacy: 86 },
+  },
+  "marcelo vieira": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 99, individualCareer: 90, primeSkill: 92, teamImportance: 89, legacy: 92 },
+  },
+  "leovegildo junior": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 88, primeSkill: 90, teamImportance: 90, legacy: 89 },
+  },
+  "claudio taffarel": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 87, primeSkill: 88, teamImportance: 94, legacy: 90 },
+  },
+  dida: {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 86, primeSkill: 88, teamImportance: 88, legacy: 88 },
+  },
+  "julio cesar": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 88, primeSkill: 89, teamImportance: 88, legacy: 87 },
+  },
+  "alisson becker": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 91, primeSkill: 91, teamImportance: 89, legacy: 89 },
+  },
   "차범근": {
     overallScore: 90,
     scoreMode: "adjusted",
@@ -4716,6 +4826,776 @@ const focusedNonEuropeProfileOverrides: Record<string, CuratedProfileEntry> = {
     sources: [
       { label: "Chelsea - Thiago Silva", url: "https://www.chelseafc.com/en/teams/profile/thiago-silva" },
       { label: "Wikipedia - Thiago Silva", url: "https://en.wikipedia.org/wiki/Thiago_Silva" },
+    ],
+  }),
+  "julian alvarez": makeFocusedProfile({
+    summary:
+      "Julian Alvarez는 River Plate, Manchester City, Atletico Madrid와 Argentina 대표팀을 거친 현역 공격수입니다. 이미 월드컵, Copa America, Champions League, Libertadores를 모두 가진 특수한 팀 커리어입니다.",
+    team: {
+      clubs: ["River Plate", "Manchester City", "Atletico Madrid", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["River Plate: Copa Libertadores 2018; Recopa Sudamericana 2019; Argentine Primera Division 2021", "Manchester City: Premier League 2022-23, 2023-24; FA Cup 2022-23; UEFA Champions League 2022-23; UEFA Super Cup 2023; FIFA Club World Cup 2023"],
+      nationalHonours: ["Argentina: FIFA World Cup 2022", "Argentina: Copa America 2021, 2024", "Argentina: Finalissima 2022", "Argentina Olympic: Tokyo 2020 squad context"],
+      verdict: "24세 이전부터 메이저 우승 컬렉션은 거의 완성형이지만, 팀 내 절대 에이스 기간은 아직 더 필요합니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 2021", "Argentine Primera Division top scorer: 2021", "FIFA World Cup 2022 breakout recognition"],
+      records: ["Scored in Copa Libertadores, Champions League and World Cup-winning career arc", "One of the youngest players with World Cup and Champions League winner medals"],
+      verdict: "개인상은 아직 적지만 2021 River와 2022 World Cup 활약이 강합니다.",
+    },
+    prime: {
+      period: "2021-24 River/Manchester City/Argentina",
+      evidence: ["River 2021 league scoring peak", "2022 World Cup four goals", "Manchester City 2022-23 treble"],
+      skills: ["Pressing", "two-foot finishing", "off-ball runs", "second-striker link play", "high-intensity counterpress"],
+      verdict: "현역 진행형이라 최고점은 보수적으로 두지만 전술 호환성과 결정력은 매우 높습니다.",
+    },
+    importance: {
+      roles: ["River Plate: 2021 attacking centerpiece", "Manchester City: high-value rotation forward", "Argentina: Messi-era pressing striker and Alvarez/Lautaro competition axis"],
+      moments: ["2022 World Cup semi-final vs Croatia", "Manchester City treble season", "River 2021 title"],
+      verdict: "대표팀에서는 이미 큰 장면을 만들었고, 클럽 절대비중은 Atletico 이후가 중요합니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "two Copa America titles", "Champions League", "Copa Libertadores", "South American POTY"],
+      context: ["active-hold, legacy still forming", "Argentina post-Messi attacking succession"],
+      verdict: "우승 이력은 이미 역사적이고, 향후 1번 옵션 시즌이 누적되면 점수 상승 여지가 큽니다.",
+    },
+    sources: [
+      { label: "Atletico Madrid - Julian Alvarez", url: "https://en.atleticodemadrid.com/jugadores/julian-alvarez-2025-2026" },
+      { label: "Wikipedia - Julian Alvarez", url: "https://en.wikipedia.org/wiki/Juli%C3%A1n_%C3%81lvarez" },
+    ],
+  }),
+  "pablo aimar": makeFocusedProfile({
+    summary:
+      "Pablo Aimar는 River Plate와 Valencia에서 빛난 기술형 10번입니다. 커리어 총량보다 창의성, 동료 평가, Valencia 전성기 기여로 평가합니다.",
+    team: {
+      clubs: ["River Plate", "Valencia", "Real Zaragoza", "Benfica", "Johor Darul Ta'zim", "Estudiantes Rio Cuarto", "Argentina U20", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division Apertura 1996, Clausura 1997, Apertura 1997, Apertura 1999", "Valencia: La Liga 2001-02, 2003-04; UEFA Cup 2003-04; UEFA Super Cup 2004", "Benfica: Primeira Liga 2009-10; Taca da Liga 2008-09, 2009-10, 2010-11, 2011-12"],
+      nationalHonours: ["Argentina U20: FIFA World Youth Championship 1997", "Argentina: Copa America runner-up 2007", "Argentina: FIFA World Cup appearances 2002, 2006"],
+      verdict: "Valencia의 라리가/UEFA Cup 우승과 River/Benfica 트로피가 균형 있게 쌓였습니다.",
+    },
+    individual: {
+      awards: ["South American Team/young-player reputation in River era", "Valencia creative-star recognition", "Lionel Messi's childhood-idol context"],
+      records: ["Key creative player in Valencia's early-2000s title team", "Argentina classic No. 10 lineage"],
+      verdict: "개인상 총량은 적지만 기술적 평판이 강한 선수입니다.",
+    },
+    prime: {
+      period: "1999-2004 River/Valencia",
+      evidence: ["Valencia La Liga 2001-02 and 2003-04", "UEFA Cup 2003-04", "Argentina 2002/2006 squad role"],
+      skills: ["Tight-space dribbling", "final pass", "one-touch play", "tempo changes", "between-lines receiving"],
+      verdict: "순수 창의성은 Argentina 10번 계보에서도 높은 편입니다.",
+    },
+    importance: {
+      roles: ["Valencia: creative midfielder in title team", "River Plate: young attacking star", "Argentina: Riquelme/Aimar era alternative creator"],
+      moments: ["Valencia 2001-04 title period", "Benfica league title", "Argentina 2006 generation"],
+      verdict: "절대 에이스보다는 고급 창의성을 더한 연결자였습니다.",
+    },
+    legacy: {
+      reasons: ["Valencia La Liga titles", "UEFA Cup", "Argentina classic playmaker reputation", "Messi-idol narrative"],
+      context: ["Aimar vs Riquelme contrast", "technical ceiling over trophy-volume profile"],
+      verdict: "기술과 미학 중심으로 오래 회자될 타입입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Pablo Aimar", url: "https://en.wikipedia.org/wiki/Pablo_Aimar" },
+      { label: "Valencia CF - Legends", url: "https://www.valenciacf.com/" },
+    ],
+  }),
+  "roberto perfumo": makeFocusedProfile({
+    summary:
+      "Roberto Perfumo는 Racing Club의 1967 Libertadores/Intercontinental 우승과 Argentina 대표팀의 1960-70년대 수비를 대표한 센터백입니다.",
+    team: {
+      clubs: ["Racing Club", "Cruzeiro", "River Plate", "Argentina national team"],
+      clubHonours: ["Racing Club: Argentine Primera Division 1966; Copa Libertadores 1967; Intercontinental Cup 1967", "Cruzeiro: Campeonato Mineiro titles in 1970s", "River Plate: Argentine Primera Division titles in 1975 and 1977 era"],
+      nationalHonours: ["Argentina: FIFA World Cup appearances 1966, 1974", "Argentina: national-team captaincy/defensive-leader era"],
+      verdict: "Racing의 세계 정상 우승과 River 말년 우승을 모두 가진 강한 수비수 커리어입니다.",
+    },
+    individual: {
+      awards: ["Racing Club all-time XI-level recognition", "Argentina historical centre-back recognition", "South American defender-era reputation"],
+      records: ["Known as El Mariscal, the Marshal", "Key defender in Racing's first Libertadores/Intercontinental triumph"],
+      verdict: "현대 개인상은 적지만 별명과 클럽사 위상이 강합니다.",
+    },
+    prime: {
+      period: "1966-74 Racing/Cruzeiro/Argentina",
+      evidence: ["Racing 1967 Libertadores/Intercontinental", "1966 and 1974 World Cups", "Cruzeiro/River elite spells"],
+      skills: ["Sweeping", "leadership", "defensive reading", "aerial command", "clean distribution"],
+      verdict: "Passarella 이전 Argentina 센터백의 가장 강한 기준 중 하나입니다.",
+    },
+    importance: {
+      roles: ["Racing Club: world champion defensive leader", "Argentina: 1960s/70s back-line organizer", "River Plate: veteran title contributor"],
+      moments: ["1967 Intercontinental Cup vs Celtic", "1967 Copa Libertadores", "1974 World Cup"],
+      verdict: "Racing 역사에서는 절대적 수비 상징입니다.",
+    },
+    legacy: {
+      reasons: ["Libertadores 1967", "Intercontinental Cup 1967", "El Mariscal identity", "Argentina pre-Passarella defensive benchmark"],
+      context: ["Argentina centre-back lineage", "Racing Club historical greatness"],
+      verdict: "Argentina 수비수 계보에서 반드시 비교되는 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Roberto Perfumo", url: "https://en.wikipedia.org/wiki/Roberto_Perfumo" },
+      { label: "CONMEBOL Libertadores - Racing history", url: "https://www.conmebollibertadores.com/" },
+    ],
+  }),
+  "juan pablo sorin": makeFocusedProfile({
+    summary:
+      "Juan Pablo Sorin은 River Plate, Villarreal, Argentina 대표팀을 거친 활동량 높은 레프트백/윙백입니다.",
+    team: {
+      clubs: ["Argentinos Juniors", "Juventus", "River Plate", "Cruzeiro", "Lazio loan", "Barcelona loan", "Paris Saint-Germain", "Cruzeiro second spell", "Villarreal", "Hamburger SV", "Cruzeiro third spell", "Argentina U20", "Argentina national team"],
+      clubHonours: ["River Plate: Copa Libertadores 1996; Argentine Primera Division titles in late-1990s era", "Cruzeiro: Copa do Brasil 2000; Brazilian/Minas titles across spells", "Villarreal: UEFA Champions League semi-final 2005-06"],
+      nationalHonours: ["Argentina U20: FIFA World Youth Championship 1995", "Argentina: FIFA World Cup appearances 2002, 2006", "Argentina: Copa America runner-up 2004"],
+      verdict: "국가대표 우승은 없지만 River Libertadores와 Villarreal 유럽 돌풍이 핵심입니다.",
+    },
+    individual: {
+      awards: ["Argentina captaincy in 2006 World Cup cycle", "Villarreal cult-hero recognition", "South American left-back/wingback reputation"],
+      records: ["Captain of Argentina at the 2006 World Cup", "High-energy two-way left-back model"],
+      verdict: "개인상보다 대표팀 주장직과 전술적 활동량이 평가 포인트입니다.",
+    },
+    prime: {
+      period: "2000-06 Cruzeiro/PSG/Villarreal/Argentina",
+      evidence: ["Cruzeiro Copa do Brasil", "Villarreal Champions League semi-final 2005-06", "Argentina 2006 World Cup captaincy"],
+      skills: ["Overlapping", "stamina", "aerial timing despite size", "left-side pressing", "combination play"],
+      verdict: "공격적 윙백 프라임은 Argentina 레프트백 계보에서 높은 편입니다.",
+    },
+    importance: {
+      roles: ["Argentina: captain and left-side engine", "Villarreal: European underdog fullback", "River/Cruzeiro: trophy contributor"],
+      moments: ["2006 World Cup", "Villarreal Champions League run", "River Libertadores 1996"],
+      verdict: "대표팀에서는 리더십과 활동량으로 비중을 만들었습니다.",
+    },
+    legacy: {
+      reasons: ["2006 Argentina captain", "River Libertadores", "Villarreal Champions League semi-final", "two-way wingback identity"],
+      context: ["Argentina left-back debate with Marzolini", "shorter elite-club stability limits score"],
+      verdict: "Argentina 팬들에게는 2006 세대의 왼쪽 얼굴로 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Juan Pablo Sorin", url: "https://en.wikipedia.org/wiki/Juan_Pablo_Sor%C3%ADn" },
+      { label: "Villarreal CF - History", url: "https://villarrealcf.es/en/club/history/" },
+    ],
+  }),
+  elber: makeFocusedProfile({
+    summary:
+      "Giovane Elber는 Bayern Munich의 2001 Champions League 우승과 Bundesliga 득점왕으로 평가하는 Brazil 출신 유럽 클럽형 스트라이커입니다.",
+    team: {
+      clubs: ["Londrina", "Milan", "Grasshopper", "VfB Stuttgart", "Bayern Munich", "Lyon", "Borussia Monchengladbach", "Cruzeiro", "Brazil national team"],
+      clubHonours: ["Bayern Munich: Bundesliga 1998-99, 1999-2000, 2000-01, 2002-03; DFB-Pokal 1997-98, 1999-2000, 2002-03; UEFA Champions League 2000-01; Intercontinental Cup 2001", "Lyon: Ligue 1 2003-04, 2004-05", "Grasshopper: Swiss Super League 1994-95"],
+      nationalHonours: ["Brazil: Copa America 1997 squad", "Brazil: limited national-team role due striker depth"],
+      verdict: "대표팀 비중은 낮지만 클럽 우승 총량과 Bayern 득점 커리어가 강합니다.",
+    },
+    individual: {
+      awards: ["Bundesliga top scorer: 2002-03", "Bayern Munich all-time foreign scorer-era recognition", "Bundesliga striker reputation in late-1990s/early-2000s"],
+      records: ["Bayern 100-goal tier", "One of the most productive Brazilian strikers in Bundesliga history"],
+      verdict: "Bundesliga 득점왕과 Bayern 장기 득점이 개인 평가의 중심입니다.",
+    },
+    prime: {
+      period: "1997-2003 Bayern Munich",
+      evidence: ["Bayern domestic titles", "2000-01 Champions League", "2002-03 Bundesliga top scorer"],
+      skills: ["Box finishing", "movement", "right-foot shooting", "combination play", "aerial timing"],
+      verdict: "브라질 대표팀 포화 때문에 국가대표 서사는 약하지만 클럽 프라임은 강합니다.",
+    },
+    importance: {
+      roles: ["Bayern Munich: primary striker across title years", "Lyon: veteran title contributor"],
+      moments: ["2001 Champions League-winning squad", "2002-03 domestic double", "Bundesliga scoring title"],
+      verdict: "Bayern에서는 주전 득점원으로 확실한 비중이 있었습니다.",
+    },
+    legacy: {
+      reasons: ["Champions League", "Bundesliga top scorer", "four Bundesliga titles", "Brazilian Bundesliga scoring legacy"],
+      context: ["Brazil striker depth behind Ronaldo/Romario/Rivaldo era", "club-heavy legacy"],
+      verdict: "대표팀보다 Bayern/Bundesliga 역사에서 더 선명하게 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Giovane Elber", url: "https://en.wikipedia.org/wiki/Giovane_%C3%89lber" },
+      { label: "Bundesliga - Giovane Elber", url: "https://www.bundesliga.com/" },
+    ],
+  }),
+  "jose altafini": makeFocusedProfile({
+    summary:
+      "Jose Altafini는 Brazil 1958 World Cup 우승 멤버이자 AC Milan과 Juventus에서 대량 득점을 기록한 Brazil/Italy 이중국적 공격수입니다.",
+    team: {
+      clubs: ["Palmeiras", "AC Milan", "Napoli", "Juventus", "Chiasso", "Mendrisio", "Brazil national team", "Italy national team"],
+      clubHonours: ["AC Milan: Serie A 1958-59, 1961-62; European Cup 1962-63", "Juventus: Serie A 1972-73, 1974-75; Coppa Italia 1978-79", "Palmeiras: Campeonato Paulista 1957"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958", "Italy: FIFA World Cup 1962 squad"],
+      verdict: "월드컵과 European Cup, Serie A 우승을 모두 가진 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["European Cup top scorer: 1962-63", "Serie A historical scoring record tier", "AC Milan/Juventus/Napoli historical scorer reputation"],
+      records: ["Scored 14 goals in the 1962-63 European Cup campaign", "Long-standing Serie A all-time scoring rank"],
+      verdict: "유럽컵 득점왕급 시즌과 Serie A 누적 득점이 핵심입니다.",
+    },
+    prime: {
+      period: "1958-63 Palmeiras/AC Milan/Brazil",
+      evidence: ["1958 World Cup", "AC Milan Serie A titles", "1962-63 European Cup scoring run"],
+      skills: ["Penalty-box finishing", "heading", "two-foot shooting", "physical centre-forward play", "poacher movement"],
+      verdict: "Brazil 대표팀 주역은 아니었지만 유럽 클럽 9번 프라임은 매우 강했습니다.",
+    },
+    importance: {
+      roles: ["AC Milan: European Cup-winning scorer", "Juventus/Napoli: veteran Serie A scoring threat", "Brazil: 1958 squad forward"],
+      moments: ["1963 European Cup", "1958 World Cup", "Serie A scoring years"],
+      verdict: "클럽 내 득점 비중이 대표팀 비중보다 훨씬 큽니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "European Cup", "Serie A scoring rank", "Brazil/Italy dual-national history"],
+      context: ["Brazil-born European scoring great", "national-team identity split limits Brazil-only memory"],
+      verdict: "브라질 대표팀보다 이탈리아 클럽 축구사에서 더 크게 남는 선수입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Jose Altafini", url: "https://en.wikipedia.org/wiki/Jos%C3%A9_Altafini" },
+      { label: "AC Milan - History", url: "https://www.acmilan.com/en/club/history" },
+    ],
+  }),
+  "juninho pernambucano": makeFocusedProfile({
+    summary:
+      "Juninho Pernambucano는 Lyon 7연패 시대의 플레이메이커이자 프리킥 역사상 최고 후보로 평가되는 Brazil 미드필더입니다.",
+    team: {
+      clubs: ["Sport Recife", "Vasco da Gama", "Lyon", "Al-Gharafa", "Vasco da Gama second spell", "New York Red Bulls", "Vasco da Gama third spell", "Brazil national team"],
+      clubHonours: ["Vasco da Gama: Campeonato Brasileiro Serie A 1997, 2000; Copa Libertadores 1998; Copa Mercosur 2000", "Lyon: Ligue 1 2001-02, 2002-03, 2003-04, 2004-05, 2005-06, 2006-07, 2007-08; Coupe de France 2007-08", "Brazil: FIFA Confederations Cup 2005"],
+      nationalHonours: ["Brazil: FIFA Confederations Cup 2005", "Brazil: FIFA World Cup 2006 squad"],
+      verdict: "Lyon 왕조와 Vasco Libertadores를 모두 가진 강한 클럽 커리어입니다.",
+    },
+    individual: {
+      awards: ["Ligue 1 Player of the Year: 2005-06", "Ligue 1 Team/foreign-player recognitions", "Vasco/Lyon all-time icon recognition"],
+      records: ["One of football's greatest free-kick takers", "Lyon's 2000s dynasty creative reference"],
+      verdict: "프리킥 기술의 역사적 위상과 Lyon에서의 리그 지배가 핵심입니다.",
+    },
+    prime: {
+      period: "2001-08 Lyon/Brazil",
+      evidence: ["Seven straight Ligue 1 titles", "2005-06 Ligue 1 Player of the Year", "Champions League knockout consistency"],
+      skills: ["Free kicks", "long passing", "tempo control", "long-range shooting", "set-piece chance creation"],
+      verdict: "프리킥 단일 능력은 축구사 최고권이고, 플레이메이킹도 엘리트였습니다.",
+    },
+    importance: {
+      roles: ["Lyon: dynasty-defining captain/creator", "Vasco: Libertadores-winning midfielder", "Brazil: deep technical option"],
+      moments: ["Lyon Ligue 1 dominance", "Vasco Libertadores 1998", "Brazil 2005 Confederations Cup"],
+      verdict: "Lyon에서는 팀 정체성 그 자체였습니다.",
+    },
+    legacy: {
+      reasons: ["seven Ligue 1 titles", "Libertadores", "free-kick GOAT debate", "Lyon all-time icon"],
+      context: ["Brazil midfield specialists", "set-piece legacy beyond trophy count"],
+      verdict: "프리킥을 이야기할 때 100년 뒤에도 빠지기 어려운 이름입니다.",
+    },
+    sources: [
+      { label: "Olympique Lyonnais - Juninho", url: "https://www.ol.fr/en" },
+      { label: "Wikipedia - Juninho Pernambucano", url: "https://en.wikipedia.org/wiki/Juninho_Pernambucano" },
+    ],
+  }),
+  "ze roberto": makeFocusedProfile({
+    summary:
+      "Ze Roberto는 Real Madrid, Bayer Leverkusen, Bayern Munich, Brazil 대표팀을 거친 장수형 왼쪽/중앙 미드필더입니다.",
+    team: {
+      clubs: ["Portuguesa", "Real Madrid", "Flamengo", "Bayer Leverkusen", "Bayern Munich", "Santos", "Hamburger SV", "Al-Gharafa", "Gremio", "Palmeiras", "Brazil national team"],
+      clubHonours: ["Real Madrid: La Liga 1996-97", "Bayern Munich: Bundesliga 2002-03, 2004-05, 2005-06, 2007-08; DFB-Pokal 2002-03, 2004-05, 2005-06, 2007-08", "Palmeiras: Copa do Brasil 2015; Campeonato Brasileiro Serie A 2016"],
+      nationalHonours: ["Brazil: Copa America 1997, 1999", "Brazil: FIFA Confederations Cup 1997, 2005", "Brazil: FIFA World Cup appearances 1998, 2006"],
+      verdict: "클럽과 대표팀에서 모두 넓은 우승 커리어를 가진 다재다능형 선수입니다.",
+    },
+    individual: {
+      awards: ["FIFA Confederations Cup Golden Ball: 2005", "Bundesliga Team/elite-left-sided midfielder recognition", "Palmeiras veteran icon recognition"],
+      records: ["Elite longevity into late 30s/40s", "Brazil 2005 Confederations Cup standout"],
+      verdict: "2005 Confederations Cup 개인상이 중요한 포인트입니다.",
+    },
+    prime: {
+      period: "2001-06 Leverkusen/Bayern/Brazil",
+      evidence: ["Leverkusen 2001-02 treble-run near miss", "Bayern domestic doubles", "2005 Confederations Cup Golden Ball"],
+      skills: ["Left-side carrying", "press resistance", "crossing", "central-midfield balance", "stamina"],
+      verdict: "한 포지션 최고점보다 여러 역할에서 높은 수준을 유지한 프라임입니다.",
+    },
+    importance: {
+      roles: ["Bayern: left/central midfield balance", "Brazil: 2005-06 midfield starter", "Palmeiras: veteran leader"],
+      moments: ["2005 Confederations Cup", "Bayern domestic doubles", "Leverkusen 2002 European run"],
+      verdict: "팀의 1번 스타는 아니지만 구조를 안정화하는 비중이 컸습니다.",
+    },
+    legacy: {
+      reasons: ["Confederations Cup Golden Ball", "Bayern titles", "two Copa America titles", "longevity"],
+      context: ["Brazil utility-midfielder lineage", "high floor rather than single all-time peak"],
+      verdict: "다재다능함과 지속성으로 Brazil 미드필더 후보군에 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Ze Roberto", url: "https://en.wikipedia.org/wiki/Z%C3%A9_Roberto" },
+      { label: "Bayern - Ze Roberto", url: "https://fcbayern.com/en" },
+    ],
+  }),
+  "gilberto silva": makeFocusedProfile({
+    summary:
+      "Gilberto Silva는 Brazil 2002 World Cup 우승과 Arsenal Invincibles를 연결한 수비형 미드필더입니다.",
+    team: {
+      clubs: ["America Mineiro", "Atletico Mineiro", "Arsenal", "Panathinaikos", "Gremio", "Atletico Mineiro second spell", "Brazil national team"],
+      clubHonours: ["Arsenal: Premier League 2003-04; FA Cup 2002-03, 2004-05; FA Community Shield 2002, 2004", "Atletico Mineiro: Copa Libertadores 2013", "Panathinaikos: Super League Greece 2009-10; Greek Cup 2009-10"],
+      nationalHonours: ["Brazil: FIFA World Cup 2002", "Brazil: Copa America 2007", "Brazil: FIFA Confederations Cup 2005, 2009"],
+      verdict: "월드컵과 Invincibles, Libertadores까지 가진 매우 균형 잡힌 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["Arsenal Invincibles defensive-midfield recognition", "Brazil 2002 World Cup starting/core recognition", "Atletico Mineiro Libertadores veteran recognition"],
+      records: ["Played every minute of Brazil's 2002 World Cup campaign after Emerson injury context", "Known as Arsenal's invisible wall"],
+      verdict: "개인상은 적지만 우승팀 구조상 비중이 강합니다.",
+    },
+    prime: {
+      period: "2002-06 Brazil/Arsenal",
+      evidence: ["2002 World Cup", "Arsenal 2003-04 unbeaten league", "Brazil Confederations Cup 2005"],
+      skills: ["Screening", "positioning", "aerial coverage", "simple passing", "defensive discipline"],
+      verdict: "수비형 미드필더로 팀 전체 균형을 잡는 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 2002 midfield shield", "Arsenal: Vieira partner and Invincibles balance", "Atletico Mineiro: veteran Libertadores winner"],
+      moments: ["2002 World Cup", "2003-04 Invincibles", "2013 Libertadores"],
+      verdict: "눈에 덜 띄었지만 우승팀 안정성을 만든 핵심입니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "Invincibles", "Copa America", "Confederations Cups", "Libertadores"],
+      context: ["Brazil defensive-midfield depth", "invisible work legacy"],
+      verdict: "화려하지 않아도 우승팀 DM의 모범 사례로 남습니다.",
+    },
+    sources: [
+      { label: "Arsenal - Gilberto Silva", url: "https://www.arsenal.com/historic/players/gilberto-silva" },
+      { label: "Wikipedia - Gilberto Silva", url: "https://en.wikipedia.org/wiki/Gilberto_Silva" },
+    ],
+  }),
+  emerson: makeFocusedProfile({
+    summary:
+      "Emerson은 Bayer Leverkusen, Roma, Juventus, Real Madrid, Brazil 대표팀을 거친 1990-2000년대 Brazil의 대표 중앙 미드필더입니다.",
+    team: {
+      clubs: ["Gremio", "Bayer Leverkusen", "Roma", "Juventus", "Real Madrid", "AC Milan", "Santos", "Miami Dade", "Brazil national team"],
+      clubHonours: ["Gremio: Copa Libertadores 1995; Campeonato Brasileiro Serie A 1996", "Roma: Serie A 2000-01; Supercoppa Italiana 2001", "Real Madrid: La Liga 2006-07", "AC Milan: FIFA Club World Cup 2007"],
+      nationalHonours: ["Brazil: Copa America 1999", "Brazil: FIFA Confederations Cup runner-up 1999", "Brazil: FIFA World Cup squad 1998/2006 context; missed 2002 through injury"],
+      verdict: "클럽 우승은 강하지만 2002 월드컵 부상 이탈이 대표팀 레거시를 제한합니다.",
+    },
+    individual: {
+      awards: ["Bola de Ouro: 1997", "Serie A elite-midfielder recognition in Roma/Juventus era", "Brazil captaincy before 2002 World Cup injury"],
+      records: ["Captain-designate of Brazil before 2002 injury", "Key midfielder in Roma's 2000-01 Scudetto"],
+      verdict: "1997 Brazil 국내 최고 평가와 Serie A 고점이 중요합니다.",
+    },
+    prime: {
+      period: "1997-2004 Leverkusen/Roma/Juventus/Brazil",
+      evidence: ["Bola de Ouro 1997", "Roma Scudetto 2000-01", "Juventus elite-midfield years"],
+      skills: ["Ball winning", "carrying", "physical duels", "box-to-box coverage", "short distribution"],
+      verdict: "힘과 전술 이해를 겸비한 2000년대 초반형 중앙 미드필더 프라임입니다.",
+    },
+    importance: {
+      roles: ["Roma: Scudetto-winning midfield force", "Brazil: pre-2002 captain-level midfielder", "Juventus/Real Madrid: title-squad midfielder"],
+      moments: ["Roma 2000-01", "1999 Copa America", "2002 World Cup injury absence"],
+      verdict: "대표팀에서는 부상 때문에 미완, 클럽에서는 확실한 비중을 만들었습니다.",
+    },
+    legacy: {
+      reasons: ["Copa Libertadores", "Serie A", "La Liga", "Copa America", "Bola de Ouro"],
+      context: ["Brazil central-midfielder depth", "what-if around 2002 injury"],
+      verdict: "우승 이력은 강하지만 2002 월드컵 공백이 장기 평가를 낮춥니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Emerson", url: "https://en.wikipedia.org/wiki/Emerson_(footballer,_born_1976)" },
+      { label: "AS Roma - Hall of Fame", url: "https://www.asroma.com/en/club/hall-of-fame" },
+    ],
+  }),
+  fernandinho: makeFocusedProfile({
+    summary:
+      "Fernandinho는 Shakhtar Donetsk와 Manchester City의 장기 성공을 지탱한 Brazil 수비형 미드필더입니다.",
+    team: {
+      clubs: ["Athletico Paranaense", "Shakhtar Donetsk", "Manchester City", "Athletico Paranaense second spell", "Brazil national team"],
+      clubHonours: ["Shakhtar Donetsk: Ukrainian Premier League titles across 2005-13; Ukrainian Cup titles; UEFA Cup 2008-09", "Manchester City: Premier League 2013-14, 2017-18, 2018-19, 2020-21, 2021-22; FA Cup 2018-19; EFL Cup multiple titles", "Athletico Paranaense: senior return and domestic leadership context"],
+      nationalHonours: ["Brazil: Copa America 2019", "Brazil: FIFA World Cup appearances 2014, 2018"],
+      verdict: "Shakhtar와 City에서 리그 지배 커리어가 강하지만 대표팀 기억은 혼재합니다.",
+    },
+    individual: {
+      awards: ["PFA Team of the Year: 2018-19", "Manchester City captaincy/leadership recognition", "Shakhtar all-time foreign-player recognition"],
+      records: ["Defensive base of Pep Guardiola's Manchester City", "Long-term Premier League elite DM"],
+      verdict: "개인상은 제한적이나 Pep City에서의 전술 비중이 큽니다.",
+    },
+    prime: {
+      period: "2013-19 Manchester City/Brazil",
+      evidence: ["Premier League 2017-18 100-point season", "2018-19 domestic treble", "PFA Team of the Year"],
+      skills: ["Counterpressing", "tactical fouls", "ball recovery", "vertical passing", "centre-back cover"],
+      verdict: "현대 EPL 수비형 미드필더로 매우 높은 전술 프라임입니다.",
+    },
+    importance: {
+      roles: ["Manchester City: midfield stabilizer in Guardiola system", "Shakhtar: European-title era leader", "Brazil: 2014/2018 squad midfielder"],
+      moments: ["City 100-point season", "2019 domestic treble", "Shakhtar UEFA Cup"],
+      verdict: "클럽에서는 핵심 구조였고 대표팀에서는 논쟁적 장면도 남았습니다.",
+    },
+    legacy: {
+      reasons: ["five Premier League titles", "UEFA Cup", "Copa America", "PFA Team of the Year", "Pep City foundation"],
+      context: ["Brazil DM depth", "club-system impact greater than national-team legacy"],
+      verdict: "Manchester City 역사에서는 오래 남을 미드필더입니다.",
+    },
+    sources: [
+      { label: "Manchester City - Fernandinho", url: "https://www.mancity.com/players/fernandinho" },
+      { label: "Wikipedia - Fernandinho", url: "https://en.wikipedia.org/wiki/Fernandinho_(footballer,_born_May_1985)" },
+    ],
+  }),
+  "hilderaldo bellini": makeFocusedProfile({
+    summary:
+      "Hilderaldo Bellini는 Brazil의 첫 World Cup 우승인 1958년의 주장이고, 1962 우승 세대까지 연결되는 수비 리더입니다.",
+    team: {
+      clubs: ["Vasco da Gama", "Sao Paulo", "Athletico Paranaense", "Brazil national team"],
+      clubHonours: ["Vasco da Gama: Campeonato Carioca 1952, 1956, 1958", "Sao Paulo: Campeonato Paulista 1970 squad-era veteran context"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962", "Brazil: FIFA World Cup 1966 squad"],
+      verdict: "클럽보다 Brazil 대표팀 첫 월드컵 주장 우승의 역사성이 압도적입니다.",
+    },
+    individual: {
+      awards: ["Brazil 1958 captaincy legacy", "World Cup trophy-lift gesture legacy", "Brazil historical centre-back recognition"],
+      records: ["First Brazilian captain to lift the FIFA World Cup", "Associated with the iconic two-handed trophy lift"],
+      verdict: "개인상보다 주장성과 시각적 레거시가 핵심입니다.",
+    },
+    prime: {
+      period: "1957-62 Vasco/Brazil",
+      evidence: ["1958 World Cup captaincy", "1962 World Cup squad/title", "Vasco late-1950s titles"],
+      skills: ["Leadership", "aerial defending", "physical marking", "defensive organization", "calm captaincy"],
+      verdict: "Brazil 초기 월드컵 수비 리더 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: first World Cup-winning captain", "Vasco: domestic title-era centre-back"],
+      moments: ["1958 World Cup final trophy lift", "1962 title defense squad", "Vasco Carioca titles"],
+      verdict: "1958 Brazil의 역사적 상징 비중이 매우 큽니다.",
+    },
+    legacy: {
+      reasons: ["1958 World Cup captain", "two World Cup winner medals", "iconic trophy lift", "Brazil's first world-title defensive leader"],
+      context: ["Brazil centre-back lineage before Carlos Alberto/Lucio/Thiago Silva", "symbolic captaincy profile"],
+      verdict: "축구사 이미지와 Brazil 첫 우승 때문에 오래 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Hilderaldo Bellini", url: "https://en.wikipedia.org/wiki/Hilderaldo_Bellini" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  aldair: makeFocusedProfile({
+    summary:
+      "Aldair는 Roma의 Scudetto와 Brazil 1994 World Cup 우승을 모두 가진 침착한 센터백입니다.",
+    team: {
+      clubs: ["Flamengo", "Benfica", "Roma", "Genoa", "Murata", "Brazil national team"],
+      clubHonours: ["Flamengo: Campeonato Brasileiro Serie A 1987; Copa do Brasil 1990", "Benfica: Portuguese league/cup-era title context", "Roma: Serie A 2000-01; Supercoppa Italiana 2001"],
+      nationalHonours: ["Brazil: FIFA World Cup 1994; runner-up 1998", "Brazil: Copa America 1989, 1997", "Brazil: FIFA Confederations Cup 1997"],
+      verdict: "World Cup와 Roma Scudetto를 모두 가진 강한 수비수 커리어입니다.",
+    },
+    individual: {
+      awards: ["Roma Hall of Fame", "FIFA 100", "Brazil 1994 defensive-core recognition"],
+      records: ["Roma retired/legendary number-6 status context", "Long-term Roma defensive icon"],
+      verdict: "Roma에서의 장기 위상과 FIFA 100이 개인 평가를 받쳐줍니다.",
+    },
+    prime: {
+      period: "1990-98 Roma/Brazil",
+      evidence: ["1994 World Cup", "1997 Copa America/Confederations Cup", "Roma long-term defensive leadership"],
+      skills: ["Composed defending", "clean tackling", "passing from the back", "aerial control", "positional reading"],
+      verdict: "힘보다 안정성과 침착함으로 평가받는 센터백 프라임입니다.",
+    },
+    importance: {
+      roles: ["Roma: long-term defensive pillar", "Brazil: 1994/1998 centre-back core"],
+      moments: ["1994 World Cup", "Roma 2000-01 Scudetto", "1997 Brazil title year"],
+      verdict: "대표팀과 Roma 양쪽에서 안정적 수비 기준이었습니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "Roma Scudetto", "FIFA 100", "Roma Hall of Fame"],
+      context: ["Brazil centre-back debate", "club loyalty and calm-defender profile"],
+      verdict: "화려하진 않지만 Roma와 Brazil 수비사에서 오래 남습니다.",
+    },
+    sources: [
+      { label: "AS Roma - Aldair Hall of Fame", url: "https://www.asroma.com/en/club/hall-of-fame" },
+      { label: "Wikipedia - Aldair", url: "https://en.wikipedia.org/wiki/Aldair" },
+    ],
+  }),
+  "domingos da guia": makeFocusedProfile({
+    summary:
+      "Domingos da Guia는 Brazil 초기 수비수 중 가장 높은 역사 평가를 받는 센터백으로, 우아한 수비와 빌드업의 원형으로 기억됩니다.",
+    team: {
+      clubs: ["Bangu", "Vasco da Gama", "Nacional", "Boca Juniors", "Flamengo", "Corinthians", "Brazil national team"],
+      clubHonours: ["Boca Juniors: Argentine Primera Division 1935", "Flamengo: Campeonato Carioca 1939, 1942, 1943", "Vasco da Gama/Bangu/Nacional: domestic elite-era spells"],
+      nationalHonours: ["Brazil: FIFA World Cup third place 1938", "Brazil: South American Championship runner-up-era context"],
+      verdict: "월드컵 우승 전 시대라 팀 커리어보다 포지션 혁신성이 중요합니다.",
+    },
+    individual: {
+      awards: ["IFFHS/Brazil historical defender recognition", "Brazilian football historical XI-level reputation", "Boca/Flamengo early-era defensive icon"],
+      records: ["Known as the Divine Master", "Often cited as Brazil's first great defender"],
+      verdict: "현대 개인상 이전 시대라 역사 평가와 스타일 영향력이 핵심입니다.",
+    },
+    prime: {
+      period: "1935-43 Boca/Flamengo/Brazil",
+      evidence: ["Boca league title 1935", "1938 World Cup", "Flamengo Carioca titles"],
+      skills: ["Elegant tackling", "ball-playing defense", "calm carrying", "anticipation", "sweeper-like control"],
+      verdict: "브라질식 기술형 센터백의 원형으로 볼 수 있습니다.",
+    },
+    importance: {
+      roles: ["Brazil: pre-war defensive reference", "Flamengo/Boca: title-era centre-back", "Bangu/Vasco: domestic star defender"],
+      moments: ["1938 World Cup", "Boca 1935", "Flamengo early-1940s titles"],
+      verdict: "우승보다 Brazil 수비수의 이미지 자체를 바꾼 비중이 큽니다.",
+    },
+    legacy: {
+      reasons: ["Brazil's first great defender reputation", "1938 World Cup", "Boca/Flamengo titles", "ball-playing centre-back archetype"],
+      context: ["pre-television evidence gap", "Brazil defender lineage before Bellini/Aldair/Lucio"],
+      verdict: "자료는 적어도 역사적 평판이 매우 강해 장기 존재감이 큽니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Domingos da Guia", url: "https://en.wikipedia.org/wiki/Domingos_da_Guia" },
+      { label: "FIFA - 1938 World Cup", url: "https://www.fifa.com/" },
+    ],
+  }),
+  marquinhos: makeFocusedProfile({
+    summary:
+      "Marquinhos는 Paris Saint-Germain의 장기 주장 센터백이고 Brazil 대표팀에서도 Copa America 우승과 월드컵 주전급 커리어를 쌓은 현역 수비수입니다.",
+    team: {
+      clubs: ["Corinthians", "Roma", "Paris Saint-Germain", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Corinthians: Copa Libertadores 2012 squad-era context", "Paris Saint-Germain: Ligue 1 titles across 2013-26 era; Coupe de France and Coupe de la Ligue titles", "Paris Saint-Germain: UEFA Champions League 2024-25"],
+      nationalHonours: ["Brazil: Copa America 2019", "Brazil: Copa America runner-up 2021", "Brazil Olympic: gold medal 2016; silver medal 2012", "Brazil: FIFA World Cup appearances 2018, 2022"],
+      verdict: "PSG 장기 우승과 Champions League, Brazil 메이저 타이틀이 있는 강한 현역 커리어입니다.",
+    },
+    individual: {
+      awards: ["Ligue 1 Team/Defender recognition", "Paris Saint-Germain captaincy", "Brazil defensive-core recognition"],
+      records: ["PSG all-time appearance leader tier", "Long-term PSG captain in European-title era"],
+      verdict: "개인상보다 PSG 주장성과 누적 출전, 트로피가 핵심입니다.",
+    },
+    prime: {
+      period: "2016-25 PSG/Brazil",
+      evidence: ["PSG domestic dominance", "2020 Champions League final run", "2024-25 Champions League title", "2019 Copa America"],
+      skills: ["Recovery defending", "aerial duels", "right-foot build-up", "defensive versatility", "leadership"],
+      verdict: "꾸준함과 멀티 포지션성이 강한 현대 센터백 프라임입니다.",
+    },
+    importance: {
+      roles: ["PSG: captain and defensive constant", "Brazil: centre-back rotation/core", "Corinthians/Roma: early development platform"],
+      moments: ["2019 Copa America", "PSG Champions League campaigns", "Olympic gold 2016"],
+      verdict: "PSG에서는 장기 리더, Brazil에서는 세대 핵심 수비수입니다.",
+    },
+    legacy: {
+      reasons: ["PSG captaincy", "Champions League", "Copa America", "Olympic gold", "long elite longevity"],
+      context: ["active defender, final rank still forming", "Brazil modern centre-back debate"],
+      verdict: "PSG 레거시는 이미 강하고 Brazil 역대 순위는 향후 대표팀 성과가 좌우합니다.",
+    },
+    sources: [
+      { label: "PSG - Marquinhos", url: "https://en.psg.fr/teams/first-team/squad/marquinhos" },
+      { label: "Wikipedia - Marquinhos", url: "https://en.wikipedia.org/wiki/Marquinhos" },
+    ],
+  }),
+  maicon: makeFocusedProfile({
+    summary:
+      "Maicon은 Inter 2010 treble과 Brazil 2007/2009/2010 전후 세대의 오른쪽을 대표한 공격형 라이트백입니다.",
+    team: {
+      clubs: ["Cruzeiro", "Monaco", "Inter Milan", "Manchester City", "Roma", "Avaí", "Criciúma", "Villa Nova", "Sona", "Tre Penne", "Brazil national team"],
+      clubHonours: ["Cruzeiro: Campeonato Brasileiro Serie A 2003; Copa do Brasil 2003", "Inter Milan: Serie A 2006-07, 2007-08, 2008-09, 2009-10; Coppa Italia 2005-06, 2009-10, 2010-11; UEFA Champions League 2009-10; FIFA Club World Cup 2010", "Manchester City: Premier League 2013-14 squad context"],
+      nationalHonours: ["Brazil: Copa America 2004, 2007", "Brazil: FIFA Confederations Cup 2005, 2009", "Brazil: FIFA World Cup appearances 2010, 2014"],
+      verdict: "Inter treble와 Brazil 메이저 타이틀을 모두 가진 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["UEFA Club Defender of the Year: 2009-10", "FIFA FIFPro World XI: 2010", "Serie A Team/defender recognition"],
+      records: ["Inter treble starting right-back", "Famous 2010 World Cup goal vs North Korea"],
+      verdict: "2010년 포지션별 세계 최고권 평가가 분명했습니다.",
+    },
+    prime: {
+      period: "2006-10 Inter/Brazil",
+      evidence: ["Inter Serie A dominance", "2009-10 Champions League treble", "FIFPro World XI 2010"],
+      skills: ["Powerful overlapping", "crossing", "long-stride carrying", "far-post shooting", "physical duels"],
+      verdict: "짧은 기간 라이트백 공격력은 세계 최고권이었습니다.",
+    },
+    importance: {
+      roles: ["Inter: Mourinho treble right flank", "Brazil: first-choice right-back before Dani Alves takeover"],
+      moments: ["2010 Champions League", "2010 World Cup goal", "2007 Copa America"],
+      verdict: "Inter에서는 오른쪽 공격 전개의 중요한 출구였습니다.",
+    },
+    legacy: {
+      reasons: ["Champions League treble", "FIFPro World XI", "Copa America titles", "peak attacking fullback reputation"],
+      context: ["Brazil right-back depth with Cafu/Dani Alves/Carlos Alberto/Djalma", "peak over longevity"],
+      verdict: "장기성은 Cafu보다 낮지만 2010 전후 고점은 강하게 남습니다.",
+    },
+    sources: [
+      { label: "Inter - Maicon", url: "https://www.inter.it/en/club/hall-of-fame/maicon" },
+      { label: "Wikipedia - Maicon", url: "https://en.wikipedia.org/wiki/Maicon_(footballer,_born_1981)" },
+    ],
+  }),
+  "marcelo vieira": makeFocusedProfile({
+    summary:
+      "Marcelo Vieira는 Real Madrid의 Champions League 5회 우승 시대를 대표한 공격형 레프트백이고 Fluminense 복귀 후 Libertadores까지 들어올린 선수입니다.",
+    team: {
+      clubs: ["Fluminense", "Real Madrid", "Olympiacos", "Fluminense second spell", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Real Madrid: La Liga 2006-07, 2007-08, 2011-12, 2016-17, 2019-20, 2021-22; Copa del Rey 2010-11, 2013-14", "Real Madrid: UEFA Champions League 2013-14, 2015-16, 2016-17, 2017-18, 2021-22; UEFA Super Cup and FIFA Club World Cup titles", "Fluminense: Copa Libertadores 2023; Recopa Sudamericana 2024"],
+      nationalHonours: ["Brazil: FIFA Confederations Cup 2013", "Brazil Olympic: silver medal 2012; bronze medal 2008", "Brazil: FIFA World Cup appearances 2014, 2018"],
+      verdict: "클럽 팀 커리어는 레프트백 역사 전체에서도 최상위권입니다. 대표팀 월드컵/코파 우승 부재만 감점입니다.",
+    },
+    individual: {
+      awards: ["FIFA FIFPro World XI selections", "UEFA Team of the Year selections", "Real Madrid captaincy and legend recognition"],
+      records: ["One of Real Madrid's most decorated players", "Modern attacking left-back benchmark"],
+      verdict: "개인상과 클럽 위상 모두 강합니다.",
+    },
+    prime: {
+      period: "2011-18 Real Madrid/Brazil",
+      evidence: ["Real Madrid Champions League four titles in five years", "2016-18 three-peat", "Brazil 2013 Confederations Cup"],
+      skills: ["One-v-one dribbling", "underlap/overlap creativity", "crossing", "press resistance", "left-foot combinations"],
+      verdict: "공격형 레프트백 프라임은 Roberto Carlos와 직접 비교되는 수준입니다.",
+    },
+    importance: {
+      roles: ["Real Madrid: left-side creative outlet", "Brazil: high-profile attacking fullback", "Fluminense: Libertadores return icon"],
+      moments: ["2014/2016/2017/2018 Champions League runs", "2023 Libertadores with Fluminense", "Real Madrid captaincy"],
+      verdict: "Real Madrid에서는 측면 공격 구조의 핵심이었습니다.",
+    },
+    legacy: {
+      reasons: ["five Champions League titles", "Libertadores", "Real Madrid captaincy", "FIFPro World XI selections"],
+      context: ["All-time left-back debate with Roberto Carlos/Maldini/Nilton Santos", "club greatness outweighs Brazil trophy gap"],
+      verdict: "클럽 레거시 기준으로는 Brazil 레프트백 최고권입니다.",
+    },
+    sources: [
+      { label: "Real Madrid - Marcelo", url: "https://www.realmadrid.com/" },
+      { label: "Wikipedia - Marcelo", url: "https://en.wikipedia.org/wiki/Marcelo_(footballer,_born_1988)" },
+    ],
+  }),
+  "leovegildo junior": makeFocusedProfile({
+    summary:
+      "Leovegildo Junior는 Flamengo 1981 Libertadores/Intercontinental 우승과 Brazil 1982 세대를 대표한 기술형 풀백/미드필더입니다.",
+    team: {
+      clubs: ["Flamengo", "Torino", "Pescara", "Flamengo second spell", "Brazil national team"],
+      clubHonours: ["Flamengo: Copa Libertadores 1981; Intercontinental Cup 1981", "Flamengo: Campeonato Brasileiro Serie A 1980, 1982, 1983, 1992; Copa do Brasil 1990", "Torino/Pescara: Serie A career context"],
+      nationalHonours: ["Brazil: FIFA World Cup appearances 1982, 1986", "Brazil: Copa America runner-up 1983"],
+      verdict: "Flamengo의 세계 정상과 Brazil 1982 세대의 상징성을 함께 가진 커리어입니다.",
+    },
+    individual: {
+      awards: ["Bola de Ouro: 1992", "FIFA World Cup All-Star Team: 1982 context", "Flamengo all-time XI-level recognition"],
+      records: ["Flamengo 800-appearance tier", "Rare elite fullback-to-midfielder adaptation"],
+      verdict: "Flamengo 누적과 1982 월드컵 평가가 중요합니다.",
+    },
+    prime: {
+      period: "1980-86 Flamengo/Brazil/Torino",
+      evidence: ["1981 Libertadores/Intercontinental", "Brazil 1982 World Cup", "Serie A move and adaptation"],
+      skills: ["Technical fullback play", "dribbling", "passing", "two-way stamina", "midfield conversion"],
+      verdict: "수비수라기보다 기술형 축구선수에 가까운 프라임입니다.",
+    },
+    importance: {
+      roles: ["Flamengo: Zico-era left-side star", "Brazil: 1982 attacking fullback", "later Flamengo: veteran midfield leader"],
+      moments: ["1981 Intercontinental Cup", "1982 World Cup", "1992 Flamengo title"],
+      verdict: "Flamengo 역사 내 비중이 특히 큽니다.",
+    },
+    legacy: {
+      reasons: ["Libertadores", "Intercontinental Cup", "Brazil 1982", "Bola de Ouro 1992", "Flamengo icon"],
+      context: ["Brazil attacking fullback lineage", "Junior vs Marcelo/Roberto Carlos/Nilton Santos depth"],
+      verdict: "Brazil 왼쪽 풀백/미드필더 계보의 고급 후보로 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Leovegildo Junior", url: "https://en.wikipedia.org/wiki/Leovegildo_J%C3%BAnior" },
+      { label: "Flamengo - History", url: "https://www.flamengo.com.br/" },
+    ],
+  }),
+  "claudio taffarel": makeFocusedProfile({
+    summary:
+      "Claudio Taffarel은 Brazil 1994 World Cup 우승 골키퍼이자 1998 준우승, Copa America 우승을 함께 가진 대표팀형 레전드입니다.",
+    team: {
+      clubs: ["Internacional", "Parma", "Reggiana", "Atletico Mineiro", "Galatasaray", "Parma second spell", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Internacional: Campeonato Gaucho 1984, 1991", "Galatasaray: Super Lig 1998-99, 1999-2000; Turkish Cup 1998-99, 1999-2000; UEFA Cup 1999-2000", "Atletico Mineiro: Copa CONMEBOL 1997"],
+      nationalHonours: ["Brazil: FIFA World Cup 1994; runner-up 1998", "Brazil: Copa America 1989, 1997", "Brazil Olympic: silver medal 1988"],
+      verdict: "클럽보다 Brazil 대표팀 메이저 우승과 Galatasaray UEFA Cup이 핵심입니다.",
+    },
+    individual: {
+      awards: ["IFFHS World's Best Goalkeeper top rankings in 1990s", "Brazil 1994 penalty-shootout hero recognition", "Galatasaray UEFA Cup final penalty-save legacy"],
+      records: ["Brazil's 1994 World Cup starting goalkeeper", "Most-capped Brazil goalkeeper before later era"],
+      verdict: "골키퍼 개인상보다 대표팀 결정 장면과 장기 주전성이 큽니다.",
+    },
+    prime: {
+      period: "1989-2000 Brazil/Parma/Galatasaray",
+      evidence: ["1989 Copa America", "1994 World Cup", "1998 World Cup final run", "2000 UEFA Cup"],
+      skills: ["Penalty saving", "shot stopping", "calm positioning", "big-match composure", "line command"],
+      verdict: "Brazil 골키퍼 대표팀 프라임 기준으로 최고권입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1994 title-winning goalkeeper", "Galatasaray: European-title goalkeeper", "Parma/Atletico: international-level keeper"],
+      moments: ["1994 World Cup final penalties", "2000 UEFA Cup final", "1998 World Cup"],
+      verdict: "Brazil 1994의 수비 안정성을 완성한 선수였습니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "two Copa America titles", "UEFA Cup", "1994 final shootout", "Brazil goalkeeper cap record era"],
+      context: ["Brazil goalkeeper debate with Gilmar/Dida/Julio Cesar/Alisson", "national-team memory profile"],
+      verdict: "대표팀 골키퍼로는 Brazil 역사 최상위권에 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Claudio Taffarel", url: "https://en.wikipedia.org/wiki/Cl%C3%A1udio_Taffarel" },
+      { label: "FIFA - 1994 Brazil", url: "https://www.fifa.com/" },
+    ],
+  }),
+  dida: makeFocusedProfile({
+    summary:
+      "Dida는 AC Milan의 Champions League 2회 우승과 Brazil 2002 World Cup 우승 스쿼드를 함께 가진 현대 Brazil 골키퍼입니다.",
+    team: {
+      clubs: ["Vitoria", "Cruzeiro", "Lugano", "Corinthians", "AC Milan", "Portuguesa", "Gremio", "Internacional", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Cruzeiro: Copa do Brasil 1996; Copa Libertadores 1997", "Corinthians: Campeonato Brasileiro Serie A 1999; FIFA Club World Championship 2000", "AC Milan: Serie A 2003-04; UEFA Champions League 2002-03, 2006-07; UEFA Super Cup 2003, 2007; FIFA Club World Cup 2007"],
+      nationalHonours: ["Brazil: FIFA World Cup 2002", "Brazil: Copa America 1999", "Brazil: FIFA Confederations Cup 1997, 2005"],
+      verdict: "클럽과 대표팀 메이저 트로피를 모두 갖춘 강한 골키퍼 커리어입니다.",
+    },
+    individual: {
+      awards: ["IFFHS World's Best Goalkeeper: 2005", "FIFPro World XI-level recognition", "Serie A/AC Milan elite goalkeeper recognition"],
+      records: ["First-choice goalkeeper for AC Milan's 2003 and 2007 Champions League-winning squads", "Brazil 2006 World Cup starting goalkeeper"],
+      verdict: "2005 전후 세계 최고권 골키퍼 평가가 핵심입니다.",
+    },
+    prime: {
+      period: "2002-07 AC Milan/Brazil",
+      evidence: ["2003 Champions League final penalty shootout", "2005 IFFHS recognition", "2007 Champions League"],
+      skills: ["Shot stopping", "penalty saving", "long reach", "calm big-match keeping", "one-v-one saves"],
+      verdict: "골키퍼 프라임은 Brazil 현대사 최고권입니다.",
+    },
+    importance: {
+      roles: ["AC Milan: Ancelotti-era goalkeeper", "Brazil: post-Taffarel starter", "Cruzeiro/Corinthians: domestic and continental winner"],
+      moments: ["2003 Champions League final", "2007 Champions League", "2006 World Cup"],
+      verdict: "Milan에서는 유럽 우승을 직접 지킨 골키퍼였습니다.",
+    },
+    legacy: {
+      reasons: ["two Champions League titles", "World Cup squad winner", "Libertadores", "IFFHS World's Best Goalkeeper"],
+      context: ["Brazil goalkeeper debate", "club-career heavyweight"],
+      verdict: "AC Milan 시절 때문에 Brazil 골키퍼 중 클럽 레거시가 매우 강합니다.",
+    },
+    sources: [
+      { label: "AC Milan - Dida", url: "https://www.acmilan.com/en/club/hall-of-fame/players/dida" },
+      { label: "Wikipedia - Dida", url: "https://en.wikipedia.org/wiki/Dida_(footballer,_born_1973)" },
+    ],
+  }),
+  "julio cesar": makeFocusedProfile({
+    summary:
+      "Julio Cesar는 Inter 2010 treble의 골키퍼이고 Brazil 대표팀 2006-14 주전급 세대를 대표한 선수입니다.",
+    team: {
+      clubs: ["Flamengo", "Chievo", "Inter Milan", "Queens Park Rangers", "Toronto FC loan", "Benfica", "Flamengo second spell", "Brazil national team"],
+      clubHonours: ["Flamengo: Campeonato Carioca titles and Copa dos Campeoes 2001 context", "Inter Milan: Serie A 2005-06, 2006-07, 2007-08, 2008-09, 2009-10; Coppa Italia 2005-06, 2009-10; UEFA Champions League 2009-10; FIFA Club World Cup 2010", "Benfica: Primeira Liga 2014-15, 2015-16, 2016-17; Taca da Liga 2014-15, 2015-16"],
+      nationalHonours: ["Brazil: Copa America 2004", "Brazil: FIFA Confederations Cup 2009, 2013", "Brazil: FIFA World Cup appearances 2006, 2010, 2014"],
+      verdict: "Inter treble와 Brazil 메이저 타이틀이 있는 강한 골키퍼 커리어입니다.",
+    },
+    individual: {
+      awards: ["UEFA Club Goalkeeper of the Year: 2009-10", "Serie A Goalkeeper of the Year awards", "FIFA Confederations Cup Golden Glove: 2013"],
+      records: ["Inter treble starting goalkeeper", "Brazil 2010/2014 starting goalkeeper"],
+      verdict: "2010 Inter에서 포지션별 세계 최고권 평가가 분명했습니다.",
+    },
+    prime: {
+      period: "2007-10 Inter/Brazil",
+      evidence: ["Inter Serie A dominance", "2009-10 Champions League treble", "2010 World Cup cycle"],
+      skills: ["Reaction saves", "one-v-one stops", "explosive diving", "penalty-area command", "big-match shot stopping"],
+      verdict: "짧은 세계 최고권 골키퍼 프라임이 강합니다.",
+    },
+    importance: {
+      roles: ["Inter: treble-winning goalkeeper", "Brazil: Dida 이후 대표팀 No. 1", "Benfica: veteran title keeper"],
+      moments: ["2010 Champions League", "2013 Confederations Cup", "2014 World Cup home tournament"],
+      verdict: "클럽에서는 절정, 대표팀에서는 2014의 그림자가 함께 남습니다.",
+    },
+    legacy: {
+      reasons: ["Champions League treble", "UEFA Club Goalkeeper of the Year", "Confederations Cup Golden Glove", "Brazil No. 1 era"],
+      context: ["Brazil goalkeeper debate", "2014 Germany 1-7 affects memory"],
+      verdict: "Inter 2010 레거시는 매우 강하지만 대표팀 기억은 양면적입니다.",
+    },
+    sources: [
+      { label: "Inter - Julio Cesar", url: "https://www.inter.it/en/club/hall-of-fame/julio-cesar" },
+      { label: "Wikipedia - Julio Cesar", url: "https://en.wikipedia.org/wiki/J%C3%BAlio_C%C3%A9sar_(football_goalkeeper,_born_1979)" },
+    ],
+  }),
+  "alisson becker": makeFocusedProfile({
+    summary:
+      "Alisson Becker는 Liverpool의 Champions League/Premier League 우승과 Brazil 2019 Copa America를 지킨 현대 최고급 골키퍼입니다.",
+    team: {
+      clubs: ["Internacional", "Roma", "Liverpool", "Brazil national team"],
+      clubHonours: ["Internacional: Campeonato Gaucho 2013, 2014, 2015, 2016", "Liverpool: Premier League 2019-20, 2024-25; FA Cup 2021-22; EFL Cup 2021-22; UEFA Champions League 2018-19; FIFA Club World Cup 2019"],
+      nationalHonours: ["Brazil: Copa America 2019", "Brazil: Copa America runner-up 2021", "Brazil: FIFA World Cup appearances 2018, 2022"],
+      verdict: "Champions League, Premier League, Copa America를 모두 가진 완성도 높은 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["The Best FIFA Goalkeeper: 2019", "Yashin Trophy: 2019", "Premier League Golden Glove: 2018-19, 2021-22", "Copa America Golden Glove: 2019"],
+      records: ["Goal and assist/goalkeeper-scoring legacy with Liverpool", "Key goalkeeper in Liverpool's first Premier League title era"],
+      verdict: "2019 개인상 싹쓸이와 Golden Glove들이 매우 강한 근거입니다.",
+    },
+    prime: {
+      period: "2018-22 Liverpool/Brazil",
+      evidence: ["2018-19 Champions League", "2019 Copa America Golden Glove", "2019-20 Premier League", "2021-22 domestic cup double"],
+      skills: ["One-v-one saves", "sweeping", "distribution", "cross claiming", "shot-stopping consistency"],
+      verdict: "현대 골키퍼 프라임으로 Brazil 역사 최고권입니다.",
+    },
+    importance: {
+      roles: ["Liverpool: Klopp-era defensive transformation", "Brazil: 2019 Copa America No. 1", "Roma: breakout goalkeeper"],
+      moments: ["2019 Champions League final clean sheet", "2019 Copa America", "Liverpool 2019-20 league title"],
+      verdict: "Liverpool 수비 구조를 세계 최고권으로 끌어올린 핵심 영입이었습니다.",
+    },
+    legacy: {
+      reasons: ["Champions League", "Premier League", "Copa America", "The Best FIFA Goalkeeper", "Yashin Trophy"],
+      context: ["Brazil goalkeeper debate with Gilmar/Taffarel/Dida/Julio Cesar", "modern sweeper-keeper model"],
+      verdict: "개인상과 클럽 임팩트 때문에 Brazil 골키퍼 역대 최고 후보군입니다.",
+    },
+    sources: [
+      { label: "Liverpool - Alisson Becker", url: "https://www.liverpoolfc.com/team/mens/player/alisson-becker" },
+      { label: "Wikipedia - Alisson Becker", url: "https://en.wikipedia.org/wiki/Alisson_Becker" },
     ],
   }),
 };

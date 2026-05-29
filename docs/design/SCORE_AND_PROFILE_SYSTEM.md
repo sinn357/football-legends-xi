@@ -444,7 +444,7 @@ type PlayerEvidenceProfile = {
 - Africa 21명: 모두 개별 큐레이션 프로필 보유
 - Africa 상위 8명: 상세 fact group, 소속팀, 팀 우승, 개인 수상, 프라임 근거, 팀 비중, 레거시 근거 보유
 - Asia focused 37명: South Korea 14명, Japan 21명, Ali Daei, Tim Cahill 적용
-- America focused 70명: 앵커 10명 + Argentina/Brazil 1차/2차/3차 확장 60명 적용
+- America focused 92명: Argentina 37명 + Brazil 55명 전체 적용
 - Asia/America 나머지 선수: baseline profile 적용
 - Europe: 기존 generic profile 유지
 
@@ -459,9 +459,10 @@ Focused profile 적용 완료:
 5. America 1차 확장: Gabriel Batistuta, Mario Kempes, Angel Di Maria, Juan Roman Riquelme, Daniel Passarella, Javier Zanetti, Ubaldo Fillol, Fernando Redondo, Jose Manuel Moreno, Adolfo Pedernera, Rivaldo, Jairzinho, Didi, Cafu, Roberto Carlos, Nilton Santos, Djalma Santos, Carlos Alberto, Kaka, Gilmar
 6. America 2차 확장: Sergio Aguero, Hernan Crespo, Lautaro Martinez, Omar Sivori, Carlos Tevez, Javier Mascherano, Juan Sebastian Veron, Luis Monti, Oscar Ruggeri, Roberto Ayala, Leonidas da Silva, Vava, Tostao, Roberto Rivellino, Socrates, Gerson, Roberto Falcao, Zito, Lucio, Dani Alves
 7. America 3차 확장: Gonzalo Higuain, Diego Milito, Angel Labruna, Ricardo Bochini, Osvaldo Ardiles, Esteban Cambiasso, Walter Samuel, Pablo Zabaleta, Silvio Marzolini, Emiliano Martinez, Bebeto, Mario Zagallo, Careca, Ademir de Menezes, Zinzinho, Toninho Cerezo, Carlos Dunga, Carlos Casemiro, Mauro Silva, Thiago Silva
+8. America 4차 확장: Julian Alvarez, Pablo Aimar, Roberto Perfumo, Juan Pablo Sorin, Elber, Jose Altafini, Juninho Pernambucano, Ze Roberto, Gilberto Silva, Emerson, Fernandinho, Hilderaldo Bellini, Aldair, Domingos da Guia, Marquinhos, Maicon, Marcelo Vieira, Leovegildo Junior, Claudio Taffarel, Dida, Julio Cesar, Alisson Becker
 
 다음 데이터 입력 우선순위:
 
 1. Asia 확장: Iran/Australia/Japan 외 아시아 핵심국 순차 큐레이션
-2. America 확장 4: Argentina/Brazil 잔여 포지션별 상위권 마무리
-3. America 확장 5: Uruguay/Chile/Colombia/Mexico/기타 America 핵심 선수
+2. America 확장 5: Uruguay/Chile/Colombia/Mexico/기타 America 핵심 선수
+3. Asia 잔여 South Korea 선수 정리 및 현역보류/삭제후보 재검토
