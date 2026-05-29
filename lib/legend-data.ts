@@ -260,6 +260,56 @@ const scoreOverrides: Record<string, ScoreOverride> = {
     scoreMode: "adjusted",
     scores: { teamCareer: 86, individualCareer: 88, primeSkill: 88, teamImportance: 94, legacy: 93 },
   },
+  "황선홍": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 84, individualCareer: 84, primeSkill: 87, teamImportance: 90, legacy: 88 },
+  },
+  "이동국": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 88, primeSkill: 86, teamImportance: 88, legacy: 86 },
+  },
+  "안정환": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 81, individualCareer: 82, primeSkill: 86, teamImportance: 90, legacy: 90 },
+  },
+  "김주성": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 85, individualCareer: 91, primeSkill: 88, teamImportance: 89, legacy: 91 },
+  },
+  "유상철": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 84, individualCareer: 84, primeSkill: 87, teamImportance: 92, legacy: 89 },
+  },
+  "기성용": {
+    overallScore: 85,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 84, primeSkill: 86, teamImportance: 88, legacy: 87 },
+  },
+  "이영표": {
+    overallScore: 86,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 83, primeSkill: 86, teamImportance: 89, legacy: 89 },
+  },
+  "김민재": {
+    overallScore: 89,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 89, primeSkill: 91, teamImportance: 89, legacy: 89 },
+  },
+  "이운재": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 87, primeSkill: 87, teamImportance: 91, legacy: 90 },
+  },
+  "김병지": {
+    overallScore: 84,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 82, individualCareer: 86, primeSkill: 86, teamImportance: 86, legacy: 88 },
+  },
   "나카타 히데토시": {
     overallScore: 87,
     scoreMode: "adjusted",
@@ -649,6 +699,363 @@ const focusedNonEuropeProfileOverrides: Record<string, CuratedProfileEntry> = {
       { label: "FIFA - Hong Myung-bo Bronze Ball", url: "https://www.plus.fifa.com/en/content/hong-myung-bo-bronze-ball-award-2002-fifa-world-cup-korea-japan/f60e1899-3383-4880-b367-47d94daf4832" },
       { label: "AFC - Hong Myung-bo profile", url: "https://www.the-afc.com/en/more/news/asian_cup_now_a_priority_says_korean_legend_hong.html" },
       { label: "Wikipedia - Hong Myung-bo", url: "https://en.wikipedia.org/wiki/Hong_Myung-bo" },
+    ],
+  }),
+  "황선홍": makeFocusedProfile({
+    summary:
+      "Hwang Sun-hong은 2002년 월드컵 첫 승의 선제골, J1 League 득점왕, 한국 대표팀 장기 득점원으로 기억되는 스트라이커입니다.",
+    team: {
+      clubs: ["Waseda University", "Bayer Leverkusen amateur context", "Wuppertaler SV", "POSCO Atoms/Pohang Steelers", "Cerezo Osaka", "Suwon Samsung Bluewings", "Kashiwa Reysol", "Chunnam Dragons", "South Korea national team"],
+      clubHonours: ["Pohang Steelers: Asian Club Championship 1996-97", "Pohang Steelers: Korean FA Cup 1996", "Suwon Samsung Bluewings: K League 2000s domestic title context"],
+      nationalHonours: ["South Korea: FIFA World Cup fourth place 2002", "South Korea: AFC Asian Cup runner-up 1988", "South Korea: Asian Games bronze medal 1990"],
+      verdict: "클럽 우승보다 2002 대표팀과 J리그 득점왕 커리어가 평가의 핵심입니다.",
+    },
+    individual: {
+      awards: ["J1 League Top Scorer: 1999", "K League Best XI selections", "South Korea national-team scoring honours"],
+      records: ["First South Korean footballer to become top scorer in a foreign top league", "Scored South Korea's first goal in their first-ever World Cup win"],
+      verdict: "개인상 총량보다 J1 득점왕과 2002 폴란드전 골의 역사성이 큽니다.",
+    },
+    prime: {
+      period: "1994-2002 Pohang/Cerezo/South Korea",
+      evidence: ["1999 J1 League 24 goals", "2002 World Cup Poland goal", "South Korea long-term striker role"],
+      skills: ["Penalty-box finishing", "heading", "near-post movement", "link play", "big-match composure"],
+      verdict: "한국 전통 9번 프라임 기준점 중 하나입니다.",
+    },
+    importance: {
+      roles: ["South Korea: senior striker and 2002 starting forward", "Cerezo Osaka: primary scorer in 1999", "Pohang: domestic and Asian-stage attacking reference"],
+      moments: ["2002 World Cup opener vs Poland", "1999 J1 League scoring title"],
+      verdict: "대표팀 역사적 첫 승 장면 때문에 팀 내 비중이 단순 득점원 이상입니다.",
+    },
+    legacy: {
+      reasons: ["2002 Poland opening goal", "J1 League top scorer 1999", "South Korea striker lineage before modern Europe-based forwards"],
+      context: ["Korea all-time striker debate with Lee Dong-gook and Cha Bum-kun", "2002 World Cup generation"],
+      verdict: "월드컵 첫 승 장면으로 장기 기억이 매우 강합니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Hwang Sun-hong", url: "https://en.wikipedia.org/wiki/Hwang_Sun-hong" },
+      { label: "Chosun - 1999 J League top scorer", url: "https://www.chosun.com/site/data/html_dir/1999/11/28/1999112870357.html" },
+    ],
+  }),
+  "이동국": makeFocusedProfile({
+    summary:
+      "Lee Dong-gook은 K League 역대 최다 득점권 기록, MVP 4회, Jeonbuk 왕조, AFC Champions League 커리어로 평가하는 한국 리그형 스트라이커입니다.",
+    team: {
+      clubs: ["Pohang Steelers", "Werder Bremen loan", "Gwangju Sangmu", "Middlesbrough", "Seongnam Ilhwa Chunma", "Jeonbuk Hyundai Motors", "South Korea U20", "South Korea national team"],
+      clubHonours: ["Jeonbuk Hyundai Motors: K League titles across 2009, 2011, 2014, 2015, 2017, 2018, 2019", "Jeonbuk Hyundai Motors: AFC Champions League 2016; runner-up 2011", "Pohang Steelers: domestic cup/league-cup honours in late 1990s"],
+      nationalHonours: ["South Korea U20: AFC Youth Championship 1998", "South Korea: AFC Asian Cup third place 2000", "South Korea: FIFA World Cup squads 1998, 2010"],
+      verdict: "국내 리그와 AFC 클럽 커리어 기준으로는 한국 공격수 최상위권입니다.",
+    },
+    individual: {
+      awards: ["K League MVP: 2009, 2011, 2014, 2015", "AFC Champions League MVP and Top Scorer: 2011", "K League Top Scorer: 2009"],
+      records: ["K League all-time top scorer", "Long-term Jeonbuk scoring icon", "AFC Champions League all-time scoring leader tier"],
+      verdict: "K League 개인 수상과 득점 기록은 한국 선수 중 독보적입니다.",
+    },
+    prime: {
+      period: "2009-16 Jeonbuk Hyundai Motors",
+      evidence: ["2009 K League MVP/top scorer", "2011 ACL MVP/top scorer", "2016 ACL title as veteran leader"],
+      skills: ["Box finishing", "heading", "post play", "penalty-area positioning", "long-career scoring consistency"],
+      verdict: "국내/AFC 클럽 무대 프라임은 한국 스트라이커 최고권입니다.",
+    },
+    importance: {
+      roles: ["Jeonbuk: dynasty-era scoring reference", "South Korea: talented but uneven national-team striker"],
+      moments: ["Jeonbuk first K League title era", "2011 ACL scoring run", "2016 ACL title"],
+      verdict: "클럽 팀 내 비중은 매우 높지만 대표팀 서사는 상대적으로 약합니다.",
+    },
+    legacy: {
+      reasons: ["K League all-time top scorer", "K League MVP 4회", "Jeonbuk dynasty icon", "ACL MVP/top scorer"],
+      context: ["Korea domestic league greatest striker debate", "club legend profile more than national-team legend"],
+      verdict: "한국 리그사를 설명할 때 반드시 남는 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Lee Dong-gook", url: "https://en.wikipedia.org/wiki/Lee_Dong-gook" },
+      { label: "AFC - Lee breaks K-League record", url: "https://www.the-afc.com/en/club/afc_champions_league/news/lee_breaks_k-league_record.html" },
+      { label: "Yonhap - Lee fourth MVP", url: "https://en.yna.co.kr/view/AEN20151201007300315" },
+    ],
+  }),
+  "안정환": makeFocusedProfile({
+    summary:
+      "Ahn Jung-hwan은 2002년 이탈리아전 골든골로 한국 축구사의 가장 유명한 장면 중 하나를 만든 세컨드 스트라이커입니다.",
+    team: {
+      clubs: ["Busan Daewoo Royals", "Perugia loan", "Shimizu S-Pulse", "Yokohama F. Marinos", "Metz", "MSV Duisburg", "Suwon Samsung Bluewings", "Busan I'Park", "Dalian Shide", "South Korea national team"],
+      clubHonours: ["Yokohama F. Marinos: J1 League 2003, 2004", "Busan Daewoo Royals: Korean domestic cup/league-cup honours context"],
+      nationalHonours: ["South Korea: FIFA World Cup fourth place 2002", "South Korea: AFC Asian Cup third place 2000"],
+      verdict: "클럽 우승 총량보다 2002 월드컵 토너먼트 임팩트가 압도적으로 큽니다.",
+    },
+    individual: {
+      awards: ["K League MVP: 1999", "K League Best XI: 1999", "AFC Asian Cup Team/Tournament-level recognition in 2000 context"],
+      records: ["Scored the golden goal that eliminated Italy in the 2002 World Cup round of 16", "One of South Korea's leading World Cup scorers"],
+      verdict: "개인상보다 월드컵 골든골 하나의 역사적 무게가 큽니다.",
+    },
+    prime: {
+      period: "1999 Busan to 2002 World Cup",
+      evidence: ["1999 K League MVP", "2002 World Cup goals vs USA and Italy", "Perugia Serie A spell before/after World Cup drama"],
+      skills: ["Second-striker movement", "aerial timing", "technical first touch", "clutch finishing", "combination play"],
+      verdict: "짧은 프라임과 클러치 임팩트형 레전드입니다.",
+    },
+    importance: {
+      roles: ["South Korea: 2002 knockout difference-maker", "Busan: late-1990s attacking star", "Yokohama F. Marinos: title-winning attacking option"],
+      moments: ["2002 USA equalizer", "2002 Italy golden goal", "Korea's first World Cup quarter-final entry"],
+      verdict: "대표팀의 역사적 장면을 직접 만든 비중이 매우 큽니다.",
+    },
+    legacy: {
+      reasons: ["2002 Italy golden goal", "K League MVP 1999", "Serie A/World Cup drama story", "Korea 2002 icon"],
+      context: ["Korea's most famous single World Cup goal", "legacy higher than trophy total"],
+      verdict: "하나의 장면으로도 100년 뒤 기억될 가능성이 높은 선수입니다.",
+    },
+    sources: [
+      { label: "FIFA - Ahn golden goal", url: "https://www.fifa.com/ko/tournaments/mens/worldcup/articles/korea-republic-italy-upset-ko" },
+      { label: "Wikipedia - Ahn Jung-hwan", url: "https://en.wikipedia.org/wiki/Ahn_Jung-hwan" },
+      { label: "Guardian - Ahn and Perugia story", url: "https://www.theguardian.com/football/2002/jun/22/worldcupfootball2002.sport13" },
+    ],
+  }),
+  "김주성": makeFocusedProfile({
+    summary:
+      "Kim Joo-sung은 Asian Footballer of the Year 3연속 수상으로 1980-90년대 아시아를 대표한 한국 공격형 미드필더/윙어입니다.",
+    team: {
+      clubs: ["Daewoo Royals", "VfL Bochum", "Busan Daewoo Royals", "South Korea national team"],
+      clubHonours: ["Daewoo Royals/Busan Daewoo: K League titles in late-1980s/early-1990s era", "Daewoo Royals: Asian Club Championship 1985-86 context"],
+      nationalHonours: ["South Korea: AFC Asian Cup runner-up 1988", "South Korea: FIFA World Cup appearances 1986, 1990, 1994"],
+      verdict: "대표팀 장기 주축성과 아시아 올해의 선수 3연속 위상이 핵심입니다.",
+    },
+    individual: {
+      awards: ["Asian Footballer of the Year/IFFHS Asian Men's Player of the Year: 1989, 1990, 1991", "K League Best XI selections"],
+      records: ["Three consecutive Asian Player of the Year awards", "Korean star of the 1986-94 World Cup generation"],
+      verdict: "개인 수상 총량만 보면 한국 선수 역사 최상위권입니다.",
+    },
+    prime: {
+      period: "1988-91 Daewoo Royals and South Korea",
+      evidence: ["AFC Asian Cup runner-up 1988", "Asian Footballer of the Year 1989-91", "World Cup appearances across three editions"],
+      skills: ["Direct wing play", "attacking midfield versatility", "pace", "crossing", "transition carrying"],
+      verdict: "동시대 아시아 지배력은 매우 뚜렷합니다.",
+    },
+    importance: {
+      roles: ["South Korea: late-1980s/early-1990s attacking face", "Daewoo Royals: domestic title-era star"],
+      moments: ["1988 Asian Cup run", "three World Cup cycles"],
+      verdict: "대표팀 세대의 얼굴 역할을 한 선수입니다.",
+    },
+    legacy: {
+      reasons: ["Asian Footballer of the Year three straight years", "three World Cups", "Korean pre-2002 star identity"],
+      context: ["Korea's best pre-Europe boom attacking midfielder", "Asian individual-award benchmark"],
+      verdict: "아시아 개인상 역사 때문에 장기 보존성이 큽니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Kim Joo-sung", url: "https://en.wikipedia.org/wiki/Kim_Joo-sung" },
+      { label: "RSSSF - Asian Player of the Year", url: "https://www.rsssf.org/miscellaneous/as-poy.html" },
+    ],
+  }),
+  "유상철": makeFocusedProfile({
+    summary:
+      "Yoo Sang-chul은 2002 월드컵 폴란드전 골과 멀티 포지션 능력으로 기억되는 한국 축구의 전술형 미드필더입니다.",
+    team: {
+      clubs: ["Ulsan Hyundai Horang-i", "Yokohama F. Marinos", "Kashiwa Reysol", "Ulsan Hyundai Horang-i second spell", "South Korea U23", "South Korea national team"],
+      clubHonours: ["Ulsan Hyundai: Korean League Cup 1995, 1998", "Yokohama F. Marinos: J.League title-era squad context"],
+      nationalHonours: ["South Korea: FIFA World Cup fourth place 2002", "South Korea: AFC Asian Cup third place 2000", "South Korea U23: Asian Games bronze medal 2002"],
+      verdict: "클럽 우승보다 2002 월드컵과 대표팀 전술적 활용도가 핵심입니다.",
+    },
+    individual: {
+      awards: ["K League Best XI selections", "Korean football domestic individual recognitions"],
+      records: ["Scored in South Korea's first World Cup win vs Poland in 2002", "Played multiple outfield positions for club and country"],
+      verdict: "화려한 개인상보다 포지션 다기능성과 월드컵 장면의 가치가 큽니다.",
+    },
+    prime: {
+      period: "1998-2002 Ulsan/Yokohama/South Korea",
+      evidence: ["2002 World Cup Poland goal", "K League/J.League peak years", "South Korea semi-final run"],
+      skills: ["Box-to-box coverage", "aerial ability", "shooting from midfield", "defensive versatility", "tactical intelligence"],
+      verdict: "한국 선수 중 전술적 다기능성 프라임이 가장 높은 축입니다.",
+    },
+    importance: {
+      roles: ["South Korea: Hiddink system's multi-role connector", "Ulsan/Yokohama: midfield/defensive spine"],
+      moments: ["2002 Poland goal", "2002 World Cup semi-final run"],
+      verdict: "대표팀 구조 안에서 빈 곳을 메우는 대체 불가능성이 컸습니다.",
+    },
+    legacy: {
+      reasons: ["2002 Poland goal", "Korea 2002 semi-final generation", "multi-position Korean football archetype"],
+      context: ["Korea's most complete utility midfielder debate", "legacy tied to 2002 World Cup identity"],
+      verdict: "대표팀 전술형 레전드로 장기 기억됩니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Yoo Sang-chul", url: "https://en.wikipedia.org/wiki/Yoo_Sang-chul" },
+      { label: "Korea JoongAng Daily - Yoo Sang-chul obituary", url: "https://koreajoongangdaily.joins.com/2021/06/08/sports/football/Yoo-Sangchul-National-football-team-2002-World-Cup/20210608181800345.html" },
+    ],
+  }),
+  "기성용": makeFocusedProfile({
+    summary:
+      "Ki Sung-yueng은 Celtic, Swansea City, 한국 대표팀에서 롱패스와 중원 조율을 맡은 현대 한국 중앙 미드필더입니다.",
+    team: {
+      clubs: ["FC Seoul", "Celtic", "Swansea City", "Sunderland loan", "Newcastle United", "Mallorca", "FC Seoul second spell", "Pohang Steelers", "South Korea U23", "South Korea national team"],
+      clubHonours: ["Celtic: Scottish Premiership 2011-12; Scottish Cup 2010-11", "Swansea City: Football League Cup 2012-13"],
+      nationalHonours: ["South Korea Olympic: bronze medal 2012", "South Korea: AFC Asian Cup runner-up 2015", "South Korea: FIFA World Cup appearances 2010, 2014, 2018"],
+      verdict: "유럽 중상위권 클럽 팀 커리어와 대표팀 장기 주장성이 균형 있게 있습니다.",
+    },
+    individual: {
+      awards: ["Swansea City Player of the Year: 2014-15", "AFC Asian Cup Team of the Tournament: 2015", "KFA Player of the Year-level recognition in Korean context"],
+      records: ["100+ South Korea caps", "One of Korea's longest-serving European midfielders"],
+      verdict: "개인상보다 EPL 중앙 미드필더로 버틴 지속성이 강점입니다.",
+    },
+    prime: {
+      period: "2011-15 Celtic/Swansea/South Korea",
+      evidence: ["Swansea League Cup 2012-13", "2014-15 Swansea Player of the Year", "2015 Asian Cup final run as captain-level midfielder"],
+      skills: ["Long passing", "set-piece delivery", "tempo control", "press resistance", "deep midfield distribution"],
+      verdict: "한국 중앙 미드필더 중 유럽 리그 검증 프라임이 높은 편입니다.",
+    },
+    importance: {
+      roles: ["South Korea: captain and deep-lying playmaker", "Swansea: ball-progressing midfielder", "Celtic: title-winning midfield option"],
+      moments: ["2012 Olympic bronze medal", "2015 Asian Cup final", "Swansea 2014-15 peak season"],
+      verdict: "대표팀 빌드업 구조에서 장기간 중심 역할을 했습니다.",
+    },
+    legacy: {
+      reasons: ["Olympic bronze", "Asian Cup runner-up as midfield leader", "Swansea Player of the Year", "long European career"],
+      context: ["Korea's post-2002 midfield benchmark", "bridge between Park Ji-sung and Son/Kim Min-jae era"],
+      verdict: "한국 현대 미드필더 계보에서 장기 보존될 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Ki Sung-yueng", url: "https://en.wikipedia.org/wiki/Ki_Sung-yueng" },
+      { label: "Swansea City - Ki Asian Cup final", url: "https://www.swanseacity.com/news/ki-all-set-asian-cup-final" },
+      { label: "BBC - Ki at Swansea", url: "https://www.bbc.co.uk/sport/football/31249015" },
+    ],
+  }),
+  "이영표": makeFocusedProfile({
+    summary:
+      "Lee Young-pyo는 PSV, Tottenham, Dortmund를 거치며 2002년 이후 한국 풀백의 유럽 기준을 만든 왼쪽 수비수입니다.",
+    team: {
+      clubs: ["Anyang LG Cheetahs", "PSV Eindhoven", "Tottenham Hotspur", "Borussia Dortmund", "Al Hilal", "Vancouver Whitecaps", "South Korea national team"],
+      clubHonours: ["Anyang LG Cheetahs: K League 2000", "PSV Eindhoven: Eredivisie 2002-03, 2004-05; KNVB Cup 2004-05", "Al Hilal: Saudi Professional League 2009-10, Crown Prince Cup 2009-10"],
+      nationalHonours: ["South Korea: FIFA World Cup fourth place 2002", "South Korea: AFC Asian Cup third place 2000, 2011"],
+      verdict: "유럽과 아시아 클럽 우승, 월드컵 4강을 모두 가진 풀백 커리어입니다.",
+    },
+    individual: {
+      awards: ["K League Best XI selections", "AFC Asian Cup Team of the Tournament-level fullback recognition", "Vancouver Whitecaps Player of the Year-type club recognition"],
+      records: ["South Korea 100+ caps", "Played in three FIFA World Cups: 2002, 2006, 2010"],
+      verdict: "개인상보다 유럽 클럽 지속성과 대표팀 장기성이 중요합니다.",
+    },
+    prime: {
+      period: "2002-06 South Korea/PSV/Tottenham",
+      evidence: ["2002 World Cup semi-final run", "2004-05 PSV Champions League semi-final run", "Tottenham Premier League spell"],
+      skills: ["Two-footed fullback play", "overlapping", "close control under pressure", "1v1 defending", "crossing angles"],
+      verdict: "아시아 풀백 프라임으로 매우 높은 검증을 받은 선수입니다.",
+    },
+    importance: {
+      roles: ["South Korea: left-side outlet in 2002 and later cycles", "PSV: Champions League semi-final team fullback", "Tottenham: Premier League fullback option"],
+      moments: ["2002 World Cup run", "PSV 2005 Champions League semi-final", "long national-team service"],
+      verdict: "대표팀과 유럽 클럽 양쪽에서 안정적인 전술 자산이었습니다.",
+    },
+    legacy: {
+      reasons: ["2002 World Cup semi-finalist", "PSV Champions League semi-finalist", "Tottenham Premier League spell", "100+ caps"],
+      context: ["Korea all-time fullback benchmark", "European pathway after Hiddink/PSV connection"],
+      verdict: "한국 풀백 역사에서는 가장 먼저 호출될 이름 중 하나입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Lee Young-pyo", url: "https://en.wikipedia.org/wiki/Lee_Young-pyo" },
+      { label: "FIFA - Lee Young-pyo interview", url: "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/lee-youngpyo-interview-korea-republic" },
+      { label: "Tottenham - Young-Pyo's Dutch adventure", url: "https://www.tottenhamhotspur.com/news-archive-1/young-pyos-dutch-adventure/" },
+    ],
+  }),
+  "김민재": makeFocusedProfile({
+    summary:
+      "Kim Min-jae는 Napoli의 33년 만의 Serie A 우승과 Serie A Best Defender 수상으로 한국 수비수 평가 기준을 새로 올린 센터백입니다.",
+    team: {
+      clubs: ["Gyeongju KHNP", "Jeonbuk Hyundai Motors", "Beijing Guoan", "Fenerbahce", "Napoli", "Bayern Munich", "South Korea U23", "South Korea national team"],
+      clubHonours: ["Jeonbuk Hyundai Motors: K League 1 2017, 2018", "Napoli: Serie A 2022-23", "Bayern Munich: Bundesliga 2024-25"],
+      nationalHonours: ["South Korea U23: Asian Games gold medal 2018", "South Korea: FIFA World Cup 2022 last-16 squad"],
+      verdict: "Napoli 우승 핵심 센터백이라는 점 때문에 한국 수비수 팀 커리어 최고권입니다.",
+    },
+    individual: {
+      awards: ["Serie A Best Defender: 2022-23", "Serie A Team of the Season: 2022-23", "KFA Player of the Year: 2023", "AFC Asian International Player of the Year-level recognition"],
+      records: ["First Asian player to win Serie A Best Defender", "Key defender in Napoli's first Serie A title in 33 years"],
+      verdict: "아시아 센터백 개인상 기준으로는 역대 최고급입니다.",
+    },
+    prime: {
+      period: "2021-24 Fenerbahce/Napoli/Bayern",
+      evidence: ["2022-23 Napoli Serie A title", "2022-23 Serie A Best Defender", "Bayern transfer after one Napoli season"],
+      skills: ["Recovery speed", "front-foot defending", "aerial duels", "progressive carrying", "high-line cover"],
+      verdict: "센터백 프라임은 한국 선수 역대 최고 논쟁권입니다.",
+    },
+    importance: {
+      roles: ["Napoli: title-winning defensive anchor", "South Korea: first-choice centre-back and build-up base", "Bayern: elite-club centre-back rotation/core"],
+      moments: ["Napoli 2022-23 Scudetto", "2022 World Cup defensive core", "rapid progression from K League to elite Europe"],
+      verdict: "단기 프라임 기준으로는 대표팀보다 클럽 비중이 특히 강합니다.",
+    },
+    legacy: {
+      reasons: ["Serie A Best Defender", "Napoli Scudetto", "Bayern Munich move", "Asian Games gold"],
+      context: ["Korea all-time defender debate with Hong Myung-bo", "Asia's elite centre-back benchmark"],
+      verdict: "커리어가 진행 중이지만 이미 한국 수비수 레거시 최상위권입니다.",
+    },
+    sources: [
+      { label: "Bayern - Minjae Kim profile", url: "https://fcbayern.com/en/teams/first-team/minjae-kim" },
+      { label: "Yonhap - Serie A best defender", url: "https://en.yna.co.kr/view/AEN20230603000200315" },
+      { label: "Wikipedia - Kim Min-jae", url: "https://en.wikipedia.org/wiki/Kim_Min-jae_(footballer)" },
+    ],
+  }),
+  "이운재": makeFocusedProfile({
+    summary:
+      "Lee Woon-jae는 2002 월드컵 스페인전 승부차기와 Suwon Samsung의 아시아 클럽 성공으로 기억되는 한국 골키퍼 레전드입니다.",
+    team: {
+      clubs: ["Kyung Hee University", "Suwon Samsung Bluewings", "Chunnam Dragons", "South Korea national team"],
+      clubHonours: ["Suwon Samsung Bluewings: K League 1998, 1999, 2004, 2008", "Suwon Samsung Bluewings: Asian Club Championship 2000-01, 2001-02; Asian Super Cup 2001, 2002"],
+      nationalHonours: ["South Korea: FIFA World Cup fourth place 2002", "South Korea: AFC Asian Cup third place 2000, 2007", "South Korea: FIFA World Cup appearances 1994, 2002, 2006, 2010 squad context"],
+      verdict: "클럽 우승과 대표팀 월드컵 장면을 모두 가진 한국 골키퍼 최고권 커리어입니다.",
+    },
+    individual: {
+      awards: ["K League MVP: 2008", "K League Best XI selections", "AFC Asian Cup penalty shootout and goalkeeper recognitions"],
+      records: ["South Korea's 2002 World Cup starting goalkeeper", "Penalty save vs Spain in 2002 World Cup quarter-final shootout", "One of Korea's most-capped goalkeepers"],
+      verdict: "골키퍼로 K League MVP를 받은 희소성과 2002 장면이 큽니다.",
+    },
+    prime: {
+      period: "2001-08 Suwon/South Korea",
+      evidence: ["Asian Club Championship/Super Cup run with Suwon", "2002 World Cup semi-final run", "2008 K League MVP and title"],
+      skills: ["Penalty saving", "shot stopping", "large-frame positioning", "big-match composure", "defensive organization"],
+      verdict: "한국 골키퍼 프라임 기준으로 최상위입니다.",
+    },
+    importance: {
+      roles: ["South Korea: 2002 World Cup starting goalkeeper", "Suwon Samsung: title-winning defensive base"],
+      moments: ["2002 Spain quarter-final penalty shootout", "Suwon Asian Super Cup back-to-back success", "2008 K League MVP season"],
+      verdict: "대표팀 역사적 성과와 클럽 왕조 모두에서 직접적 비중이 있습니다.",
+    },
+    legacy: {
+      reasons: ["2002 Spain penalty save", "K League MVP as goalkeeper", "Suwon Asian Club Championship titles", "four World Cup cycles"],
+      context: ["Korea all-time goalkeeper debate with Kim Byung-ji", "big-match goalkeeper archetype"],
+      verdict: "2002 월드컵의 결정적 장면 때문에 장기 기억이 매우 강합니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Lee Woon-jae", url: "https://en.wikipedia.org/wiki/Lee_Woon-jae" },
+      { label: "Reuters/Moneycontrol - Lee retirement", url: "https://www.moneycontrol.com/news/business/wire-news/-1665569.html" },
+      { label: "Donga - Asian Super Cup", url: "https://www.donga.com/en/article/all/20020721/223820/1" },
+    ],
+  }),
+  "김병지": makeFocusedProfile({
+    summary:
+      "Kim Byung-ji는 K League 최다 출장/클린시트 기록과 골키퍼 득점 서사로 남는 한국 프로축구의 장수형 골키퍼 레전드입니다.",
+    team: {
+      clubs: ["Sangmu", "Ulsan Hyundai", "Pohang Steelers", "FC Seoul", "Gyeongnam FC", "Jeonnam Dragons", "South Korea national team"],
+      clubHonours: ["Ulsan Hyundai: K League 1996", "Ulsan/Pohang/FC Seoul: Korean domestic cup and league-cup honours across long career"],
+      nationalHonours: ["South Korea: FIFA World Cup squad 1998, 2002", "South Korea: AFC Asian Cup 1996/2000 era squads"],
+      verdict: "대표팀 주전 월드컵 서사는 이운재보다 약하지만 K League 누적은 독보적입니다.",
+    },
+    individual: {
+      awards: ["K League Hall of Fame induction context", "K League Best XI selections", "Korean goalkeeper of the year-level domestic recognitions"],
+      records: ["K League record appearances", "K League record clean sheets", "First goalkeeper to score in K League", "Oldest player in K League history at retirement context"],
+      verdict: "국내 리그 기록형 개인 커리어는 한국 골키퍼 중 최상위입니다.",
+    },
+    prime: {
+      period: "1996-2002 Ulsan/Pohang/South Korea squad era",
+      evidence: ["Ulsan K League 1996", "long-term K League clean-sheet record", "1998 World Cup starting goalkeeper context"],
+      skills: ["Reflex saves", "aggressive sweeping", "distribution risk-taking", "leadership", "longevity and conditioning"],
+      verdict: "순수 K League 장기 프라임과 지속성은 매우 강합니다.",
+    },
+    importance: {
+      roles: ["K League: generational goalkeeper icon", "South Korea: 1990s national-team goalkeeper", "multiple clubs: defensive leader over two decades"],
+      moments: ["K League goalkeeper goal", "record appearance/clean-sheet accumulation", "1998 World Cup role"],
+      verdict: "대표팀보다 프로리그 역사에서의 비중이 훨씬 큽니다.",
+    },
+    legacy: {
+      reasons: ["K League record appearances", "K League clean-sheet record", "first K League goalkeeper goal", "career until age 46"],
+      context: ["Korea all-time goalkeeper debate with Lee Woon-jae", "longevity and domestic-league icon"],
+      verdict: "한국 프로축구 기록사에서는 반드시 남는 골키퍼입니다.",
+    },
+    sources: [
+      { label: "AFC - Kim Byung-ji retires", url: "https://www.the-afc.com/en/more/news/legendary_korea_republic_goalkeeper_kim_byung-ji__retires.html" },
+      { label: "Yonhap - Kim Byung-ji retirement", url: "https://en.yna.co.kr/view/AEN20160719010000315" },
+      { label: "Wikipedia - Kim Byung-ji", url: "https://en.wikipedia.org/wiki/Kim_Byung-ji" },
     ],
   }),
   "나카타 히데토시": makeFocusedProfile({
