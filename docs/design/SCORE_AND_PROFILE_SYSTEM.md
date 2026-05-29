@@ -451,10 +451,11 @@ type PlayerEvidenceProfile = {
 - Germany 53명: 전체 큐레이션 프로필 적용
 - Italy 60명: 전체 큐레이션 프로필 적용
 - France 38명: 전체 큐레이션 프로필 적용
-- Europe 누적 261명: profile override 누락 0명
-- Europe 잔여 182명: 기존 generic profile 유지
+- Spain 48명: 전체 큐레이션 프로필 적용
+- Europe 누적 309명: profile override 누락 0명
+- Europe 잔여 134명: 기존 generic profile 유지
 
-Baseline profile은 이제 Germany/Italy/France를 제외한 Core Europe 선수에게만 남아 있다. 유럽 제외 선수와 Europe 1/2/Germany/Italy/France 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
+Baseline profile은 이제 Germany/Italy/France/Spain을 제외한 Core Europe 선수에게만 남아 있다. 유럽 제외 선수와 Europe 1/2/Germany/Italy/France/Spain 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
 
 Focused profile 적용 완료:
 
@@ -475,10 +476,11 @@ Focused profile 적용 완료:
 15. Germany 확장: Gerd Muller, Miroslav Klose, Uwe Seeler, Jurgen Klinsmann, Rudi Voller, Jupp Heynckes, Mario Gomez, Thomas Muller, Karl-Heinz Rummenigge, Helmut Rahn, Pierre Littbarski, Jurgen Grabowski, Marco Reus, Fritz Walter, Gunter Netzer, Wolfgang Overath, Bernd Schuster, Mesut Ozil, Thomas Hassler, Andreas Moller, Lothar Matthaus, Toni Kroos, Michael Ballack, Bastian Schweinsteiger, Ilkay Gundogan, Stefan Effenberg, Uli Stielike, Rainer Bonhof, Sami Khedira, Franz Beckenbauer, Matthias Sammer, Jurgen Kohler, Karl-Heinz Forster, Hans-Georg Schwarzenbeck, Klaus Augenthaler, Jerome Boateng, Mats Hummels, Philipp Lahm, Berti Vogts, Manfred Kaltz, Stefan Reuter, Joshua Kimmich, Paul Breitner, Andreas Brehme, Karl-Heinz Schnellinger, Hans-Peter Briegel, Manuel Neuer, Sepp Maier, Harald Schumacher, Jens Lehmann, Oliver Kahn, Bodo Illgner, Marc-Andre ter Stegen
 16. Italy 확장: Luigi Riva, Silvio Piola, Angelo Schiavio, Paolo Rossi, Christian Vieri, Gianluca Vialli, Alessandro Altobelli, Filippo Inzaghi, Luca Toni, Giuseppe Meazza, Roberto Baggio, Francesco Totti, Alessandro Del Piero, Roberto Bettega, Roberto Mancini, Gianfranco Zola, Giuseppe Signori, Antonio Di Natale, Bruno Conti, Giampiero Boniperti, Franco Causio, Roberto Donadoni, Mauro Camoranesi, Mario Corso, Raimundo Orsi, Gianni Rivera, Alessandro Mazzola, Valentino Mazzola, Giovanni Ferrari, Giacomo Bulgarelli, Gennaro Gattuso, Carlo Ancelotti, Marco Verratti, Claudio Marchisio, Antonio Conte, Nicolo Barella, Andrea Pirlo, Marco Tardelli, Demetrio Albertini, Daniele De Rossi, Franco Baresi, Fabio Cannavaro, Gaetano Scirea, Alessandro Nesta, Pietro Vierchowod, Giorgio Chiellini, Leonardo Bonucci, Ciro Ferrara, Alessandro Costacurta, Andrea Barzagli, Giuseppe Bergomi, Claudio Gentile, Gianluca Zambrotta, Paolo Maldini, Giacinto Facchetti, Antonio Cabrini, Gianluigi Buffon, Dino Zoff, Walter Zenga, Gianluigi Donnarumma
 17. France 확장: Kylian Mbappe, Thierry Henry, Karim Benzema, Jean-Pierre Papin, Just Fontaine, David Trezeguet, Olivier Giroud, Antoine Griezmann, Eric Cantona, Youri Djorkaeff, Ousmane Dembele, Franck Ribery, Robert Pires, Zinedine Zidane, Michel Platini, Raymond Kopa, Alain Giresse, Patrick Vieira, N'Golo Kante, Jean Tigana, Blaise Matuidi, Paul Pogba, Didier Deschamps, Claude Makelele, Emmanuel Petit, Marcel Desailly, Laurent Blanc, Raphael Varane, Maxime Bossis, Marius Tresor, Lilian Thuram, Willy Sagnol, Bixente Lizarazu, Patrice Evra, Eric Abidal, Theo Hernandez, Hugo Lloris, Fabien Barthez
+18. Spain 확장: David Villa, Telmo Zarra, Fernando Torres, Fernando Morientes, Carlos Santillana, Raul Gonzalez, Emilio Butragueno, Amancio Amaro, Michel, Juanito, Luis Enrique, Joaquin, Pedro Rodriguez, Francisco Gento, Luis Suarez Miramontes, Andres Iniesta, David Silva, Juan Carlos Valeron, Rafael Martin Vazquez, Jose Mari Bakero, Isco, Xavi, Luis del Sol, Jose Pirri, Cesc Fabregas, Thiago Alcantara, Koke, Gaizka Mendieta, Santi Cazorla, Rodri, Sergio Busquets, Xabi Alonso, Josep Guardiola, Sergio Ramos, Carles Puyol, Fernando Hierro, Gerard Pique, Daniel Carvajal, Michel Salgado, Chendo, Cesar Azpilicueta, Jesus Navas, Jose Antonio Camacho, Jordi Alba, Rafael Gordillo, Iker Casillas, Andoni Zubizarreta, Victor Valdes
 
 다음 데이터 입력 우선순위:
 
-1. Core Europe 2: Spain, England, Netherlands
+1. Core Europe 2 잔여: England, Netherlands
 2. Core Europe 3: Portugal, Belgium
 3. 유럽 제외 선수의 팀 우승/개인 수상 세부 항목 교차 검증
 4. 현역보류/삭제후보 선수 유지 여부 재검토
