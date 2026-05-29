@@ -1325,11 +1325,27 @@ function PlayerDetailDrawer({
                 </strong>
               </div>
               <p>{section.explanation}</p>
+              {section.verdict ? <p className="profile-verdict">{section.verdict}</p> : null}
+              {section.facts?.length ? (
+                <div className="fact-group-stack">
+                  {section.facts.map((fact) => (
+                    <article className="fact-group" key={fact.label}>
+                      <h4>{fact.label}</h4>
+                      <ul>
+                        {fact.items.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
               <ul>
                 {section.bullets.map((bullet) => (
                   <li key={bullet}>{bullet}</li>
                 ))}
               </ul>
+              {section.caveat ? <p className="profile-caveat">{section.caveat}</p> : null}
             </section>
           );
         })}

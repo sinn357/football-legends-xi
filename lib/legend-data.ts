@@ -37,8 +37,14 @@ export type PlayerProfileSection = {
   score: number;
   grade: string;
   title: string;
+  verdict?: string;
+  facts?: Array<{
+    label: string;
+    items: string[];
+  }>;
   bullets: string[];
   explanation: string;
+  caveat?: string;
 };
 
 export type PlayerProfileSource = {
@@ -240,7 +246,16 @@ const topTierRankByName = new Map(topTierNames.map((name, index) => [normalizedN
 
 type CuratedProfileEntry = {
   summary: string;
-  sections: Record<ScoreKey, { bullets: string[]; explanation: string }>;
+  sections: Record<
+    ScoreKey,
+    {
+      bullets: string[];
+      caveat?: string;
+      explanation: string;
+      facts?: Array<{ label: string; items: string[] }>;
+      verdict?: string;
+    }
+  >;
   sources: PlayerProfileSource[];
 };
 
@@ -894,6 +909,1038 @@ const curatedProfileOverrides: Record<string, CuratedProfileEntry> = {
   },
 };
 
+const detailedAfricanProfileOverrides: Record<string, CuratedProfileEntry> = {
+  "george weah": {
+    summary:
+      "George Weah는 African Player of the Century, 1995 Ballon d'Or, 1995 FIFA World Player를 모두 가진 Liberia의 절대적 축구 상징입니다. 클럽 우승 총량은 Eto'o/Salah보다 적지만, 개인 고점과 역사적 유일성은 아프리카 전체 최상단입니다.",
+    sections: {
+      teamCareer: {
+        explanation: "소속팀 전체와 공식 우승 내역을 분리해 봅니다. Weah는 Monaco, PSG, Milan에서 커리어 핵심을 만들었고, Liberia 대표팀에서는 우승보다 국가 전체를 대표한 비중이 큽니다.",
+        verdict: "팀 커리어는 Milan/PSG 우승과 Chelsea FA Cup까지 강하지만, Champions League 우승 부재와 Liberia 대표팀 전력 한계 때문에 개인 위상만큼 압도적이지는 않습니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: [
+              "Young Survivors",
+              "Bong Range United",
+              "Mighty Barrolle",
+              "Invincible Eleven",
+              "Africa Sports",
+              "Tonnerre Yaounde",
+              "Monaco",
+              "Paris Saint-Germain",
+              "AC Milan",
+              "Chelsea loan",
+              "Manchester City",
+              "Marseille",
+              "Al Jazira",
+              "Liberia national team",
+            ],
+          },
+          {
+            label: "팀 우승",
+            items: [
+              "Mighty Barrolle: Liberian Premier League 1986, Liberian FA Cup 1986",
+              "Invincible Eleven: Liberian Premier League 1987",
+              "Monaco: Coupe de France 1990-91",
+              "Paris Saint-Germain: Division 1 1993-94, Coupe de France 1992-93/1994-95, Coupe de la Ligue 1994-95",
+              "AC Milan: Serie A 1995-96, 1998-99",
+              "Chelsea: FA Cup 1999-2000",
+            ],
+          },
+          {
+            label: "대표팀 성과",
+            items: ["Liberia: West African Nations Cup runner-up 1987", "FIFA World Cup 본선 출전은 없음"],
+          },
+        ],
+        bullets: ["PSG에서 1994-95 Champions League 득점왕을 차지했고 Milan에서는 Serie A 2회 우승을 기록했습니다.", "Liberia에서는 우승 기록보다 국가 축구 전체의 얼굴이라는 의미가 더 큽니다."],
+      },
+      individualCareer: {
+        explanation: "Weah의 개인 수상은 아프리카 선수 역사상 가장 상징적인 단일 시즌을 포함합니다.",
+        verdict: "1995년 Ballon d'Or와 FIFA World Player 동시 수상은 아프리카 선수 평가에서 여전히 가장 강한 개인상 근거입니다.",
+        facts: [
+          {
+            label: "주요 개인 수상",
+            items: [
+              "African Footballer of the Year: 1989, 1995",
+              "BBC African Footballer of the Year: 1995",
+              "Ballon d'Or: 1995",
+              "FIFA World Player of the Year: 1995; Silver Award: 1996",
+              "Onze d'Or: 1995; Onze d'Argent: 1996",
+              "RSSSF Player of the Year: 1995",
+              "El Pais King of European Soccer: 1995",
+              "FIFA Fair Play Award: 1996",
+              "IFFHS African Player of the Century: 1999",
+            ],
+          },
+          {
+            label: "기록/명예",
+            items: [
+              "UEFA Champions League top scorer: 1994-95",
+              "ESM Team of the Year: 1995-96",
+              "FIFA 100: 2004",
+              "Golden Foot Legends Award: 2005",
+              "AC Milan Hall of Fame",
+              "IFFHS All-time Africa Men's Dream Team: 2021",
+            ],
+          },
+        ],
+        bullets: ["아프리카 국적 선수로 Ballon d'Or와 FIFA World Player를 모두 받은 유일한 선수입니다.", "1995년은 PSG/Milan 활약과 개인상 결과가 한꺼번에 폭발한 커리어 정점입니다."],
+      },
+      primeSkill: {
+        explanation: "1994-96년을 프라임으로 봅니다. PSG에서 유럽 득점력을 증명한 뒤 Milan에서 속도, 파워, 드리블, 마무리를 동시에 보여줬습니다.",
+        verdict: "프라임 고점만 놓고 보면 아프리카 공격수 중 최고 후보입니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: [
+              "1994-95 UEFA Champions League top scorer, PSG semi-final 진출",
+              "1995 Ballon d'Or, FIFA World Player of the Year, Onze d'Or 동시 수상",
+              "1995-96 Milan Serie A 우승 시즌 팀 내 핵심 공격수",
+              "1996 FIFA World Player of the Year 2위",
+            ],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["긴 거리 운반 드리블", "폭발적인 가속과 몸싸움", "박스 안 마무리와 중거리 슈팅", "오픈 필드에서 수비 라인을 직접 파괴하는 능력"],
+          },
+        ],
+        bullets: ["Hellas Verona전 단독 질주 골처럼 자기 진영부터 골까지 혼자 전진할 수 있는 희소한 공격수였습니다.", "동시대 유럽 최상위 수비수들을 상대로 피지컬과 기술을 모두 통과시킨 프라임입니다."],
+      },
+      teamImportance: {
+        explanation: "클럽에서는 차이를 만드는 에이스형 포워드였고, Liberia에서는 전력 이상의 의미를 가진 국가 대표 아이콘이었습니다.",
+        verdict: "Liberia 대표팀 비중은 축구사 전체에서도 특수한 수준입니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: [
+              "PSG: 1994-95 유럽 대항전 공격의 중심",
+              "AC Milan: 1995-96 우승 시즌 주 공격 옵션",
+              "Liberia: 대표팀의 절대적 얼굴이자 전력 기준점",
+            ],
+          },
+          {
+            label: "감점/맥락",
+            items: ["Milan에서는 팀 전체 왕조의 일부였고, Liberia에서는 국제대회 우승으로 연결되기 어려운 환경이었습니다."],
+          },
+        ],
+        bullets: ["Liberia의 국제 경쟁력 한계 때문에 우승 결과는 적지만, 개인 의존도는 매우 높았습니다.", "PSG와 Milan에서는 우승 가능한 팀의 최종 차이를 만드는 공격수였습니다."],
+      },
+      legacy: {
+        explanation: "100년 뒤에도 남을 객관 근거는 '유일한 아프리카 Ballon d'Or/FIFA World Player'와 'African Player of the Century'입니다.",
+        verdict: "역사적 존재감은 아프리카 축구 전체 1위 후보입니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: [
+              "현재까지 African nationality 기준 유일한 Ballon d'Or 수상자",
+              "현재까지 유일한 African FIFA World Player of the Year 수상자",
+              "IFFHS African Player of the Century",
+              "축구 선수 출신 국가원수라는 축구 외적 역사성",
+            ],
+          },
+        ],
+        bullets: ["팀 트로피가 더 많은 선수는 있어도, Weah의 개인상 유일성은 대체가 어렵습니다.", "Liberia라는 작은 축구 국가 출신이라는 서사가 역사적 기억을 더 강하게 만듭니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - George Weah", url: "https://en.wikipedia.org/wiki/George_Weah" },
+      { label: "RSSSF African Player of the Year", url: "https://www.rsssf.org/miscellaneous/afr-poy.html" },
+      { label: "IFFHS Africa Player of the Century", url: "https://portal.iffhs.com/posts/500" },
+    ],
+  },
+  "samuel eto o": {
+    summary:
+      "Samuel Eto'o는 Barcelona와 Inter에서 모두 Champions League를 든 아프리카 역사상 가장 완성도 높은 팀 커리어형 스트라이커입니다. 클럽 트로피, 대표팀 우승, 개인상, 큰 경기 득점이 모두 강합니다.",
+    sections: {
+      teamCareer: {
+        explanation: "Eto'o는 소속팀 전체가 많지만, 팀 커리어의 핵심은 Mallorca, Barcelona, Inter, Cameroon입니다.",
+        verdict: "팀 커리어만 놓으면 아프리카 공격수 중 최상위권입니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: [
+              "Real Madrid B",
+              "Leganes loan",
+              "Espanyol loan",
+              "Mallorca loan/permanent",
+              "Barcelona",
+              "Inter Milan",
+              "Anzhi Makhachkala",
+              "Chelsea",
+              "Everton",
+              "Sampdoria",
+              "Antalyaspor",
+              "Konyaspor",
+              "Qatar SC",
+              "Cameroon U23",
+              "Cameroon national team",
+            ],
+          },
+          {
+            label: "클럽 우승",
+            items: [
+              "Mallorca: Copa del Rey 2002-03",
+              "Barcelona: La Liga 2004-05, 2005-06, 2008-09",
+              "Barcelona: Copa del Rey 2008-09",
+              "Barcelona: Supercopa de Espana 2005, 2006",
+              "Barcelona: UEFA Champions League 2005-06, 2008-09",
+              "Inter Milan: Serie A 2009-10",
+              "Inter Milan: Coppa Italia 2009-10, 2010-11",
+              "Inter Milan: Supercoppa Italiana 2010",
+              "Inter Milan: UEFA Champions League 2009-10",
+              "Inter Milan: FIFA Club World Cup 2010",
+            ],
+          },
+          {
+            label: "대표팀 우승",
+            items: ["Cameroon U23: Olympic Gold Medal 2000", "Cameroon: Africa Cup of Nations 2000, 2002", "Cameroon: Africa Cup of Nations runner-up 2008", "Cameroon: FIFA Confederations Cup runner-up 2003"],
+          },
+        ],
+        bullets: ["2006, 2009 Champions League 결승에서 모두 득점했고 2010 Inter 트레블에도 주전으로 기여했습니다.", "Barcelona와 Inter에서 연속 시즌 대륙 트레블을 경험한 희귀한 커리어입니다."],
+      },
+      individualCareer: {
+        explanation: "개인 수상은 African Player of the Year 4회를 중심으로, 유럽 베스트 XI급 평가와 득점왕 기록이 붙습니다.",
+        verdict: "개인상 누적도 Weah 다음 급 최상단입니다.",
+        facts: [
+          {
+            label: "주요 개인 수상/선정",
+            items: [
+              "Young African Player of the Year: 2000",
+              "African Player of the Year: 2003, 2004, 2005, 2010",
+              "ESM Team of the Year: 2004-05, 2005-06, 2008-09, 2010-11",
+              "FIFA World Player of the Year Bronze Award: 2005",
+              "FIFA FIFPro World XI: 2005, 2006",
+              "UEFA Team of the Year: 2005, 2006",
+              "CAF Team of the Year: 2005, 2006, 2008, 2009, 2010, 2011",
+              "UEFA Club Forward of the Year: 2006",
+              "Golden Foot: 2015",
+              "Globe Soccer Player Career Award: 2016",
+              "IFFHS All-time Africa Men's Dream Team: 2021",
+              "Inter Milan Hall of Fame: 2021",
+            ],
+          },
+          {
+            label: "득점/기록상",
+            items: [
+              "Pichichi Trophy: 2005-06",
+              "UEFA Champions League top assist provider: 2005-06",
+              "Africa Cup of Nations top goalscorer: 2006, 2008",
+              "FIFA Club World Cup Golden Ball: 2010",
+              "Coppa Italia top goalscorer: 2010-11",
+              "Russian Premier League MVP Award: 2012-13",
+              "Africa Cup of Nations all-time top goalscorer",
+              "RCD Mallorca all-time top goalscorer",
+              "Cameroon all-time top goalscorer",
+            ],
+          },
+        ],
+        bullets: ["African Player of the Year 4회는 역사적 누적입니다.", "FIFPro World XI와 UEFA Team of the Year 선정은 단순 아프리카 범위를 넘어선 세계급 평가입니다."],
+      },
+      primeSkill: {
+        explanation: "프라임 구간은 2004-10년입니다. Barcelona에서 폭발적 9번, Inter에서는 더 넓은 전술 역할까지 수행했습니다.",
+        verdict: "득점형 스트라이커와 전술형 포워드를 모두 해낸 프라임입니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: [
+              "2005-06 La Liga Pichichi, Champions League 결승 득점",
+              "2008-09 Barcelona 트레블 시즌 주전 스트라이커, Champions League 결승 득점",
+              "2009-10 Inter 트레블 시즌 주전, Mourinho 체제에서 윙/수비 가담까지 수행",
+              "2005 FIFA World Player of the Year 3위",
+            ],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["순간 침투와 첫 터치", "양발 마무리와 박스 안 위치 선정", "전방 압박과 수비 가담", "큰 경기에서 직접 득점하는 클러치 능력"],
+          },
+        ],
+        bullets: ["2006/2009 UCL 결승 득점은 프라임 실력의 가장 직접적인 근거입니다.", "2010 Inter에서는 득점만이 아니라 전술 희생까지 수행해 평가 폭이 넓습니다."],
+      },
+      teamImportance: {
+        explanation: "Barcelona와 Cameroon에서는 직접 득점 축, Inter에서는 팀 구조를 완성하는 전술적 핵심이었습니다.",
+        verdict: "대표팀과 클럽 양쪽에서 모두 핵심 역할을 증명했습니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: [
+              "Barcelona: Ronaldinho/Messi/Henry와 함께한 공격의 중앙 마무리 축",
+              "Inter Milan: 2009-10 트레블 팀에서 왼쪽 공격/수비 밸런스 담당",
+              "Cameroon: AFCON 우승 세대의 간판 공격수이자 역대 최다 득점자",
+            ],
+          },
+        ],
+        bullets: ["Inter에서 보여준 역할 변화는 단순 골잡이 이상의 팀 비중을 증명합니다.", "Cameroon에서는 성과와 기록이 모두 따라온 대표팀 에이스였습니다."],
+      },
+      legacy: {
+        explanation: "Eto'o의 장기 존재감은 트레블 2회, African Player of the Year 4회, AFCON 역대 득점 기록에서 나옵니다.",
+        verdict: "아프리카 역대 최고 스트라이커 논쟁의 1순위 후보입니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: [
+              "서로 다른 두 클럽으로 연속 Champions League 우승",
+              "Barcelona 2009, Inter 2010 연속 트레블 멤버",
+              "African Player of the Year 4회",
+              "AFCON all-time top goalscorer",
+              "Cameroon all-time top goalscorer",
+            ],
+          },
+        ],
+        bullets: ["팀 커리어, 대표팀 성과, 개인상, 기록이 모두 균형 잡힌 아프리카 레전드입니다.", "Weah의 개인상 유일성과 다른 방식으로, Eto'o는 우승과 지속성의 기준점입니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - Samuel Eto'o", url: "https://en.wikipedia.org/wiki/Samuel_Eto%27o" },
+      { label: "FC Barcelona - Samuel Eto'o", url: "https://www.fcbarcelona.com/en/card/648033/samuel-etoogo" },
+      { label: "RSSSF African Player of the Year", url: "https://www.rsssf.org/miscellaneous/afr-poy.html" },
+    ],
+  },
+  "mohamed salah": {
+    summary:
+      "Mohamed Salah는 Liverpool 시대를 대표하는 오른쪽 윙포워드이자 Egypt의 절대 에이스입니다. 프리미어리그 기록, 개인상 누적, 클럽 우승, 대표팀 상징성을 모두 가진 현대 아프리카 최고 후보입니다.",
+    sections: {
+      teamCareer: {
+        explanation: "Salah는 Basel, Chelsea, Fiorentina, Roma, Liverpool를 거쳤고, 팀 우승의 대부분은 Basel과 Liverpool에서 나왔습니다.",
+        verdict: "팀 커리어는 Liverpool 왕조의 핵심으로 충분히 강하지만, Egypt 대표팀 우승이 없다는 점은 남습니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: ["Al Mokawloon", "Basel", "Chelsea", "Fiorentina loan", "Roma loan/permanent", "Liverpool", "Egypt U20", "Egypt U23", "Egypt national team"],
+          },
+          {
+            label: "클럽 우승",
+            items: [
+              "Basel: Swiss Super League 2012-13, 2013-14",
+              "Liverpool: Premier League 2019-20, 2024-25",
+              "Liverpool: FA Cup 2021-22",
+              "Liverpool: EFL Cup 2021-22, 2023-24",
+              "Liverpool: FA Community Shield 2022",
+              "Liverpool: UEFA Champions League 2018-19",
+              "Liverpool: UEFA Super Cup 2019",
+              "Liverpool: FIFA Club World Cup 2019",
+            ],
+          },
+          {
+            label: "대표팀 성과",
+            items: ["Egypt: Africa Cup of Nations runner-up 2017, 2021", "Egypt: 2018 FIFA World Cup 본선 진출의 핵심"],
+          },
+        ],
+        bullets: ["Liverpool에서 Champions League와 Premier League 우승의 핵심 득점원이었습니다.", "2024-25 두 번째 리그 우승까지 포함하면 클럽 누적도 매우 강합니다."],
+      },
+      individualCareer: {
+        explanation: "Salah는 현대 아프리카 선수 중 개인상과 리그 기록 누적이 가장 강한 축입니다.",
+        verdict: "Premier League 개인상 누적은 아프리카 선수 역대 최상단입니다.",
+        facts: [
+          {
+            label: "주요 개인 수상",
+            items: [
+              "CAF Most Promising Talent of the Year: 2012",
+              "Swiss Super League Player of the Year: 2013",
+              "AS Roma Player of the Season: 2015-16",
+              "Globe Soccer Best Arab Player of the Year: 2016",
+              "African Footballer of the Year: 2017, 2018",
+              "BBC African Footballer of the Year: 2017, 2018",
+              "UAFA Golden Boy: 2012",
+              "El Heddaf Arab Footballer of the Year: 2013, 2017, 2018",
+              "PFA Players' Player of the Year: 2017-18, 2021-22, 2024-25",
+              "FWA Footballer of the Year: 2017-18, 2021-22, 2024-25",
+              "Premier League Player of the Season: 2017-18, 2024-25",
+              "FIFA Puskas Award: 2018",
+              "FIFA Club World Cup Golden Ball: 2019",
+              "FSA Player of the Year: 2018, 2021, 2023",
+              "Golden Foot: 2021",
+              "Laureus Sporting Inspiration Award: 2021",
+              "Globe Soccer Fans' Player of the Year: 2022",
+              "FPL Pod Player of the Year: 2025",
+              "The Athletic's Premier League Player of the Year: 2024-25",
+            ],
+          },
+          {
+            label: "득점/선정/기록",
+            items: [
+              "Premier League Golden Boot: 2017-18, 2018-19 shared, 2021-22 shared, 2024-25",
+              "Premier League Playmaker of the Season: 2021-22, 2024-25",
+              "Premier League Goal of the Season: 2021-22",
+              "PFA Premier League Team of the Year: 2017-18, 2020-21, 2021-22, 2024-25",
+              "Liverpool Players' Player of the Season: 2017-18, 2020-21, 2021-22, 2023-24, 2024-25",
+              "PFA Fans' Player of the Year: 2017-18, 2020-21, 2021-22",
+              "UEFA Champions League Squad of the Season: 2017-18",
+              "ESM Team of the Year: 2017-18, 2021-22",
+              "CAF Team of the Year: 2017, 2018, 2019, 2023, 2024",
+              "Africa Cup of Nations Team of the Tournament: 2017, 2021",
+              "Premier League Player of the Month: November 2017, February 2018, March 2018, October 2021, October 2023, November 2024, February 2025",
+              "PFA Player of the Month: November 2017, December 2017, February 2018, March 2018, December 2018, January 2019, April 2019, September 2021, October 2021, February 2022, September 2023, October 2023, November 2024, February 2025",
+              "BBC Goal of the Month: December 2017, February 2018, April 2019, September 2019, January 2021, October 2021, November 2024",
+              "BBC Goal of the Season: 2021-22",
+              "Liverpool Goal of the Season: 2018-19, 2021-22, 2022-23",
+              "IFFHS Best CAF Men's Player of the Decade: 2011-2020",
+              "IFFHS CAF Men's Team of the Decade: 2011-2020",
+              "IFFHS CAF Men's Team of The Year: 2020, 2021, 2022, 2023, 2024",
+              "IFFHS Best CAF Men's Player of the Year: 2021",
+              "The Athletic Premier League Team of the Season: 2024-25",
+              "The Athletic European Men's Team of the Season: 2024-25",
+              "Premier League Fan Team of the Season: 2024-25",
+              "EA Sports FC Premier League Team of the Season: 2024-25",
+              "Time 100: 2019",
+              "Liverpool all-time Premier League top scorer",
+            ],
+          },
+        ],
+        bullets: ["2017-18 32골 시즌은 38경기 체제 Premier League의 기준점으로 남습니다.", "득점왕과 플레이메이커상을 모두 받은 시즌들이 있어 단순 마무리형이 아닙니다."],
+      },
+      primeSkill: {
+        explanation: "프라임은 2017-18, 2021-22, 2024-25를 핵심 고점으로 봅니다. 속도형 윙에서 창출형 포워드로 진화한 점이 중요합니다.",
+        verdict: "현대 축구 기준 생산성, 지속성, 창출력을 모두 갖춘 월드클래스 윙포워드입니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: [
+              "2017-18 Premier League 32골, PFA/FWA/PL Player of the Season",
+              "2021-22 Premier League Golden Boot shared + Playmaker of the Season",
+              "2024-25 PFA/FWA/PL Player of the Season, Golden Boot, Playmaker of the Season",
+              "2018 and 2021 The Best FIFA Men's Player 3위",
+            ],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["오른쪽에서 안쪽으로 들어오는 왼발 득점", "뒷공간 침투와 박스 안 위치 선정", "전환 상황 스피드", "후기 커리어의 패스/찬스 창출 증가"],
+          },
+        ],
+        bullets: ["프라임 Salah는 골과 도움을 동시에 리그 최상단으로 생산했습니다.", "단일 시즌 고점뿐 아니라 여러 시즌 반복 생산이 강점입니다."],
+      },
+      teamImportance: {
+        explanation: "Liverpool에서는 Klopp 공격 구조의 최종 생산자, Egypt에서는 전술과 여론을 모두 짊어진 절대 에이스입니다.",
+        verdict: "팀 내 비중은 현역 아프리카 선수 중 최고 수준입니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: [
+              "Liverpool: Mane-Firmino-Salah 3톱의 최다 득점 축",
+              "Liverpool: 2020년대 중반 이후에도 팀 공격 생산의 1순위",
+              "Egypt: 주장, 월드컵 진출과 AFCON 결승 진출의 중심",
+            ],
+          },
+          {
+            label: "한계/맥락",
+            items: ["Egypt에서는 AFCON 우승이 없어 대표팀 팀 커리어는 개인 영향력 대비 미완입니다."],
+          },
+        ],
+        bullets: ["Liverpool에서는 시스템의 일부이면서 동시에 시스템을 결과로 바꾸는 최종 생산자였습니다.", "Egypt에서는 전술적 의존도와 상징성이 모두 매우 높습니다."],
+      },
+      legacy: {
+        explanation: "Salah의 존재감은 Premier League 기록, Liverpool 역사 순위, Egypt 국가 상징성으로 장기 보존됩니다.",
+        verdict: "100년 뒤에도 Weah/Eto'o와 함께 아프리카 역대 최고 논쟁에 남을 가능성이 큽니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: [
+              "Liverpool all-time Premier League top scorer",
+              "Premier League Golden Boot 4회",
+              "PFA Players' Player of the Year 3회",
+              "African Footballer of the Year 2회",
+              "Egypt 축구의 세계적 상징",
+            ],
+          },
+        ],
+        bullets: ["현대 EPL의 글로벌 노출과 기록 누적이 결합돼 장기 기억에 유리합니다.", "대표팀 우승만 추가되면 역사적 위치는 더 올라갈 여지가 있습니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - Mohamed Salah", url: "https://en.wikipedia.org/wiki/Mohamed_Salah" },
+      { label: "Britannica - Mohamed Salah", url: "https://www.britannica.com/biography/Mohamed-Salah" },
+      { label: "Liverpool FC - Salah awards references", url: "https://www.liverpoolfc.com/" },
+    ],
+  },
+  "didier drogba": {
+    summary:
+      "Didier Drogba는 Chelsea의 결승 해결사이자 Cote d'Ivoire 황금세대의 주장입니다. 우승 내역, 클러치 득점, 대표팀 비중을 함께 봐야 하는 9번입니다.",
+    sections: {
+      teamCareer: {
+        explanation: "Drogba는 Le Mans, Guingamp, Marseille, Chelsea, Shanghai Shenhua, Galatasaray, Montreal Impact, Phoenix Rising을 거쳤고, 우승 대부분은 Chelsea와 Galatasaray에서 나왔습니다.",
+        verdict: "Chelsea 팀 커리어는 최상급이고, 대표팀은 결승까지 갔지만 AFCON 우승은 없습니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: ["Le Mans", "Guingamp", "Marseille", "Chelsea", "Shanghai Shenhua", "Galatasaray", "Chelsea second spell", "Montreal Impact", "Phoenix Rising", "Cote d'Ivoire national team"],
+          },
+          {
+            label: "클럽 우승",
+            items: [
+              "Chelsea: Premier League 2004-05, 2005-06, 2009-10, 2014-15",
+              "Chelsea: FA Cup 2006-07, 2008-09, 2009-10, 2011-12",
+              "Chelsea: Football League Cup 2004-05, 2006-07, 2014-15",
+              "Chelsea: FA Community Shield 2005, 2009",
+              "Chelsea: UEFA Champions League 2011-12",
+              "Galatasaray: Super Lig 2012-13",
+              "Galatasaray: Turkish Cup 2013-14",
+              "Galatasaray: Turkish Super Cup 2013",
+              "Phoenix Rising: USL Western Conference 2018",
+            ],
+          },
+          {
+            label: "대표팀 성과",
+            items: ["Cote d'Ivoire: Africa Cup of Nations runner-up 2006, 2012", "Cote d'Ivoire: 2006 FIFA World Cup 첫 본선 진출 세대 주장"],
+          },
+        ],
+        bullets: ["2012 Champions League 결승 동점골과 승부차기 결승골은 팀 커리어의 정점입니다.", "Chelsea의 2000년대 우승 DNA를 상징하는 공격수입니다."],
+      },
+      individualCareer: {
+        explanation: "Drogba의 개인상은 African Footballer of the Year 2회와 EPL/컵 결승 기록 중심입니다.",
+        verdict: "개인상 총량보다 결승 기록과 클러치 서사가 강한 선수입니다.",
+        facts: [
+          {
+            label: "개인 수상/선정",
+            items: [
+              "African Footballer of the Year: 2006, 2009",
+              "BBC African Footballer of the Year: 2009",
+              "Africa Cup of Nations Team of the Tournament: 2006, 2012",
+              "Africa Cup of Nations Top Scorer: 2012",
+              "CAF Team of the Year: 2005, 2006, 2009, 2010, 2012",
+              "FIFPro World XI: 2007",
+              "ESM Team of the Year: 2006-07",
+              "Chelsea Players' Player of the Year: 2007",
+              "Chelsea Player of the Year: 2010",
+              "Ligue 1 Goal of the Year: 2003-04",
+              "Ligue 1 Player of the Month: January 2004, May 2004",
+              "Ligue 1 Player of the Year: 2003-04",
+              "Ligue 1 Team of the Year: 2003-04",
+              "MLS All-Star: 2016",
+              "MLS Player of the Month: September 2015, October 2015",
+              "Montreal Impact Top Scorer: 2015",
+              "Onze d'Or: 2004",
+              "Onze de Bronze: 2007",
+              "Premier League Golden Boot: 2006-07, 2009-10",
+              "Premier League Most Assists: 2005-06",
+              "PFA Team of the Year: 2006-07 Premier League, 2009-10 Premier League",
+              "Time 100: 2010",
+              "Turkish Footballer of the Year: 2013",
+              "Alan Hardaker Trophy: 2007",
+              "FA Cup Final Man of the Match: 2010",
+              "FA Community Shield Man of the Match: 2005",
+              "UEFA Champions League Final Man of the Match: 2012",
+              "UEFA Cup Top Scorer: 2003-04",
+              "UEFA President's Award: 2020",
+              "UEFA Team of the Year: 2007",
+              "UNFP Trophy of Honour: 2019",
+              "FWA Tribute Award: 2015",
+            ],
+          },
+          {
+            label: "기록",
+            items: ["First African player to score 100 Premier League goals", "FA Cup finals 4경기 득점", "Chelsea 공식 경기 결승전 10골급 클러치 기록으로 자주 인용"],
+          },
+        ],
+        bullets: ["2006-07, 2009-10 전후의 EPL 지배력과 2012 UCL 결승 퍼포먼스가 개인 평가의 핵심입니다.", "수상 목록 이상의 큰 경기 이미지가 강하게 남습니다."],
+      },
+      primeSkill: {
+        explanation: "프라임은 2006-10년 Chelsea 1기 후반으로 봅니다. 피지컬, 포스트플레이, 제공권, 슈팅, 프리킥이 결합된 타깃맨 고점입니다.",
+        verdict: "순수 타깃맨/클러치 9번으로는 아프리카 최고 후보입니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: ["2006 African Footballer of the Year", "2006-07 ESM Team of the Year, FIFPro World XI 2007", "2009 African Footballer of the Year", "2009-10 Chelsea Player of the Year", "2010 FA Cup Final Man of the Match"],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["등지는 플레이와 롱볼 수신", "제공권과 몸싸움", "큰 경기 마무리", "중거리/프리킥 한 방", "수비 세트피스 기여"],
+          },
+        ],
+        bullets: ["Drogba는 팀이 막힐 때 가장 단순하고 강력한 해법을 제공했습니다.", "전성기에는 수비수와의 물리적 경합 자체를 경기 계획으로 만들 수 있었습니다."],
+      },
+      teamImportance: {
+        explanation: "Chelsea에서는 전술적 기준점, Cote d'Ivoire에서는 황금세대의 주장과 상징이었습니다.",
+        verdict: "팀 내 비중은 Eto'o보다 높게 볼 여지가 있습니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: [
+              "Chelsea: Mourinho/Ancelotti/Di Matteo 체제에서 직접 공격 루트의 기준점",
+              "Chelsea: 2012 Champions League 우승의 결정적 해결사",
+              "Cote d'Ivoire: 2006/2010/2014 월드컵 세대의 주장",
+            ],
+          },
+        ],
+        bullets: ["Chelsea는 Drogba가 있으면 경기 양상이 달라지는 팀이었습니다.", "코트디부아르에서는 우승은 없었지만 황금세대의 정신적 중심이었습니다."],
+      },
+      legacy: {
+        explanation: "Drogba는 Chelsea 역사와 아프리카 EPL 공격수 역사에서 장기 보존될 근거가 확실합니다.",
+        verdict: "100년 뒤에도 '큰 경기의 9번'을 말할 때 남을 이름입니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: ["Chelsea 2012 Champions League 우승의 상징", "African Footballer of the Year 2회", "Premier League 100골을 넘긴 최초의 아프리카 선수", "Cote d'Ivoire all-time top goalscorer"],
+          },
+        ],
+        bullets: ["Weah/Salah/Eto'o가 개인상과 기록의 축이라면 Drogba는 결승 서사의 축입니다.", "Chelsea 팬덤에서의 기억 강도는 역대 스트라이커 중 최상급입니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - Didier Drogba", url: "https://en.wikipedia.org/wiki/Didier_Drogba" },
+      { label: "UEFA - Drogba final master", url: "https://www.uefa.com/uefachampionsleague/news/0261-107d82d75d76-8f0e9280f586-1000--how-brilliant-was-chelsea-s-final-master-didier-drogba/" },
+      { label: "RSSSF African Player of the Year", url: "https://www.rsssf.org/miscellaneous/afr-poy.html" },
+    ],
+  },
+  "yaya toure": {
+    summary:
+      "Yaya Toure는 Barcelona 트레블과 Manchester City 시대 개막, Cote d'Ivoire AFCON 우승을 모두 가진 중앙 미드필더입니다. 피지컬, 운반, 득점력을 결합한 프라임이 강합니다.",
+    sections: {
+      teamCareer: {
+        explanation: "소속팀 전체를 나열하고, 공식 우승은 Olympiacos, Barcelona, Manchester City, Qingdao Huanghai, Cote d'Ivoire에서 확인합니다.",
+        verdict: "팀 커리어는 중앙 미드필더 기준 아프리카 최상위권입니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: ["ASEC Mimosas", "Beveren", "Metalurh Donetsk", "Olympiacos", "Monaco", "Barcelona", "Manchester City", "Olympiacos second spell", "Qingdao Huanghai", "Cote d'Ivoire national team"],
+          },
+          {
+            label: "팀 우승",
+            items: [
+              "Olympiacos: Alpha Ethniki 2005-06, Greek Football Cup 2005-06",
+              "Barcelona: La Liga 2008-09, 2009-10",
+              "Barcelona: Copa del Rey 2008-09",
+              "Barcelona: Supercopa de Espana 2009",
+              "Barcelona: UEFA Champions League 2008-09",
+              "Barcelona: UEFA Super Cup 2009",
+              "Barcelona: FIFA Club World Cup 2009",
+              "Manchester City: Premier League 2011-12, 2013-14, 2017-18",
+              "Manchester City: FA Cup 2010-11",
+              "Manchester City: Football League Cup 2013-14, 2015-16",
+              "Manchester City: FA Community Shield 2012",
+              "Qingdao Huanghai: China League One 2019",
+              "Cote d'Ivoire: Africa Cup of Nations 2015; runner-up 2006, 2012",
+            ],
+          },
+        ],
+        bullets: ["Barcelona에서는 2009 UCL 결승을 센터백으로 소화했고, City에서는 우승 시대를 연 중원의 핵심이었습니다.", "2015 AFCON 우승은 대표팀 커리어의 결정적 완성입니다."],
+      },
+      individualCareer: {
+        explanation: "개인 수상은 African Footballer of the Year 4연속 수상이 핵심입니다.",
+        verdict: "미드필더로 African Player of the Year를 4회 받은 점은 독보적입니다.",
+        facts: [
+          {
+            label: "개인 수상/선정",
+            items: [
+              "Ivory Coast Player of the Year: 2009",
+              "CAF Team of the Year: 2008, 2009, 2011, 2012, 2013, 2014, 2015",
+              "African Footballer of the Year: 2011, 2012, 2013, 2014",
+              "Premio Bulgarelli Number 8: 2013",
+              "ESM Team of the Year: 2013-14",
+              "PFA Team of the Year: 2011-12 Premier League, 2013-14 Premier League",
+            ],
+          },
+        ],
+        bullets: ["2011-14년 아프리카 올해의 선수 4연속 수상은 전성기 지배력을 보여줍니다.", "2013-14 시즌은 EPL 중앙 미드필더 단일 시즌 고점 논쟁에 들어갈 만합니다."],
+      },
+      primeSkill: {
+        explanation: "프라임은 2011-14 Manchester City 시기입니다. 특히 2013-14는 득점형 8번으로 폭발했습니다.",
+        verdict: "피지컬형 미드필더 중에서도 기술과 득점을 모두 가진 특수한 고점입니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: [
+              "2011-12 Premier League 우승 시즌 PFA Team of the Year",
+              "2013-14 Premier League 우승 시즌 PFA Team of the Year, ESM Team of the Year",
+              "2011-14 African Footballer of the Year 4연속 수상",
+            ],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["중앙 운반 드리블", "압박 저항", "박스 침투와 중거리 슈팅", "세트피스", "수비형/중앙/공격형 미드필더 역할 전환"],
+          },
+        ],
+        bullets: ["전성기 Yaya는 미드필더가 직접 공을 운반해 득점까지 끝내는 보기 드문 유형이었습니다.", "Barcelona 시절 수비적 역할과 City 시절 공격적 역할 모두 소화한 전술 폭이 강점입니다."],
+      },
+      teamImportance: {
+        explanation: "City에서는 새 왕조의 핵심, Cote d'Ivoire에서는 2015 우승 주장급 중심, Barcelona에서는 훌륭한 팀 조각이었습니다.",
+        verdict: "City에서의 비중은 Barcelona보다 훨씬 높습니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: [
+              "Manchester City: 2010년대 초반 팀 격상기의 핵심 중앙 미드필더",
+              "Cote d'Ivoire: 황금세대 중원 중심, 2015 AFCON 우승 멤버",
+              "Barcelona: 트레블 팀의 전술적 보조 축, 결승 센터백 대체",
+            ],
+          },
+        ],
+        bullets: ["City가 우승 가능한 팀으로 바뀌는 시기에 중원의 물리적/기술적 기준을 세웠습니다.", "대표팀에서는 우승 전까지 이어진 황금세대의 부담을 함께 짊어졌습니다."],
+      },
+      legacy: {
+        explanation: "중앙 미드필더 포지션에서의 African Player of the Year 4회, City 역사 내 비중, EPL 고점 시즌이 장기 근거입니다.",
+        verdict: "아프리카 중앙 미드필더 역대 1위 후보입니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: ["African Footballer of the Year 4회", "Manchester City 2010년대 왕조 초석", "Barcelona 2009 트레블 멤버", "Cote d'Ivoire 2015 AFCON 우승 멤버"],
+          },
+        ],
+        bullets: ["아프리카 미드필더 평가에서는 Essien, Okocha, Abedi Pele와 비교되는 중심축입니다.", "팀 우승과 개인 고점을 모두 가진 미드필더라는 점이 오래 남습니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - Yaya Toure", url: "https://en.wikipedia.org/wiki/Yaya_Tour%C3%A9" },
+      { label: "Manchester City - Yaya wins CAF award", url: "https://www.mancity.com/news/first-team/first-team-news/2014/january/yaya-toure-wins-third-successive-african-footballer-of-the-year-award" },
+      { label: "UEFA - Toure named best in Africa", url: "https://www.uefa.com/uefachampionsleague/news/0211-0e885e8ccd8b-55326a1fefe0-1000--toure-named-best-in-africa-for-third-time-in-a-row/" },
+    ],
+  },
+  "sadio mane": {
+    summary:
+      "Sadio Mane는 Liverpool의 전방 압박과 득점 구조를 완성한 윙어이자 Senegal 첫 AFCON 우승의 상징입니다. 클럽과 대표팀 양쪽에서 모두 결과를 만든 현대 레전드입니다.",
+    sections: {
+      teamCareer: {
+        explanation: "Mane의 팀 커리어는 Salzburg, Liverpool, Bayern, Al-Nassr, Senegal에서 확인됩니다.",
+        verdict: "팀 커리어는 Liverpool와 Senegal 성과 때문에 매우 강합니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: ["Generation Foot youth", "Metz B", "Metz", "Red Bull Salzburg", "Southampton", "Liverpool", "Bayern Munich", "Al-Nassr", "Senegal Olympic", "Senegal national team"],
+          },
+          {
+            label: "팀 우승",
+            items: [
+              "Red Bull Salzburg: Austrian Bundesliga 2013-14, Austrian Cup 2013-14",
+              "Liverpool: Premier League 2019-20",
+              "Liverpool: FA Cup 2021-22",
+              "Liverpool: EFL Cup 2021-22",
+              "Liverpool: UEFA Champions League 2018-19",
+              "Liverpool: UEFA Super Cup 2019",
+              "Liverpool: FIFA Club World Cup 2019",
+              "Bayern Munich: Bundesliga 2022-23",
+              "Bayern Munich: DFL-Supercup 2022",
+              "Al-Nassr: Arab Club Champions Cup 2023",
+              "Al-Nassr: Saudi Pro League 2025-26",
+              "Senegal: Africa Cup of Nations 2021; runner-up 2019",
+              "Senegal: 2025 Africa Cup of Nations final was initially won on the pitch, then overturned by CAF to Morocco after the final walk-off dispute",
+            ],
+          },
+        ],
+        caveat: "2025 AFCON은 2026년 1월 결승 직후 Senegal 우승/Mané MVP로 발표됐지만, 이후 CAF가 결승 결과를 Morocco 3-0 몰수승으로 뒤집은 이슈가 있어 팀 우승 목록에는 단정형으로 넣지 않았습니다.",
+        bullets: ["Liverpool에서는 2019 UCL, 2020 PL 우승의 핵심 전방 자원이었습니다.", "Senegal의 2021 AFCON 첫 우승은 국가사적 팀 커리어입니다."],
+      },
+      individualCareer: {
+        explanation: "개인상은 African Footballer of the Year 2회, Premier League Golden Boot, AFCON MVP가 중심입니다.",
+        verdict: "대표팀 토너먼트 개인상까지 있어 단순 클럽 스타 이상입니다.",
+        facts: [
+          {
+            label: "개인 수상/선정",
+            items: [
+              "African Footballer of the Year: 2019, 2022",
+              "Premier League Golden Boot: 2018-19 shared",
+              "Africa Cup of Nations Player of the Tournament: 2021",
+              "Africa Cup of Nations Player of the Tournament: 2025 initially awarded by CAF, later affected by the final result dispute",
+              "Africa Cup of Nations Team of the Tournament: 2019, 2021, 2025",
+              "PFA Team of the Year: 2016-17, 2018-19, 2019-20, 2021-22 Premier League",
+              "UEFA Champions League Squad of the Season: 2018-19",
+              "UEFA Team of the Year: 2019",
+              "Onze d'Or: 2018-19",
+              "ESM Team of the Year: 2018-19",
+              "PFA Fans' Player of the Year: 2019-20 Premier League",
+              "CAF Team of the Year: 2015, 2016, 2018, 2019, 2023",
+              "IFFHS CAF Men's Team of the Decade: 2011-2020",
+              "Socrates Award: 2022",
+            ],
+          },
+        ],
+        bullets: ["2019 Ballon d'Or 4위, 2022 Ballon d'Or 2위권 평가가 프라임 인지도를 보강합니다.", "AFCON 우승 대회 MVP는 대표팀 비중과 개인 수상을 동시에 설명합니다."],
+      },
+      primeSkill: {
+        explanation: "프라임은 2018-22 Liverpool/Senegal 시기입니다. 압박, 침투, 결정력, 전환 속도가 함께 최고 수준이었습니다.",
+        verdict: "공 없는 움직임과 압박까지 포함하면 현대 윙어 고점이 매우 높습니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: [
+              "2018-19 Premier League Golden Boot shared",
+              "2018-19 UEFA Champions League 우승 및 Squad of the Season",
+              "2019 UEFA Team of the Year",
+              "2021 AFCON Player of the Tournament, 우승 결승 승부차기 성공",
+              "2025 AFCON semi-final Egypt전 결승골 및 CAF 최초 Player of the Tournament 발표",
+              "2022 African Footballer of the Year, Ballon d'Or 2위",
+            ],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["전방 압박", "왼쪽에서 중앙 침투", "스피드와 몸싸움", "양발 마무리", "토너먼트 멘털리티"],
+          },
+        ],
+        bullets: ["Mane의 가치는 득점뿐 아니라 Klopp 시스템의 압박 강도를 유지한 데 있습니다.", "대표팀에서는 공격 생산과 심리적 리더십이 동시에 나타났습니다."],
+      },
+      teamImportance: {
+        explanation: "Liverpool에서는 3톱의 동등한 축, Senegal에서는 절대 에이스에 가까웠습니다.",
+        verdict: "대표팀 비중은 Salah와 함께 현대 아프리카 최상단입니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: [
+              "Liverpool: Mane-Firmino-Salah 3톱의 왼쪽 압박/득점 축",
+              "Senegal: 2021 AFCON 우승의 결정적 선수, 결승 승부차기 마무리",
+              "Bayern/Al-Nassr: 주전 공격 자원이나 역사적 비중은 Liverpool/Senegal보다 낮음",
+            ],
+          },
+        ],
+        bullets: ["Senegal 첫 AFCON 우승은 Mane의 팀 내 비중을 가장 강하게 증명합니다.", "Liverpool에서는 Salah만큼 눈에 띄지 않는 순간에도 전술 완성도가 매우 컸습니다."],
+      },
+      legacy: {
+        explanation: "Senegal 첫 AFCON 우승, Ballon d'Or 2위, Liverpool 왕조 핵심이라는 세 축이 장기 기억을 만듭니다.",
+        verdict: "Senegal 역대 1위 논쟁의 강력한 기준점입니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: ["Senegal 첫 AFCON 우승 주역", "African Footballer of the Year 2회", "Premier League/Champions League 우승 핵심", "Ballon d'Or 2022 2위"],
+          },
+        ],
+        bullets: ["국가대표 우승 서사가 있어 100년 뒤에도 Senegal 역사에서 지워지기 어렵습니다.", "Liverpool 전성기와 함께 기억되는 글로벌 클럽 서사도 강합니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - Sadio Mane", url: "https://en.wikipedia.org/wiki/Sadio_Man%C3%A9" },
+      { label: "Liverpool FC - Sadio Mane", url: "https://www.liverpoolfc.com/info/sadio-mane" },
+      { label: "BBC - Mane African Footballer of the Year", url: "https://www.bbc.co.uk/sport/africa/62257143" },
+      { label: "CAF - Mane AFCON 2025 best player", url: "https://www.cafonline.com/afcon2025/news/sadio-mane-best-player-of-afcon-2025-the-coronation-of-leadership/" },
+      { label: "BBC - AFCON 2025 result overturned", url: "https://www.bbc.co.uk/sport/football/articles/ce949glzzglo" },
+    ],
+  },
+  "abedi pele": {
+    summary:
+      "Abedi Pele는 Marseille의 1993 Champions League 우승과 Ghana의 1982 AFCON 우승, 1990년대 초 아프리카 개인상 지배를 함께 가진 플레이메이커입니다. Weah 이전 글로벌 아프리카 스타 계보의 핵심입니다.",
+    sections: {
+      teamCareer: {
+        explanation: "Abedi Pele의 소속팀은 여러 리그에 걸쳐 있으며, 팀 우승은 Marseille, Al Ain, Ghana 성과가 핵심입니다.",
+        verdict: "팀 커리어는 1993 Marseille UCL 우승 하나만으로도 매우 강합니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: [
+              "Real Tamale United",
+              "Al Sadd",
+              "Dragons de l'Oueme",
+              "Real Tamale United second spell",
+              "Niort",
+              "Mulhouse",
+              "Marseille",
+              "Lille loan",
+              "Marseille second spell",
+              "Lyon",
+              "Torino",
+              "1860 Munich",
+              "Al Ain",
+              "Ghana national team",
+            ],
+          },
+          {
+            label: "팀 우승",
+            items: [
+              "Marseille: French Division 1 1990-91, 1991-92",
+              "Marseille: UEFA Champions League 1992-93",
+              "Al Ain: UAE Pro-League 1999-2000",
+              "Al Ain: UAE President's Cup 1999",
+              "Ghana: African Cup of Nations 1982; runner-up 1992",
+              "Ghana: West African Nations Cup 1982, 1983, 1984",
+            ],
+          },
+        ],
+        bullets: ["1993 Marseille UCL 우승은 아프리카 플레이메이커가 유럽 정상팀 중심에 설 수 있음을 보여준 사건입니다.", "Ghana에서는 1982 AFCON 우승 멤버이자 1992 결승 진출 세대의 핵심이었습니다."],
+      },
+      individualCareer: {
+        explanation: "Abedi Pele의 개인상은 1991-93 African Footballer of the Year 3연속 수상이 핵심입니다.",
+        verdict: "1990년대 초 아프리카 개인상 지배력은 Weah 이전 최고급입니다.",
+        facts: [
+          {
+            label: "개인 수상/선정",
+            items: [
+              "BBC African Footballer of the Year: 1991",
+              "African Footballer of the Year: 1991, 1992, 1993",
+              "Africa Cup of Nations Golden Ball: 1992",
+              "Africa Cup of Nations Team of the Tournament: 1992, 1994, 1996",
+              "Ghana Footballer of the Year: 1993",
+              "MasterCard African Team of the 20th Century: 1998",
+              "IFFHS African Player of the Century: 3rd",
+              "IFFHS All-time Africa Men's Dream Team: 2021",
+            ],
+          },
+        ],
+        bullets: ["1991-93 개인상 3연속은 동시대 아프리카 지배력을 명확히 보여줍니다.", "1992 AFCON Golden Ball은 대표팀 대회에서의 개인 고점을 보강합니다."],
+      },
+      primeSkill: {
+        explanation: "프라임은 1991-93 Marseille/Ghana 시기입니다. 짧은 터치, 전진 패스, 드리블, 득점 가담을 갖춘 10번형 고점입니다.",
+        verdict: "창조형 미드필더로는 아프리카 역대 최고 후보입니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: [
+              "African Footballer of the Year 1991, 1992, 1993",
+              "1992 AFCON Golden Ball",
+              "Marseille French Division 1 1990-91, 1991-92",
+              "Marseille UEFA Champions League 1992-93",
+            ],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["공격형 미드필더/포워드 겸용", "좁은 공간 드리블", "마지막 패스", "중앙과 하프스페이스에서 템포 조절", "대표팀 공격 창조성"],
+          },
+        ],
+        bullets: ["Marseille에서의 유럽 정상 경험과 AFCON 개인상은 프라임 근거가 분명합니다.", "순수 기술과 창조성 기준으로는 Okocha와 함께 최고급 비교 대상입니다."],
+      },
+      teamImportance: {
+        explanation: "Marseille와 Ghana 양쪽에서 공격 연결의 중심 역할을 했습니다.",
+        verdict: "팀 내 비중은 우승팀의 일부가 아니라 공격 구조를 움직인 축으로 봐야 합니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: ["Marseille: 유럽 정상권 팀의 창조형 공격 자원", "Ghana: 1980-90년대 대표팀 핵심 플레이메이커", "Ghana: 1992 AFCON 결승 진출 과정의 중심, 결승은 경고 누적으로 결장"],
+          },
+        ],
+        bullets: ["1992 AFCON 결승 결장은 오히려 Ghana가 그에게 얼마나 의존했는지를 보여주는 맥락입니다.", "Marseille에서는 개인 드리블보다 팀 공격 흐름을 만드는 역할이 컸습니다."],
+      },
+      legacy: {
+        explanation: "Abedi Pele의 장기 존재감은 '아프리카 10번의 원형', 3연속 개인상, Marseille UCL 우승으로 남습니다.",
+        verdict: "아프리카 플레이메이커 계보에서는 반드시 보존될 이름입니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: ["African Footballer of the Year 3연속", "Marseille 1993 Champions League 우승 멤버", "Ghana 역대 최고 선수 후보", "IFFHS African Player of the Century 3위"],
+          },
+        ],
+        bullets: ["George Weah, Eto'o 이전 세대의 대표 글로벌 아프리카 스타입니다.", "Ayew 가문과 Ghana 축구사 전체에서도 상징성이 큽니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - Abedi Pele", url: "https://en.wikipedia.org/wiki/Abedi_Pele" },
+      { label: "Britannica - Abedi Pele", url: "https://www.britannica.com/biography/Abedi-Ayew-Pele" },
+      { label: "L'Equipe - Abedi Pele", url: "https://www.lequipe.fr/Football/FootballFicheJoueur14331.html" },
+      { label: "RSSSF African Player of the Year", url: "https://www.rsssf.org/miscellaneous/afr-poy.html" },
+    ],
+  },
+  "roger milla": {
+    summary:
+      "Roger Milla는 Cameroon의 AFCON 우승과 1990 월드컵 8강 서사를 만든 공격수입니다. 클럽 커리어도 길지만, 장기 존재감은 월드컵과 아프리카 대표팀 역사에서 나옵니다.",
+    sections: {
+      teamCareer: {
+        explanation: "Milla는 Cameroon과 France, Reunion 클럽을 두루 거쳤고, 팀 우승은 Cameroon 국내/프랑스 컵/대표팀 AFCON 성과가 중심입니다.",
+        verdict: "팀 커리어는 유럽 빅클럽형은 아니지만, 대표팀 성과와 국내/프랑스 컵 우승 누적이 탄탄합니다.",
+        facts: [
+          {
+            label: "소속팀",
+            items: [
+              "Eclair de Douala",
+              "Leopards Douala",
+              "Tonnerre Yaounde",
+              "Valenciennes",
+              "Monaco",
+              "Bastia",
+              "Saint-Etienne",
+              "Montpellier",
+              "Saint-Pierroise",
+              "Tonnerre Yaounde second spell",
+              "Pelita Jaya",
+              "Putra Samarinda",
+              "Cameroon national team",
+            ],
+          },
+          {
+            label: "팀 우승",
+            items: [
+              "Leopards Douala: Cameroon Premiere Division 1971-72, 1972-73, 1973-74",
+              "Tonnerre Yaounde: African Cup Winners' Cup 1975",
+              "Tonnerre Yaounde: Cameroonian Cup 1991",
+              "Monaco: Coupe de France 1979-80",
+              "Bastia: Coupe de France 1980-81",
+              "Montpellier: Division 2 1986-87",
+              "Saint-Pierroise: D1 Pro 1989, 1990",
+              "Saint-Pierroise: Coupe de la Reunion 1989",
+              "Cameroon: Africa Cup of Nations 1984, 1988; runner-up 1986",
+              "Cameroon: Afro-Asian Cup of Nations 1985",
+            ],
+          },
+        ],
+        bullets: ["1984/1988 AFCON 우승은 대표팀 팀 커리어의 핵심입니다.", "1990 월드컵 8강은 우승은 아니지만 Cameroon과 아프리카 축구사 전체의 역사적 팀 성과입니다."],
+      },
+      individualCareer: {
+        explanation: "Milla의 개인상은 African Footballer of the Year 2회와 1986/1988 AFCON 개인상, 1990 월드컵 수상입니다.",
+        verdict: "개인상 총량보다 월드컵 문화사에 남은 임팩트가 강합니다.",
+        facts: [
+          {
+            label: "개인 수상/선정",
+            items: [
+              "African Footballer of the Year: 1976, 1990",
+              "Africa Cup of Nations best player: 1986, 1988",
+              "Africa Cup of Nations top scorer: 1986, 1988",
+              "FIFA World Cup Bronze Boot: 1990",
+              "FIFA World Cup All-Star Team: 1990",
+              "FIFA 100",
+              "CAF Best African Player of the last 50 years: 2007",
+              "Golden Foot Legends Award: 2014",
+              "IFFHS Legends",
+              "World Soccer: The 100 Greatest Footballers of All Time",
+              "CAF Golden Jubilee #1 Best Player",
+              "Knight of the Legion of Honour: 2006",
+            ],
+          },
+        ],
+        bullets: ["1990년 38세 월드컵 4골과 Bronze Boot는 개인 커리어의 상징입니다.", "CAF가 뽑은 지난 50년 최고 아프리카 선수라는 평가는 레거시 근거가 강합니다."],
+      },
+      primeSkill: {
+        explanation: "프라임은 두 갈래로 봅니다. 1970년대 중후반 Cameroon/프랑스 진출 초기의 실제 고점과, 1986-90 대표팀 토너먼트 고점입니다.",
+        verdict: "순수 빅리그 장기 지배형은 아니지만, 토너먼트 결정력과 기술적 센스가 역사적입니다.",
+        facts: [
+          {
+            label: "프라임 근거",
+            items: [
+              "African Footballer of the Year 1976",
+              "AFCON best player/top scorer 1986, 1988",
+              "1990 World Cup Bronze Boot and All-Star Team",
+              "Cameroon 1990 World Cup quarter-final 진출 과정에서 Romania/Colombia전 결정적 득점",
+            ],
+          },
+          {
+            label: "스킬 프로필",
+            items: ["박스 주변 민첩성", "턴 동작과 짧은 터치", "노장 시기에도 살아 있던 마무리 타이밍", "교체 투입 후 경기 흐름을 바꾸는 결정력"],
+          },
+        ],
+        bullets: ["1990 월드컵은 프라임 나이는 아니지만, 국제 토너먼트 고점으로는 매우 강합니다.", "Milla의 기술은 스피드보다 박스 주변 센스와 타이밍에 가까웠습니다."],
+      },
+      teamImportance: {
+        explanation: "Cameroon 대표팀에서의 Milla는 단순 공격수 이상으로, 팀을 월드컵 서사의 주인공으로 만든 상징입니다.",
+        verdict: "대표팀 팀 내 비중은 아프리카 역사 전체에서도 최상위권입니다.",
+        facts: [
+          {
+            label: "팀별 역할",
+            items: [
+              "Cameroon: 1984/1988 AFCON 우승 세대의 핵심 공격수",
+              "Cameroon: 1990 World Cup에서 결정적 조커/득점원",
+              "Leopards/Tonnerre: Cameroon 국내 우승과 대륙 컵 성과의 핵심 공격수",
+            ],
+          },
+        ],
+        bullets: ["1990 월드컵 Cameroon은 Milla의 골과 세리머니를 통해 전 세계가 기억하는 팀이 됐습니다.", "대표팀 상징성은 클럽 커리어 규모를 넘어섭니다."],
+      },
+      legacy: {
+        explanation: "Milla의 장기 존재감은 1990 월드컵, 최고령 득점 서사, CAF 50년 최고 선수 선정, FIFA 100에서 나옵니다.",
+        verdict: "월드컵 문화사 기준으로는 아프리카 선수 중 가장 오래 남을 이름 중 하나입니다.",
+        facts: [
+          {
+            label: "장기 보존 근거",
+            items: [
+              "Cameroon 1990 World Cup quarter-final 상징",
+              "1990 World Cup Bronze Boot and All-Star Team",
+              "FIFA 100",
+              "CAF Best African Player of the last 50 years",
+              "월드컵 코너 플래그 댄스 세리머니의 상징성",
+            ],
+          },
+        ],
+        bullets: ["Weah의 Ballon d'Or, Eto'o의 클럽 트로피와 다른 축에서 Milla는 월드컵 서사의 대표입니다.", "100년 뒤에도 1990 Cameroon을 설명할 때 빠질 수 없습니다."],
+      },
+    },
+    sources: [
+      { label: "Wikipedia - Roger Milla", url: "https://en.wikipedia.org/wiki/Roger_Milla" },
+      { label: "BBC - Milla is CAF's best from 50 years", url: "http://news.bbc.co.uk/sport2/hi/football/africa/6262747.stm" },
+      { label: "FIFA archive - Roger Milla", url: "https://web.archive.org/web/20150924082424/http://www.fifa.com/classicfootball/players/player=174748/" },
+    ],
+  },
+};
+
 export function loadLegendData(): LegendData {
   const sourcePath = resolveSourcePath();
   const markdown = fs.readFileSync(sourcePath, "utf8");
@@ -1276,7 +2323,7 @@ function makePlayerProfile(
   status: PlayerStatus,
   scores: PlayerScores,
 ): PlayerProfile {
-  const curatedProfile = curatedProfileOverrides[normalizedName(name)];
+  const curatedProfile = detailedAfricanProfileOverrides[normalizedName(name)] ?? curatedProfileOverrides[normalizedName(name)];
   if (curatedProfile) {
     return {
       isCurated: true,
@@ -1361,7 +2408,10 @@ function makeCuratedProfileSections(entry: CuratedProfileEntry, scores: PlayerSc
         score: scores[key],
         title: scoreLabelsForData[key],
         bullets: entry.sections[key].bullets,
+        caveat: entry.sections[key].caveat,
         explanation: entry.sections[key].explanation,
+        facts: entry.sections[key].facts,
+        verdict: entry.sections[key].verdict,
       }),
     }),
     {} as Record<ScoreKey, PlayerProfileSection>,
@@ -1380,19 +2430,28 @@ function makeProfileSection({
   score,
   title,
   bullets,
+  caveat,
   explanation,
+  facts,
+  verdict,
 }: {
   score: number;
   title: string;
   bullets: string[];
+  caveat?: string;
   explanation: string;
+  facts?: Array<{ label: string; items: string[] }>;
+  verdict?: string;
 }): PlayerProfileSection {
   return {
     score,
     grade: score >= 97 ? "S+" : score >= 92 ? "S" : score >= 86 ? "A" : score >= 78 ? "B" : "C",
     title,
+    verdict,
+    facts,
     bullets,
     explanation,
+    caveat,
   };
 }
 
