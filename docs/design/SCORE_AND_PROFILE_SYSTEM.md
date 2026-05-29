@@ -444,7 +444,7 @@ type PlayerEvidenceProfile = {
 - Africa 21명: 모두 개별 큐레이션 프로필 보유
 - Africa 상위 8명: 상세 fact group, 소속팀, 팀 우승, 개인 수상, 프라임 근거, 팀 비중, 레거시 근거 보유
 - Asia focused 37명: South Korea 14명, Japan 21명, Ali Daei, Tim Cahill 적용
-- America focused 30명: 앵커 10명 + Argentina/Brazil 1차 확장 20명 적용
+- America focused 50명: 앵커 10명 + Argentina/Brazil 1차/2차 확장 40명 적용
 - Asia/America 나머지 선수: baseline profile 적용
 - Europe: 기존 generic profile 유지
 
@@ -457,9 +457,10 @@ Focused profile 적용 완료:
 3. Japan 확장: Shinji Okazaki, Kazuyoshi Miura, Kunishige Kamamoto, Kaoru Mitoma, Takefusa Kubo, Shinji Ono, Yasuhito Endo, Makoto Hasebe, Wataru Endo, Yuto Nagatomo, Atsuto Uchida, Yuji Nakazawa, Masami Ihara, Maya Yoshida, Takehiro Tomiyasu, Yoshikatsu Kawaguchi, Eiji Kawashima
 4. America 앵커: Lionel Messi, Diego Maradona, Pele, Ronaldo, Garrincha, Zico, Ronaldinho, Romario, Neymar, Alfredo Di Stefano
 5. America 1차 확장: Gabriel Batistuta, Mario Kempes, Angel Di Maria, Juan Roman Riquelme, Daniel Passarella, Javier Zanetti, Ubaldo Fillol, Fernando Redondo, Jose Manuel Moreno, Adolfo Pedernera, Rivaldo, Jairzinho, Didi, Cafu, Roberto Carlos, Nilton Santos, Djalma Santos, Carlos Alberto, Kaka, Gilmar
+6. America 2차 확장: Sergio Aguero, Hernan Crespo, Lautaro Martinez, Omar Sivori, Carlos Tevez, Javier Mascherano, Juan Sebastian Veron, Luis Monti, Oscar Ruggeri, Roberto Ayala, Leonidas da Silva, Vava, Tostao, Roberto Rivellino, Socrates, Gerson, Roberto Falcao, Zito, Lucio, Dani Alves
 
 다음 데이터 입력 우선순위:
 
 1. Asia 확장: Iran/Australia/Japan 외 아시아 핵심국 순차 큐레이션
-2. America 확장 2: Argentina/Brazil 잔여 포지션별 상위권
-3. America 확장 3: Uruguay/Chile/Colombia/Mexico/기타 America 핵심 선수
+2. America 확장 3: Argentina/Brazil 잔여 포지션별 상위권
+3. America 확장 4: Uruguay/Chile/Colombia/Mexico/기타 America 핵심 선수

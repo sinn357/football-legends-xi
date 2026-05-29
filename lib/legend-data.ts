@@ -340,6 +340,106 @@ const scoreOverrides: Record<string, ScoreOverride> = {
     scoreMode: "adjusted",
     scores: { teamCareer: 97, individualCareer: 88, primeSkill: 91, teamImportance: 93, legacy: 94 },
   },
+  "sergio aguero": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 91, primeSkill: 92, teamImportance: 92, legacy: 91 },
+  },
+  "hernan crespo": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 88, primeSkill: 90, teamImportance: 88, legacy: 88 },
+  },
+  "lautaro martinez": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 87, primeSkill: 90, teamImportance: 89, legacy: 88 },
+  },
+  "omar sivori": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 93, primeSkill: 93, teamImportance: 91, legacy: 92 },
+  },
+  "carlos tevez": {
+    overallScore: 89,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 95, individualCareer: 89, primeSkill: 91, teamImportance: 90, legacy: 90 },
+  },
+  "javier mascherano": {
+    overallScore: 89,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 96, individualCareer: 86, primeSkill: 89, teamImportance: 92, legacy: 90 },
+  },
+  "juan sebastian veron": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 89, primeSkill: 90, teamImportance: 88, legacy: 89 },
+  },
+  "luis monti": {
+    overallScore: 89,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 88, primeSkill: 90, teamImportance: 92, legacy: 92 },
+  },
+  "oscar ruggeri": {
+    overallScore: 88,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 88, primeSkill: 88, teamImportance: 91, legacy: 90 },
+  },
+  "roberto ayala": {
+    overallScore: 87,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 89, individualCareer: 86, primeSkill: 88, teamImportance: 90, legacy: 88 },
+  },
+  "leonidas da silva": {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 87, individualCareer: 92, primeSkill: 94, teamImportance: 93, legacy: 95 },
+  },
+  vava: {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 88, primeSkill: 90, teamImportance: 93, legacy: 92 },
+  },
+  tostao: {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 89, primeSkill: 93, teamImportance: 94, legacy: 93 },
+  },
+  "roberto rivellino": {
+    overallScore: 92,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 90, individualCareer: 91, primeSkill: 94, teamImportance: 94, legacy: 95 },
+  },
+  socrates: {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 86, individualCareer: 89, primeSkill: 93, teamImportance: 94, legacy: 94 },
+  },
+  gerson: {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 92, individualCareer: 89, primeSkill: 92, teamImportance: 94, legacy: 93 },
+  },
+  "roberto falcao": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 90, primeSkill: 92, teamImportance: 92, legacy: 91 },
+  },
+  zito: {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 98, individualCareer: 86, primeSkill: 89, teamImportance: 93, legacy: 91 },
+  },
+  lucio: {
+    overallScore: 89,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 97, individualCareer: 86, primeSkill: 89, teamImportance: 91, legacy: 90 },
+  },
+  "dani alves": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 99, individualCareer: 89, primeSkill: 91, teamImportance: 88, legacy: 90 },
+  },
   "차범근": {
     overallScore: 90,
     scoreMode: "adjusted",
@@ -3115,6 +3215,706 @@ const focusedNonEuropeProfileOverrides: Record<string, CuratedProfileEntry> = {
     sources: [
       { label: "Wikipedia - Gilmar", url: "https://en.wikipedia.org/wiki/Gilmar" },
       { label: "FIFA - 1958/1962 Brazil records", url: "https://www.fifa.com/pt/articles/brasil-pele-garrincha-numeros-copa-mundo-1958-1962" },
+    ],
+  }),
+  "sergio aguero": makeFocusedProfile({
+    summary:
+      "Sergio Aguero는 Manchester City의 프리미어리그 시대를 연 스트라이커이자 93:20 골로 클럽사를 바꾼 Argentina 공격수입니다.",
+    team: {
+      clubs: ["Independiente", "Atletico Madrid", "Manchester City", "Barcelona", "Argentina U20", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["Atletico Madrid: UEFA Europa League 2009-10; UEFA Super Cup 2010", "Manchester City: Premier League 2011-12, 2013-14, 2017-18, 2018-19, 2020-21; FA Cup 2018-19; EFL Cup 2013-14, 2015-16, 2017-18, 2018-19, 2019-20, 2020-21", "Manchester City: UEFA Champions League runner-up 2020-21"],
+      nationalHonours: ["Argentina: Copa America 2021", "Argentina: FIFA World Cup runner-up 2014", "Argentina: Copa America runner-up 2015, 2016", "Argentina U20: FIFA U-20 World Cup 2005, 2007", "Argentina Olympic: Olympic gold medal 2008"],
+      verdict: "클럽 우승 총량과 City 상징성은 Argentina 스트라이커 중 최상위권입니다.",
+    },
+    individual: {
+      awards: ["Premier League Golden Boot: 2014-15", "PFA Team of the Year selections", "Manchester City all-time top scorer"],
+      records: ["Most Premier League hat-tricks at retirement context", "Scored the 2011-12 Premier League title-winning goal vs QPR", "Premier League 184-goal tier"],
+      verdict: "개인상보다 Premier League 득점 누적과 City 최다 득점 기록이 핵심입니다.",
+    },
+    prime: {
+      period: "2011-19 Manchester City",
+      evidence: ["93:20 goal in 2011-12", "2014-15 Golden Boot", "2017-19 Pep City title-era scoring"],
+      skills: ["Explosive box movement", "near-post finishing", "low-centre dribbling", "two-foot shooting", "quick release"],
+      verdict: "EPL 9번 프라임 기준으로 최고권이지만 대표팀 토너먼트 주인공성은 메시/디마리아보다 낮습니다.",
+    },
+    importance: {
+      roles: ["Manchester City: title-era defining striker", "Argentina: Messi-era elite striker option", "Atletico Madrid: European breakout scorer"],
+      moments: ["2012 QPR title goal", "Europa League 2010", "Copa America 2021 squad contribution"],
+      verdict: "클럽 내 비중은 절대적이고 대표팀은 강한 조력자에 가깝습니다.",
+    },
+    legacy: {
+      reasons: ["Manchester City all-time top scorer", "93:20", "five Premier League titles", "Copa America 2021"],
+      context: ["Argentina all-time striker debate with Batistuta/Kempes/Crespo", "Premier League striker history"],
+      verdict: "City 시대의 시작을 상징하기 때문에 장기 존재감이 강합니다.",
+    },
+    sources: [
+      { label: "Premier League - Sergio Aguero", url: "https://www.premierleague.com/players/4328/Sergio-Ag%C3%BCero/overview" },
+      { label: "Wikipedia - Sergio Aguero", url: "https://en.wikipedia.org/wiki/Sergio_Ag%C3%BCero" },
+    ],
+  }),
+  "hernan crespo": makeFocusedProfile({
+    summary:
+      "Hernan Crespo는 River Plate, Parma, Lazio, Chelsea, Inter를 거치며 1990년대 후반-2000년대 초반 최고급 박스 스트라이커로 평가받은 Argentina 공격수입니다.",
+    team: {
+      clubs: ["River Plate", "Parma", "Lazio", "Inter Milan", "Chelsea", "AC Milan loan", "Genoa", "Parma second spell", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["River Plate: Copa Libertadores 1996; Argentine Primera Division Apertura 1993, Apertura 1994", "Parma: UEFA Cup 1998-99; Coppa Italia 1998-99; Supercoppa Italiana 1999", "Chelsea: Premier League 2005-06", "Inter Milan: Serie A 2006-07, 2007-08, 2008-09; Supercoppa Italiana 2006, 2008"],
+      nationalHonours: ["Argentina Olympic: silver medal 1996", "Argentina: FIFA World Cup appearances 1998, 2002, 2006", "Argentina: Copa America runner-up 2007"],
+      verdict: "대표팀 메이저 우승은 없지만 클럽 트로피와 유럽 정상권 공격수 커리어가 탄탄합니다.",
+    },
+    individual: {
+      awards: ["Serie A top scorer: 2000-01", "Copa Libertadores final scorer/young star reputation 1996", "FIFA 100"],
+      records: ["Argentina national-team 35-goal tier", "High-value transfer record era from Parma to Lazio"],
+      verdict: "Serie A 득점왕과 1990년대 후반 이탈리아 리그 가치가 핵심입니다.",
+    },
+    prime: {
+      period: "1998-2002 Parma/Lazio/Argentina",
+      evidence: ["Parma UEFA Cup/Coppa Italia 1998-99", "Serie A top scorer 2000-01", "Argentina 2002-cycle striker status"],
+      skills: ["Penalty-box timing", "heading", "one-touch finishing", "near-post movement", "technical volleys"],
+      verdict: "순수 마무리와 움직임은 Batistuta 다음 층위 Argentina 스트라이커 프라임입니다.",
+    },
+    importance: {
+      roles: ["Parma/Lazio: elite scoring reference", "Inter/Chelsea: title-squad striker", "Argentina: Batistuta 이후 득점 핵심"],
+      moments: ["1996 Libertadores final", "2005 Champions League final brace for Milan loan spell", "Serie A scoring peak"],
+      verdict: "클럽별 절대 상징성은 낮지만 여러 정상권 팀에서 득점 가치를 증명했습니다.",
+    },
+    legacy: {
+      reasons: ["Serie A top scorer", "Copa Libertadores", "Premier League and Serie A titles", "Argentina scoring rank"],
+      context: ["Argentina striker depth era", "Crespo vs Batistuta/Aguero comparison"],
+      verdict: "월드컵/코파 우승 부재 때문에 상한은 있지만 정통 9번 계보에서 강하게 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Hernan Crespo", url: "https://en.wikipedia.org/wiki/Hern%C3%A1n_Crespo" },
+      { label: "Chelsea - Hernan Crespo", url: "https://www.chelseafc.com/en/teams/profile/hernan-crespo" },
+    ],
+  }),
+  "lautaro martinez": makeFocusedProfile({
+    summary:
+      "Lautaro Martinez는 Inter 주장으로 Serie A를 지배하고 Argentina의 2021-24 메이저 3연속 우승기에 포함된 현역 스트라이커입니다.",
+    team: {
+      clubs: ["Racing Club", "Inter Milan", "Argentina national team"],
+      clubHonours: ["Inter Milan: Serie A 2020-21, 2023-24", "Inter Milan: Coppa Italia 2021-22, 2022-23; Supercoppa Italiana 2021, 2022, 2023", "Inter Milan: UEFA Champions League runner-up 2022-23"],
+      nationalHonours: ["Argentina: FIFA World Cup 2022", "Argentina: Copa America 2021, 2024", "Argentina: Finalissima 2022", "Argentina: Copa America 2024 top-scorer title run"],
+      verdict: "현역이지만 Inter와 Argentina 양쪽에서 메이저 팀 커리어가 이미 강합니다.",
+    },
+    individual: {
+      awards: ["Serie A top scorer: 2023-24", "Serie A Most Valuable Player: 2023-24", "Copa America top scorer: 2024", "Inter captaincy recognition"],
+      records: ["Inter 100-goal tier", "Argentina 2024 Copa America winning goal in final"],
+      verdict: "2023-24 시즌 개인상과 2024 Copa 결승골로 평가가 급상승했습니다.",
+    },
+    prime: {
+      period: "2022-24 Inter/Argentina",
+      evidence: ["2022-23 Champions League final run", "2023-24 Serie A MVP/top scorer/title", "2024 Copa America top scorer and final goal"],
+      skills: ["Pressing", "near-post finishing", "two-striker combinations", "aerial finishing", "captain's work rate"],
+      verdict: "현역 진행형이라 총점은 보수적이지만 최근 프라임은 Argentina 공격수 상위권입니다.",
+    },
+    importance: {
+      roles: ["Inter Milan: captain and primary scorer", "Argentina: Alvarez/Messi era rotational but decisive striker"],
+      moments: ["Inter 2023 Champions League final run", "2024 Copa America final goal", "2023-24 Scudetto"],
+      verdict: "Inter 내 비중은 절대적이고 대표팀에서는 중요한 결승 카드입니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "two Copa America titles", "Serie A MVP/top scorer", "Inter captaincy"],
+      context: ["active-hold, legacy still forming", "Argentina modern striker succession after Aguero/Higuain"],
+      verdict: "우승 완결성은 이미 높고, 장기 누적에 따라 90점대 진입 여지가 있습니다.",
+    },
+    sources: [
+      { label: "Inter - Lautaro Martinez", url: "https://www.inter.it/en/teams/first-team/lautaro-martinez" },
+      { label: "Wikipedia - Lautaro Martinez", url: "https://en.wikipedia.org/wiki/Lautaro_Mart%C3%ADnez" },
+    ],
+  }),
+  "omar sivori": makeFocusedProfile({
+    summary:
+      "Omar Sivori는 River Plate, Juventus, Argentina/Italy 대표팀을 거친 1961 Ballon d'Or 수상자입니다.",
+    team: {
+      clubs: ["River Plate", "Juventus", "Napoli", "Argentina national team", "Italy national team"],
+      clubHonours: ["River Plate: Argentine Primera Division 1955, 1956, 1957", "Juventus: Serie A 1957-58, 1959-60, 1960-61; Coppa Italia 1958-59, 1959-60, 1964-65"],
+      nationalHonours: ["Argentina: South American Championship 1957", "Italy: FIFA World Cup 1962 squad context"],
+      verdict: "River와 Juventus에서 모두 왕조급 팀 커리어를 갖고 있습니다.",
+    },
+    individual: {
+      awards: ["Ballon d'Or: 1961", "Serie A top scorer: 1959-60", "South American Championship 1957 attacking-star recognition"],
+      records: ["Part of Argentina's 1957 Angels with Dirty Faces attack", "Juventus pre-modern attacking icon"],
+      verdict: "Ballon d'Or 수상이 Argentina-born 선수 중 역사적 지위를 크게 올립니다.",
+    },
+    prime: {
+      period: "1957-62 River/Juventus",
+      evidence: ["1957 South American Championship", "Juventus Serie A titles", "1961 Ballon d'Or"],
+      skills: ["Close-control dribbling", "inside-forward creativity", "left-foot finishing", "combination play", "street-football flair"],
+      verdict: "시대 대비 공격 재능은 Argentina 역사 상위권입니다.",
+    },
+    importance: {
+      roles: ["Juventus: creative scorer around Boniperti/Charles era", "Argentina: 1957 continental champion forward", "River: pre-Europe breakout star"],
+      moments: ["1957 South American Championship", "1961 Ballon d'Or season", "Juventus domestic titles"],
+      verdict: "국가대표 누적은 짧지만 클럽과 개인상 비중이 강합니다.",
+    },
+    legacy: {
+      reasons: ["Ballon d'Or 1961", "Juventus legend status", "South American champion 1957", "Argentina/Italy dual-national historical path"],
+      context: ["Argentina pre-Maradona elite attackers", "Juventus number 10 lineage"],
+      verdict: "유럽 개인상과 Juventus 역사성 때문에 계속 소환됩니다.",
+    },
+    sources: [
+      { label: "Juventus - Omar Sivori", url: "https://www.juventus.com/en/club/history/hall-of-fame/omar-sivori" },
+      { label: "Wikipedia - Omar Sivori", url: "https://en.wikipedia.org/wiki/Omar_S%C3%ADvori" },
+    ],
+  }),
+  "carlos tevez": makeFocusedProfile({
+    summary:
+      "Carlos Tevez는 Boca, Corinthians, Manchester United, Manchester City, Juventus를 모두 거치며 큰 경기 에너지와 우승을 남긴 Argentina 공격수입니다.",
+    team: {
+      clubs: ["Boca Juniors", "Corinthians", "West Ham United", "Manchester United", "Manchester City", "Juventus", "Shanghai Shenhua", "Boca Juniors second/third spells", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["Boca Juniors: Copa Libertadores 2003; Intercontinental Cup 2003; Copa Sudamericana 2004; Argentine league titles across spells", "Corinthians: Campeonato Brasileiro Serie A 2005", "Manchester United: Premier League 2007-08, 2008-09; UEFA Champions League 2007-08; FIFA Club World Cup 2008", "Manchester City: Premier League 2011-12; FA Cup 2010-11", "Juventus: Serie A 2013-14, 2014-15; Coppa Italia 2014-15"],
+      nationalHonours: ["Argentina Olympic: Olympic gold medal 2004", "Argentina: Copa America runner-up 2004, 2007, 2015", "Argentina: FIFA World Cup appearances 2006, 2010"],
+      verdict: "클럽 우승 폭은 매우 넓고 대표팀 메이저 우승 부재가 유일한 큰 한계입니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 2003, 2004, 2005", "Campeonato Brasileiro best-player recognition 2005", "Serie A Team/Player of the season-level Juventus recognition"],
+      records: ["Rare player to win major honours with both Manchester United and Manchester City", "Boca modern icon"],
+      verdict: "남미 3년 연속 최고권 평가와 유럽 빅클럽 우승 조합이 강합니다.",
+    },
+    prime: {
+      period: "2003-15 Boca/Manchester/Juventus",
+      evidence: ["Boca Libertadores/Intercontinental 2003", "Manchester United Champions League 2008", "Juventus 2014-15 Champions League final run"],
+      skills: ["Relentless pressing", "low-centre dribbling", "powerful shooting", "link play", "emotional intensity"],
+      verdict: "기술과 투쟁성이 결합된 세컨드 스트라이커 프라임입니다.",
+    },
+    importance: {
+      roles: ["Boca: modern idol", "Manchester clubs: high-energy forward", "Juventus: post-Del Piero attacking reference"],
+      moments: ["2003 Intercontinental Cup", "West Ham survival 2006-07", "Juventus 2015 European run"],
+      verdict: "여러 클럽에서 단순 보조가 아니라 팀 감정과 전방 압박을 바꿨습니다.",
+    },
+    legacy: {
+      reasons: ["Boca icon", "Champions League", "Premier League with both Manchester clubs", "South American POTY three times"],
+      context: ["Argentina warrior-forward archetype", "Tevez vs Aguero/Higuain national-team era debate"],
+      verdict: "대표팀 완결성은 부족하지만 클럽 여정과 캐릭터가 강하게 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Carlos Tevez", url: "https://en.wikipedia.org/wiki/Carlos_Tevez" },
+      { label: "Juventus - Tevez profile", url: "https://www.juventus.com/en/teams/first-team-men/squad/carlos-tevez" },
+    ],
+  }),
+  "javier mascherano": makeFocusedProfile({
+    summary:
+      "Javier Mascherano는 Liverpool과 Barcelona, Argentina 대표팀에서 수비 밸런스를 책임진 현대 Argentina의 대표 수비형 미드필더/센터백입니다.",
+    team: {
+      clubs: ["River Plate", "Corinthians", "West Ham United", "Liverpool", "Barcelona", "Hebei China Fortune", "Estudiantes", "Argentina U20", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division Clausura 2003-04", "Corinthians: Campeonato Brasileiro Serie A 2005", "Barcelona: La Liga 2010-11, 2012-13, 2014-15, 2015-16; Copa del Rey 2011-12, 2014-15, 2015-16, 2016-17; UEFA Champions League 2010-11, 2014-15"],
+      nationalHonours: ["Argentina Olympic: Olympic gold medal 2004, 2008", "Argentina U20: FIFA World Youth Championship 2003", "Argentina: FIFA World Cup runner-up 2014", "Argentina: Copa America runner-up 2004, 2007, 2015, 2016"],
+      verdict: "Barcelona 우승 총량과 Argentina 주장급 누적이 매우 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["Argentina captaincy and national-team appearance record era", "Barcelona defensive-leader recognition", "Olympic double-gold distinction"],
+      records: ["One of the few footballers with two Olympic gold medals", "Argentina appearance leader before Messi/Zanetti context"],
+      verdict: "수비형 역할이라 개인상은 적지만 국제대회 누적과 클럽 우승이 보완합니다.",
+    },
+    prime: {
+      period: "2007-15 Liverpool/Barcelona/Argentina",
+      evidence: ["Liverpool elite defensive-midfield years", "Barcelona 2011 and 2015 Champions League titles", "2014 World Cup defensive run"],
+      skills: ["Tackling", "cover defense", "emergency defending", "positional discipline", "centre-back adaptation"],
+      verdict: "공격 영향은 제한적이지만 수비 밸런스 프라임은 Argentina 최고권입니다.",
+    },
+    importance: {
+      roles: ["Argentina: defensive soul of Messi-era teams", "Barcelona: midfield-to-centre-back conversion core", "Liverpool: elite ball-winner"],
+      moments: ["2014 World Cup semi-final tackle vs Robben", "Barcelona Champions League titles", "two Olympic golds"],
+      verdict: "Argentina에서는 공격 스타들 뒤에서 팀 구조를 지탱한 핵심이었습니다.",
+    },
+    legacy: {
+      reasons: ["two Champions League titles", "two Olympic gold medals", "2014 World Cup final run", "Argentina defensive leader"],
+      context: ["Argentina all-time defensive midfielder debate", "Mascherano vs Redondo/Monti/Cambiasso profile split"],
+      verdict: "우승보다도 Messi-era Argentina의 수비 기준점으로 남습니다.",
+    },
+    sources: [
+      { label: "FC Barcelona - Mascherano", url: "https://www.fcbarcelona.com/en/card/648003/javier-mascherano" },
+      { label: "Wikipedia - Javier Mascherano", url: "https://en.wikipedia.org/wiki/Javier_Mascherano" },
+    ],
+  }),
+  "juan sebastian veron": makeFocusedProfile({
+    summary:
+      "Juan Sebastian Veron은 Parma/Lazio/Manchester United/Estudiantes를 거친 장거리 패스형 플레이메이커이며, 유럽과 남미 양쪽에서 우승을 남긴 미드필더입니다.",
+    team: {
+      clubs: ["Estudiantes", "Boca Juniors", "Sampdoria", "Parma", "Lazio", "Manchester United", "Chelsea", "Inter Milan", "Estudiantes second spell", "Brandsen", "Argentina national team"],
+      clubHonours: ["Parma: UEFA Cup 1998-99; Coppa Italia 1998-99; Supercoppa Italiana 1999", "Lazio: Serie A 1999-2000; Coppa Italia 1999-2000; UEFA Super Cup 1999; Supercoppa Italiana 2000", "Manchester United: Premier League 2002-03", "Inter Milan: Serie A 2005-06; Coppa Italia 2004-05, 2005-06", "Estudiantes: Argentine Primera Division Apertura 2006; Copa Libertadores 2009"],
+      nationalHonours: ["Argentina: FIFA World Cup appearances 1998, 2002, 2010", "Argentina: Copa America runner-up 2007"],
+      verdict: "대표팀 서사는 아쉽지만 유럽/남미 클럽 우승 폭이 넓습니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 2008, 2009", "UEFA/Serie A elite midfielder recognition in Parma-Lazio years", "Argentine Footballer of the Year-level Estudiantes return"],
+      records: ["Led Estudiantes to Copa Libertadores 2009", "One of Argentina's most technically gifted deep playmakers"],
+      verdict: "유럽 초반 고점과 남미 복귀 후 개인상이 함께 평가됩니다.",
+    },
+    prime: {
+      period: "1998-2001 Parma/Lazio/Argentina",
+      evidence: ["Parma UEFA Cup 1998-99", "Lazio Serie A 1999-2000", "high-profile Manchester United transfer"],
+      skills: ["Long passing", "switches of play", "set-piece delivery", "tempo control", "vertical playmaking"],
+      verdict: "패스 범위와 경기 조율은 Argentina 미드필더 계보 최고권입니다.",
+    },
+    importance: {
+      roles: ["Lazio/Parma: central passer in title-winning teams", "Estudiantes: returning idol and Libertadores leader", "Argentina: 2002-cycle playmaking focus"],
+      moments: ["Lazio Scudetto", "Estudiantes Copa Libertadores 2009", "Parma UEFA Cup"],
+      verdict: "클럽에서는 확실한 중심이었고 대표팀에서는 기대 대비 완성도가 아쉬웠습니다.",
+    },
+    legacy: {
+      reasons: ["Copa Libertadores 2009", "Serie A and UEFA Cup titles", "South American POTY twice", "Estudiantes icon status"],
+      context: ["Argentina deep playmaker debate", "European transfer disappointment balanced by South American redemption"],
+      verdict: "맨유 실패 이미지가 있지만 전체 커리어는 훨씬 견고한 레전드입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Juan Sebastian Veron", url: "https://en.wikipedia.org/wiki/Juan_Sebasti%C3%A1n_Ver%C3%B3n" },
+      { label: "CONMEBOL Libertadores - Veron", url: "https://www.conmebollibertadores.com/" },
+    ],
+  }),
+  "luis monti": makeFocusedProfile({
+    summary:
+      "Luis Monti는 Argentina와 Italy 두 국가로 월드컵 결승에 출전하고 Italy의 1934 World Cup 우승을 이끈 초기 축구의 강력한 센터하프입니다.",
+    team: {
+      clubs: ["Huracan", "Boca Juniors", "San Lorenzo", "Juventus", "Argentina national team", "Italy national team"],
+      clubHonours: ["Huracan: Argentine Primera Division 1921", "San Lorenzo: Argentine Primera Division 1923, 1924, 1927", "Juventus: Serie A 1931-32, 1932-33, 1933-34, 1934-35; Coppa Italia 1937-38"],
+      nationalHonours: ["Italy: FIFA World Cup 1934", "Argentina: FIFA World Cup runner-up 1930", "Argentina: South American Championship 1927", "Argentina Olympic: silver medal 1928"],
+      verdict: "두 대륙/두 국가의 초기 최상위 팀 성과를 모두 가진 특수한 커리어입니다.",
+    },
+    individual: {
+      awards: ["Early-era world XI/historical centre-half recognition", "Juventus Quinquennio d'Oro central figure"],
+      records: ["Only player to play World Cup finals for two different countries", "World Cup winner and runner-up with different nations"],
+      verdict: "현대 개인상 이전이지만 월드컵 결승 양국 출전 기록은 독보적입니다.",
+    },
+    prime: {
+      period: "1927-35 Argentina/Juventus/Italy",
+      evidence: ["1927 South American Championship", "1930 World Cup final", "1934 World Cup title", "Juventus five-title era"],
+      skills: ["Physical tackling", "centre-half control", "man marking", "long passing", "intimidating presence"],
+      verdict: "초기 축구의 수비형 미드필더/센터하프 원형으로 강한 프라임입니다.",
+    },
+    importance: {
+      roles: ["Argentina: 1930 finalist midfield enforcer", "Italy: 1934 world champion centre-half", "Juventus: domestic dynasty anchor"],
+      moments: ["1930 and 1934 World Cup finals", "Juventus Serie A run"],
+      verdict: "팀 구조를 몸싸움과 위치선정으로 지배한 시대형 핵심입니다.",
+    },
+    legacy: {
+      reasons: ["World Cup finals for two nations", "1934 World Cup winner", "Juventus five-title era", "early Argentina/Italy bridge"],
+      context: ["pre-war football evidence gap", "Argentina/Italy dual-national history"],
+      verdict: "초기 축구의 특수한 국제사 때문에 100년 뒤에도 기록으로 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Luis Monti", url: "https://en.wikipedia.org/wiki/Luis_Monti" },
+      { label: "FIFA - Luis Monti", url: "https://www.fifa.com/" },
+    ],
+  }),
+  "oscar ruggeri": makeFocusedProfile({
+    summary:
+      "Oscar Ruggeri는 Argentina 1986 World Cup 우승 수비수이고 River Plate의 Libertadores/Intercontinental 우승까지 가진 강인한 센터백입니다.",
+    team: {
+      clubs: ["Boca Juniors", "River Plate", "Logrones", "Real Madrid", "Velez Sarsfield", "Ancona", "America", "San Lorenzo", "Lanus", "Argentina national team"],
+      clubHonours: ["Boca Juniors: Argentine Primera Division Metropolitano 1981", "River Plate: Copa Libertadores 1986; Intercontinental Cup 1986; Argentine league 1985-86", "Real Madrid: La Liga 1989-90", "San Lorenzo: Argentine Primera Division Clausura 1995"],
+      nationalHonours: ["Argentina: FIFA World Cup 1986; runner-up 1990", "Argentina: Copa America 1991, 1993", "Argentina: FIFA Confederations Cup/King Fahd Cup 1992"],
+      verdict: "월드컵, 코파, Libertadores, Intercontinental, La Liga가 모두 있는 매우 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 1991", "Argentina captaincy and defensive-leader recognition"],
+      records: ["Argentina defensive core across 1986 and 1990 World Cups", "One of Argentina's most decorated centre-backs"],
+      verdict: "센터백으로 South American POTY를 받은 점이 큰 개인 근거입니다.",
+    },
+    prime: {
+      period: "1986-91 River/Real Madrid/Argentina",
+      evidence: ["1986 World Cup", "1986 Libertadores/Intercontinental", "1991 Copa America and South American POTY"],
+      skills: ["Aerial defending", "physical marking", "leadership", "set-piece threat", "defensive aggression"],
+      verdict: "Passarella 이후 Argentina 센터백 프라임의 핵심 기준입니다.",
+    },
+    importance: {
+      roles: ["Argentina: 1986/1990 defensive pillar", "River Plate: world champion club defender", "Real Madrid: title-squad centre-back"],
+      moments: ["1986 World Cup title", "1990 World Cup final run", "1991/1993 Copa America titles"],
+      verdict: "Maradona 시대 대표팀의 수비 안정성에서 큰 비중을 차지했습니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "two Copa America titles", "Libertadores and Intercontinental Cup", "South American POTY 1991"],
+      context: ["Argentina all-time centre-back debate after Passarella", "warrior-defender archetype"],
+      verdict: "팀 우승 완결성과 수비 리더십 때문에 Argentina 수비수 상위권입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Oscar Ruggeri", url: "https://en.wikipedia.org/wiki/%C3%93scar_Ruggeri" },
+      { label: "RSSSF - South American Footballer of the Year", url: "https://www.rsssf.org/miscellaneous/sam-poy.html" },
+    ],
+  }),
+  "roberto ayala": makeFocusedProfile({
+    summary:
+      "Roberto Ayala는 Valencia의 La Liga/UEFA Cup 시대와 Argentina 대표팀 장기 주전성을 가진 2000년대 대표 센터백입니다.",
+    team: {
+      clubs: ["Ferro Carril Oeste", "River Plate", "Napoli", "AC Milan", "Valencia", "Real Zaragoza", "Racing Club", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division Apertura 1994", "AC Milan: Serie A 1998-99", "Valencia: La Liga 2001-02, 2003-04; UEFA Cup 2003-04; UEFA Super Cup 2004", "Valencia: UEFA Champions League runner-up 2000-01"],
+      nationalHonours: ["Argentina Olympic: Olympic gold medal 2004; silver medal 1996", "Argentina: FIFA World Cup appearances 1998, 2002, 2006", "Argentina: Copa America runner-up 2004, 2007"],
+      verdict: "Valencia 황금기와 Olympic gold가 팀 커리어의 핵심입니다.",
+    },
+    individual: {
+      awards: ["UEFA Team of the Year: 2001", "Valencia captain/defensive leader recognition", "Argentina 100-cap tier"],
+      records: ["Argentina captain in the 2006 World Cup cycle", "One of Valencia's best modern defenders"],
+      verdict: "수비수 개인상은 제한적이지만 UEFA Team과 장기 주전성이 중요합니다.",
+    },
+    prime: {
+      period: "2000-06 Valencia/Argentina",
+      evidence: ["Valencia Champions League final 2001", "La Liga 2001-02 and 2003-04", "UEFA Cup 2003-04"],
+      skills: ["Anticipation", "aerial timing", "back-line command", "clean tackling", "set-piece threat"],
+      verdict: "작은 체구에도 읽기와 타이밍으로 지배한 센터백 프라임입니다.",
+    },
+    importance: {
+      roles: ["Valencia: defensive captain in title era", "Argentina: 2000s back-line leader"],
+      moments: ["Valencia 2003-04 double", "2004 Olympic gold", "2006 World Cup quarter-final run"],
+      verdict: "클럽과 대표팀 모두에서 수비 조직의 리더였습니다.",
+    },
+    legacy: {
+      reasons: ["Valencia La Liga titles", "UEFA Cup", "Olympic gold", "Argentina 100-cap tier"],
+      context: ["Argentina modern centre-back debate", "Ayala vs Ruggeri/Samuel/Passarella"],
+      verdict: "월드컵 우승은 없지만 Valencia 시대를 통해 강하게 기억됩니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Roberto Ayala", url: "https://en.wikipedia.org/wiki/Roberto_Ayala" },
+      { label: "Valencia CF - Legends", url: "https://www.valenciacf.com/" },
+    ],
+  }),
+  "leonidas da silva": makeFocusedProfile({
+    summary:
+      "Leonidas da Silva는 1938 World Cup 득점왕과 바이시클킥 신화로 기억되는 Brazil 초기 축구의 첫 글로벌 공격 스타입니다.",
+    team: {
+      clubs: ["Sao Cristovao", "Bonsucesso", "Penarol", "Vasco da Gama", "Botafogo", "Flamengo", "Sao Paulo", "Brazil national team"],
+      clubHonours: ["Vasco da Gama: Campeonato Carioca 1934", "Botafogo: Campeonato Carioca 1935", "Flamengo: Campeonato Carioca 1939", "Sao Paulo: Campeonato Paulista titles in the 1940s"],
+      nationalHonours: ["Brazil: FIFA World Cup third place 1938", "Brazil: Copa Rio Branco and South American Championship-era squads"],
+      verdict: "대표팀 월드컵 우승은 없지만 초기 Brazil 축구의 공격 상징성이 매우 큽니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup top scorer: 1938", "FIFA World Cup Golden Ball-level historical recognition: 1938", "Brazilian football historical icon"],
+      records: ["Nicknamed the Black Diamond", "Bicycle-kick popularization myth", "Brazil's first global World Cup scoring star"],
+      verdict: "1938 월드컵 득점왕과 스타일 혁신성이 개인 평가의 핵심입니다.",
+    },
+    prime: {
+      period: "1934-42 Brazil/Flamengo/Sao Paulo",
+      evidence: ["1938 World Cup seven-goal tournament", "Flamengo and Sao Paulo domestic stardom", "early Brazil national-team fame"],
+      skills: ["Acrobatic finishing", "improvised shooting", "agility", "box movement", "spectacle creation"],
+      verdict: "시대 대비 공격 창의성과 득점 고점이 매우 높습니다.",
+    },
+    importance: {
+      roles: ["Brazil: first World Cup attacking superstar", "Flamengo/Sao Paulo: crowd-pulling scorer"],
+      moments: ["1938 World Cup", "bicycle-kick legend", "Brazil's rise before Pele era"],
+      verdict: "Brazil이 세계 공격 축구 이미지로 기억되기 전 그 원형을 만든 선수입니다.",
+    },
+    legacy: {
+      reasons: ["1938 World Cup top scorer", "Black Diamond identity", "bicycle-kick mythology", "pre-Pele Brazil icon"],
+      context: ["Brazil historical lineage before Pele/Garrincha", "early evidence gap but huge mythic weight"],
+      verdict: "100년 뒤에도 Brazil 초기 축구의 상징으로 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Leonidas da Silva", url: "https://en.wikipedia.org/wiki/Le%C3%B4nidas" },
+      { label: "FIFA - World Cup 1938", url: "https://www.fifa.com/" },
+    ],
+  }),
+  vava: makeFocusedProfile({
+    summary:
+      "Vava는 Brazil의 1958/1962 World Cup 연속 우승에서 결승 득점을 모두 기록한 큰 경기형 센터포워드입니다.",
+    team: {
+      clubs: ["Sport Recife", "Vasco da Gama", "Atletico Madrid", "Palmeiras", "Club America", "Toros Neza", "San Diego Toros", "Portuguesa", "Brazil national team"],
+      clubHonours: ["Vasco da Gama: Campeonato Carioca 1956, 1958; Rio-Sao Paulo Tournament 1958", "Atletico Madrid: Copa del Generalisimo 1959-60, 1960-61", "Palmeiras: Brazilian national-title era squad context"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962"],
+      verdict: "월드컵 두 번의 결승 득점이 팀 커리어의 압도적 근거입니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup Golden Boot: 1962 shared", "FIFA World Cup All-Star Team: 1962 context"],
+      records: ["Scored in two different FIFA World Cup finals", "Brazil 1958/1962 central striker"],
+      verdict: "개인상보다 월드컵 결승 득점 기록이 결정적입니다.",
+    },
+    prime: {
+      period: "1958-62 Brazil/Vasco/Atletico",
+      evidence: ["1958 World Cup final brace", "1962 World Cup Golden Boot shared", "Atletico Madrid cup wins"],
+      skills: ["Centre-forward finishing", "heading", "near-post runs", "physical hold-up", "big-match calm"],
+      verdict: "기술적 만능성보다 토너먼트 결정력이 강한 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: finishing reference beside Pele/Garrincha", "Vasco/Atletico: title-era striker"],
+      moments: ["1958 World Cup final", "1962 World Cup final", "1962 knockout scoring"],
+      verdict: "Brazil 황금기에서 공격 스타들 사이의 마무리 역할을 확실히 수행했습니다.",
+    },
+    legacy: {
+      reasons: ["two World Cups", "goals in two World Cup finals", "1962 Golden Boot shared", "Brazil first dynasty striker"],
+      context: ["Brazil number 9 lineage before Romario/Ronaldo", "World Cup final scorer archetype"],
+      verdict: "월드컵 결승 기록 때문에 Brazil 스트라이커 역사에서 계속 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Vava", url: "https://en.wikipedia.org/wiki/Vav%C3%A1" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  tostao: makeFocusedProfile({
+    summary:
+      "Tostao는 Brazil 1970 World Cup의 지능적 세컨드 스트라이커/플레이메이커로, Pele와 Jairzinho를 연결한 공격 구조의 핵심입니다.",
+    team: {
+      clubs: ["Cruzeiro", "Vasco da Gama", "Brazil national team"],
+      clubHonours: ["Cruzeiro: Taca Brasil 1966", "Cruzeiro: Campeonato Mineiro titles across 1965-69", "Vasco da Gama: short late-career spell"],
+      nationalHonours: ["Brazil: FIFA World Cup 1970", "Brazil: FIFA World Cup appearances 1966, 1970"],
+      verdict: "클럽 트로피보다 1970 Brazil에서의 전술적 비중이 훨씬 큽니다.",
+    },
+    individual: {
+      awards: ["Brazilian Bola de Ouro: 1970", "Taca Brasil top scorer: 1966", "Cruzeiro all-time icon"],
+      records: ["Cruzeiro historical top-scorer tier", "Brazil 1970 creative forward core"],
+      verdict: "짧은 커리어에도 1970 국내 최고 평가와 Cruzeiro 상징성이 강합니다.",
+    },
+    prime: {
+      period: "1966-70 Cruzeiro/Brazil",
+      evidence: ["Cruzeiro 1966 Taca Brasil", "1970 World Cup", "1970 Bola de Ouro"],
+      skills: ["Link play", "vision", "one-touch combinations", "left-foot finishing", "space interpretation"],
+      verdict: "스트라이커와 10번 사이를 오간 지능형 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: false-nine-like connector in 1970", "Cruzeiro: club's early national icon"],
+      moments: ["1970 World Cup attacking combinations", "1966 Cruzeiro national title"],
+      verdict: "Pele가 중심이어도 Tostao의 연결 능력이 1970 공격을 완성했습니다.",
+    },
+    legacy: {
+      reasons: ["1970 World Cup", "Cruzeiro icon", "Brazilian Bola de Ouro 1970", "intelligent forward archetype"],
+      context: ["Brazil 1970 tactical balance", "shortened career due eye injury"],
+      verdict: "커리어가 짧아도 1970 팀의 구조적 핵심으로 오래 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Tostao", url: "https://en.wikipedia.org/wiki/Tost%C3%A3o" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  "roberto rivellino": makeFocusedProfile({
+    summary:
+      "Roberto Rivellino는 Brazil 1970의 왼발 10번 계열 스타이며, 강력한 슈팅과 elastico로 Brazil 기술 축구의 상징이 된 플레이메이커입니다.",
+    team: {
+      clubs: ["Corinthians", "Fluminense", "Al Hilal", "Brazil national team"],
+      clubHonours: ["Fluminense: Campeonato Carioca 1975, 1976", "Corinthians: long-term star era despite major-title drought", "Al Hilal: Saudi league/cup-era veteran impact"],
+      nationalHonours: ["Brazil: FIFA World Cup 1970", "Brazil: FIFA World Cup appearances 1970, 1974, 1978"],
+      verdict: "클럽 우승 총량보다 1970 월드컵과 기술적 상징성이 평가의 중심입니다.",
+    },
+    individual: {
+      awards: ["FIFA 100", "Brazilian Bola de Prata-level recognition", "World Cup All-Star/historical XI recognition"],
+      records: ["Elastico popularizer", "Brazil 1970 free-kick and left-foot icon"],
+      verdict: "정량 개인상보다 기술 혁신과 1970 팀 내 위상이 강합니다.",
+    },
+    prime: {
+      period: "1969-76 Brazil/Corinthians/Fluminense",
+      evidence: ["1970 World Cup", "Fluminense Carioca titles", "Brazil 1974/1978 senior creative role"],
+      skills: ["Left-foot shooting", "free kicks", "long passing", "elastico", "wide playmaking"],
+      verdict: "왼발 킥과 창의성의 Brazil 역사 최고권 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1970 left-sided creator/shooter", "Corinthians: title-drought era idol", "Fluminense: mid-1970s title star"],
+      moments: ["1970 World Cup free-kick vs Czechoslovakia", "Fluminense 1975-76", "Brazil 1974 leadership"],
+      verdict: "1970 브라질에서 Pele/Jairzinho 뒤의 창조적 축 중 하나였습니다.",
+    },
+    legacy: {
+      reasons: ["1970 World Cup", "elastico legacy", "FIFA 100", "Brazil left-footed playmaker lineage"],
+      context: ["Brazil 1970 all-time team", "Rivellino-Zico-Ronaldinho creative lineage"],
+      verdict: "기술과 스타일의 기억이 장기 존재감을 유지합니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Roberto Rivellino", url: "https://en.wikipedia.org/wiki/Roberto_Rivellino" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  socrates: makeFocusedProfile({
+    summary:
+      "Socrates는 Brazil 1982의 주장과 Corinthians Democracy로 기억되는 지성형 공격형 미드필더입니다.",
+    team: {
+      clubs: ["Botafogo-SP", "Corinthians", "Fiorentina", "Flamengo", "Santos", "Brazil national team"],
+      clubHonours: ["Corinthians: Campeonato Paulista 1979, 1982, 1983", "Flamengo: Campeonato Carioca 1986", "Brazil: major-tournament near-miss context rather than winner profile"],
+      nationalHonours: ["Brazil: FIFA World Cup appearances 1982, 1986", "Brazil: Copa America runner-up 1983"],
+      verdict: "우승 총량은 낮지만 Brazil 1982와 Corinthians의 상징성이 매우 큽니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 1983", "Brazilian Bola de Prata selections", "FIFA 100"],
+      records: ["Captain of Brazil's 1982 World Cup team", "Corinthians Democracy symbol"],
+      verdict: "축구 실력과 정치/문화 상징성이 함께 개인 평가를 만듭니다.",
+    },
+    prime: {
+      period: "1979-83 Corinthians/Brazil",
+      evidence: ["Corinthians Paulista titles", "1982 World Cup", "1983 South American Footballer of the Year"],
+      skills: ["Backheel passing", "one-touch play", "late shooting", "tall playmaker control", "penalty technique"],
+      verdict: "운동능력보다 지능과 터치로 경기를 지배한 특수한 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1982 captain and attacking midfielder", "Corinthians: football/civic movement leader"],
+      moments: ["1982 World Cup Italy match era", "Corinthians Democracy", "1983 Copa America"],
+      verdict: "팀 내 비중은 전술과 문화 양쪽에서 컸습니다.",
+    },
+    legacy: {
+      reasons: ["1982 Brazil captain", "Corinthians Democracy", "South American POTY 1983", "FIFA 100"],
+      context: ["Best players never to win World Cup debate", "football intellectual archetype"],
+      verdict: "월드컵 우승이 없어도 문화적 레거시 때문에 오래 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Socrates", url: "https://en.wikipedia.org/wiki/S%C3%B3crates" },
+      { label: "Britannica - Socrates", url: "https://www.britannica.com/biography/Socrates-Brazilian-athlete" },
+    ],
+  }),
+  gerson: makeFocusedProfile({
+    summary:
+      "Gerson은 Brazil 1970 World Cup 우승팀의 패스 마스터이며 결승전 중거리 골로 상징되는 중앙 미드필더입니다.",
+    team: {
+      clubs: ["Flamengo", "Botafogo", "Sao Paulo", "Fluminense", "Brazil national team"],
+      clubHonours: ["Botafogo: Campeonato Carioca 1967, 1968; Taca Brasil 1968", "Sao Paulo: Campeonato Paulista 1970, 1971", "Fluminense: Campeonato Carioca 1973"],
+      nationalHonours: ["Brazil: FIFA World Cup 1970", "Brazil: FIFA World Cup appearances 1966, 1970"],
+      verdict: "국내 클럽 우승과 1970 월드컵 우승을 모두 가진 안정적 커리어입니다.",
+    },
+    individual: {
+      awards: ["Brazil 1970 all-time-team recognition", "Brazilian midfield historical XI recognition", "World Cup final Man-of-the-Match-level reputation"],
+      records: ["Scored in the 1970 World Cup final", "Known as Canhotinha de Ouro, the Golden Left Foot"],
+      verdict: "정량 개인상보다 1970 결승 지배력과 패스 명성이 핵심입니다.",
+    },
+    prime: {
+      period: "1967-70 Botafogo/Sao Paulo/Brazil",
+      evidence: ["Botafogo 1968 Taca Brasil", "1970 World Cup", "1970 final goal vs Italy"],
+      skills: ["Long passing", "left-foot distribution", "tempo control", "line-breaking passes", "midfield leadership"],
+      verdict: "Didi 이후 Brazil 중앙 패스마스터 계보의 핵심입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1970 midfield organizer", "Botafogo/Sao Paulo: domestic-title playmaker"],
+      moments: ["1970 World Cup final goal", "1970 midfield control", "Botafogo late-1960s titles"],
+      verdict: "화려한 전방 스타들을 살리는 중원 배급의 중심이었습니다.",
+    },
+    legacy: {
+      reasons: ["1970 World Cup", "final goal", "Golden Left Foot identity", "Brazil midfield passing archetype"],
+      context: ["Brazil 1970 structural midfield", "Gerson-Didi-Falcao-Zico line"],
+      verdict: "1970 브라질의 균형을 설명할 때 반드시 필요한 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Gerson", url: "https://en.wikipedia.org/wiki/G%C3%A9rson" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  "roberto falcao": makeFocusedProfile({
+    summary:
+      "Roberto Falcao는 Internacional과 Roma, Brazil 1982를 대표한 박스 투 박스형 중앙 미드필더입니다.",
+    team: {
+      clubs: ["Internacional", "Roma", "Sao Paulo", "Brazil national team"],
+      clubHonours: ["Internacional: Campeonato Brasileiro Serie A 1975, 1976, 1979", "Roma: Serie A 1982-83; Coppa Italia 1980-81, 1983-84", "Sao Paulo: Campeonato Paulista 1985"],
+      nationalHonours: ["Brazil: FIFA World Cup appearances 1982, 1986", "Brazil: Copa America third place 1979"],
+      verdict: "월드컵 우승은 없지만 Internacional/Roma 양쪽에서 리그 우승 중심이었습니다.",
+    },
+    individual: {
+      awards: ["Bola de Ouro: 1978, 1979", "Serie A Foreign Footballer of the Year-level Roma recognition", "FIFA 100"],
+      records: ["Known as the King of Rome", "Brazil 1982 midfield icon"],
+      verdict: "Brazil 국내 MVP급 시즌과 Roma 역사성이 강한 개인 근거입니다.",
+    },
+    prime: {
+      period: "1978-84 Internacional/Roma/Brazil",
+      evidence: ["Internacional 1979 unbeaten Brazilian title", "Roma Serie A 1982-83", "Brazil 1982 World Cup"],
+      skills: ["Box-to-box control", "late shooting", "long passing", "tactical intelligence", "two-way midfield leadership"],
+      verdict: "중원 전체를 장악하는 고전적 완성형 미드필더 프라임입니다.",
+    },
+    importance: {
+      roles: ["Roma: Scudetto-winning midfield king", "Internacional: domestic dynasty leader", "Brazil: 1982 midfield pillar"],
+      moments: ["Roma 1982-83 Scudetto", "Brazil 1982 goal vs Italy", "Internacional 1979 title"],
+      verdict: "Roma와 Internacional에서는 팀 역사 중심에 들어갑니다.",
+    },
+    legacy: {
+      reasons: ["Roma Scudetto", "Brazil 1982", "Bola de Ouro twice", "King of Rome identity"],
+      context: ["Brazil all-time central midfielder debate", "Falcao vs Socrates/Gerson/Didi profile split"],
+      verdict: "우승과 미완의 Brazil 1982 서사를 모두 가진 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Paulo Roberto Falcao", url: "https://en.wikipedia.org/wiki/Paulo_Roberto_Falc%C3%A3o" },
+      { label: "AS Roma - Hall of Fame", url: "https://www.asroma.com/en/club/hall-of-fame" },
+    ],
+  }),
+  zito: makeFocusedProfile({
+    summary:
+      "Zito는 Brazil의 1958/1962 World Cup과 Santos의 Libertadores/Intercontinental 왕조를 연결한 수비형 미드필더 리더입니다.",
+    team: {
+      clubs: ["Taubate", "Santos", "Brazil national team"],
+      clubHonours: ["Santos: Copa Libertadores 1962, 1963; Intercontinental Cup 1962, 1963", "Santos: Taca Brasil/Campeonato Brasileiro-era national titles and Campeonato Paulista titles through the Pele era"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962"],
+      verdict: "팀 커리어 총량은 Brazil 미드필더 중 최상위권입니다.",
+    },
+    individual: {
+      awards: ["Santos historical captain/leader recognition", "Brazil 1962 World Cup final scorer", "Brazil/Santos all-time XI-level recognition"],
+      records: ["Scored in the 1962 World Cup final", "Captain-level organizer of Pele's Santos"],
+      verdict: "개인상보다 월드컵/산투스 왕조에서의 리더십과 결승 득점이 핵심입니다.",
+    },
+    prime: {
+      period: "1958-63 Santos/Brazil",
+      evidence: ["1958 and 1962 World Cups", "1962 and 1963 Libertadores/Intercontinental Cups", "1962 final goal"],
+      skills: ["Ball winning", "short passing", "leadership", "defensive balance", "late box arrival"],
+      verdict: "화려한 10번보다 팀 균형을 만든 수비형 미드필더 프라임입니다.",
+    },
+    importance: {
+      roles: ["Santos: captain and midfield balance", "Brazil: veteran stabilizer in two World Cup wins"],
+      moments: ["1962 World Cup final goal", "Santos Intercontinental Cups", "Brazil title defenses"],
+      verdict: "Pele/Garrincha/Didi 뒤의 팀 안정성을 책임졌습니다.",
+    },
+    legacy: {
+      reasons: ["two World Cups", "two Libertadores", "two Intercontinental Cups", "1962 final goal"],
+      context: ["winner-profile defensive midfielder", "Brazil Santos-era leadership"],
+      verdict: "개인 하이라이트보다 우승팀 구조의 핵심으로 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Zito", url: "https://en.wikipedia.org/wiki/Zito_(footballer)" },
+      { label: "FIFA - Brazil 1958/1962 numbers", url: "https://www.fifa.com/pt/articles/brasil-pele-garrincha-numeros-copa-mundo-1958-1962" },
+    ],
+  }),
+  lucio: makeFocusedProfile({
+    summary:
+      "Lucio는 Brazil 2002 World Cup 우승과 Inter 2010 treble을 모두 가진 현대 Brazil의 대표 센터백입니다.",
+    team: {
+      clubs: ["Internacional", "Bayer Leverkusen", "Bayern Munich", "Inter Milan", "Juventus", "Sao Paulo", "Palmeiras", "FC Goa", "Brasiliense", "Gama", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Bayern Munich: Bundesliga 2004-05, 2005-06, 2007-08; DFB-Pokal 2004-05, 2005-06, 2007-08", "Inter Milan: Serie A 2009-10; Coppa Italia 2009-10, 2010-11; UEFA Champions League 2009-10; FIFA Club World Cup 2010", "Palmeiras: Copa do Brasil 2015"],
+      nationalHonours: ["Brazil: FIFA World Cup 2002", "Brazil: FIFA Confederations Cup 2005, 2009", "Brazil: Copa America 2004", "Brazil Olympic: bronze medal 2000"],
+      verdict: "대표팀과 클럽에서 모두 최고 대회를 이긴 매우 강한 수비수 커리어입니다.",
+    },
+    individual: {
+      awards: ["FIFA Confederations Cup Golden Ball: 2009", "FIFA FIFPro World XI: 2010", "UEFA Team of the Year-level Inter treble recognition"],
+      records: ["Captain of Brazil's 2009 Confederations Cup-winning side", "Inter treble starting centre-back"],
+      verdict: "수비수로 2009 Confederations Cup Golden Ball을 받은 점이 특이하게 강합니다.",
+    },
+    prime: {
+      period: "2002-10 Brazil/Bayern/Inter",
+      evidence: ["2002 World Cup", "Bayern domestic doubles", "Inter 2009-10 treble"],
+      skills: ["Powerful carrying", "aerial duels", "front-foot defending", "recovery speed", "big-match concentration"],
+      verdict: "공격적으로 전진하는 센터백 프라임이 강했습니다.",
+    },
+    importance: {
+      roles: ["Brazil: 2002-10 defensive leader", "Inter: Mourinho treble centre-back", "Bayern: domestic-title defensive core"],
+      moments: ["2002 World Cup", "2010 Champions League final", "2009 Confederations Cup"],
+      verdict: "클럽과 대표팀 모두에서 수비 라인의 중심이었습니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "Champions League treble", "Confederations Cup Golden Ball", "FIFPro World XI"],
+      context: ["Brazil all-time centre-back debate with Bellini/Aldair/Thiago Silva", "modern attacking centre-back model"],
+      verdict: "트로피 완결성과 수비수 개인상 모두로 Brazil 센터백 상위권에 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Lucio", url: "https://en.wikipedia.org/wiki/L%C3%BAcio" },
+      { label: "Inter - Lucio Hall of Fame", url: "https://www.inter.it/en/club/hall-of-fame/lucio" },
+    ],
+  }),
+  "dani alves": makeFocusedProfile({
+    summary:
+      "Dani Alves는 Barcelona와 Brazil에서 역대급 우승 총량을 쌓은 공격형 라이트백입니다. 점수는 팀 커리어를 높게, 팀 내 절대비중은 보수적으로 둡니다.",
+    team: {
+      clubs: ["Bahia", "Sevilla", "Barcelona", "Juventus", "Paris Saint-Germain", "Sao Paulo", "Barcelona second spell", "UNAM", "Brazil U20", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Sevilla: UEFA Cup 2005-06, 2006-07; Copa del Rey 2006-07; UEFA Super Cup 2006", "Barcelona: La Liga 2008-09, 2009-10, 2010-11, 2012-13, 2014-15, 2015-16; Copa del Rey and Supercopa titles; UEFA Champions League 2008-09, 2010-11, 2014-15", "Juventus: Serie A 2016-17; Coppa Italia 2016-17", "Paris Saint-Germain: Ligue 1 2017-18, 2018-19 and domestic cups"],
+      nationalHonours: ["Brazil: Copa America 2007, 2019", "Brazil: FIFA Confederations Cup 2009, 2013", "Brazil Olympic: gold medal 2020", "Brazil U20: FIFA World Youth Championship 2003"],
+      verdict: "우승 총량은 축구사 전체에서도 최고권이지만 항상 팀의 1번 스타는 아니었습니다.",
+    },
+    individual: {
+      awards: ["Copa America Best Player: 2019", "FIFA FIFPro World XI selections", "UEFA Team of the Year selections", "La Liga/Barcelona all-time fullback recognition"],
+      records: ["One of the most decorated players in football history", "Barcelona right-back of Guardiola/Messi era"],
+      verdict: "팀 우승 총량과 2019 Copa MVP가 개인 평가를 받쳐줍니다.",
+    },
+    prime: {
+      period: "2006-15 Sevilla/Barcelona/Brazil",
+      evidence: ["Sevilla UEFA Cups", "Barcelona 2008-11 and 2014-15 Champions League titles", "Brazil 2019 Copa America MVP late peak"],
+      skills: ["Overlapping", "underlapping combinations", "crossing", "pressing", "technical midfield-like play"],
+      verdict: "공격형 라이트백 프라임은 축구사 최고권입니다.",
+    },
+    importance: {
+      roles: ["Barcelona: Messi-side combination fullback", "Brazil: long-term right-back and 2019 Copa leader", "Sevilla: breakout attacking fullback"],
+      moments: ["Barcelona trebles 2009 and 2015", "2019 Copa America MVP", "Sevilla UEFA Cups"],
+      verdict: "Barcelona에서는 시스템 핵심 부품, Brazil 2019에서는 대회 리더였습니다.",
+    },
+    legacy: {
+      reasons: ["three Champions League titles", "Copa America MVP 2019", "massive trophy count", "attacking fullback archetype"],
+      context: ["All-time right-back debate with Cafu/Djalma/Carlos Alberto/Lahm", "team-career vs individual-importance calibration"],
+      verdict: "우승 총량과 전술 영향력 때문에 라이트백 역사에서 계속 비교됩니다.",
+    },
+    sources: [
+      { label: "FC Barcelona - Dani Alves", url: "https://www.fcbarcelona.com/en/football/first-team/players/24140/dani-alves" },
+      { label: "Wikipedia - Dani Alves", url: "https://en.wikipedia.org/wiki/Dani_Alves" },
     ],
   }),
 };
