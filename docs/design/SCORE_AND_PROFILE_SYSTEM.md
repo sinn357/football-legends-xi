@@ -417,7 +417,7 @@ type PlayerEvidenceProfile = {
 | Abedi Pele | 92 | adjusted | 91 | 92 | 93 | 92 | 93 | Marseille UCL, African POTY 3연속, Ghana 플레이메이커 원형으로 92권 |
 | Roger Milla | 92 | adjusted | 88 | 91 | 91 | 95 | 96 | 클럽 커리어는 낮지만 1990 World Cup/Cameroon/CAF 50년 서사 때문에 레거시와 팀 비중을 높게 둠 |
 
-그 다음 나머지 아프리카 선수는 국가별로 처리한다.
+나머지 아프리카 선수도 국가별 큐레이션 프로필을 완료했다.
 
 1. Ghana: Michael Essien, Samuel Kuffour
 2. Nigeria: Jay-Jay Okocha, Nwankwo Kanu
@@ -443,12 +443,12 @@ type PlayerEvidenceProfile = {
 
 - Africa 21명: 모두 개별 큐레이션 프로필 보유
 - Africa 상위 8명: 상세 fact group, 소속팀, 팀 우승, 개인 수상, 프라임 근거, 팀 비중, 레거시 근거 보유
-- Asia focused 37명: South Korea 14명, Japan 21명, Ali Daei, Tim Cahill 적용
-- America focused 92명: Argentina 37명 + Brazil 55명 전체 적용
-- Asia/America 나머지 선수: baseline profile 적용
+- Asia 62명: South Korea 39명, Japan 21명, Ali Daei, Tim Cahill 전체 큐레이션 프로필 적용
+- America 130명: Argentina 37명, Brazil 55명, 기타 America 38명 전체 큐레이션 프로필 적용
+- 유럽 제외 총 213명: profile override 누락 0명
 - Europe: 기존 generic profile 유지
 
-Baseline profile은 빈 정보가 아니라 다음 큐레이션을 위한 구조화된 입력 틀이다. 팀 커리어, 개인 수상, 프라임 실력, 팀 내 비중, 100년 뒤 존재감 섹션이 모두 같은 배열로 나오며, 아직 선수별 exact honours가 들어가지 않은 경우 caveat로 명시한다.
+Baseline profile은 이제 Europe 선수에게만 남아 있다. 유럽 제외 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
 
 Focused profile 적용 완료:
 
@@ -460,9 +460,12 @@ Focused profile 적용 완료:
 6. America 2차 확장: Sergio Aguero, Hernan Crespo, Lautaro Martinez, Omar Sivori, Carlos Tevez, Javier Mascherano, Juan Sebastian Veron, Luis Monti, Oscar Ruggeri, Roberto Ayala, Leonidas da Silva, Vava, Tostao, Roberto Rivellino, Socrates, Gerson, Roberto Falcao, Zito, Lucio, Dani Alves
 7. America 3차 확장: Gonzalo Higuain, Diego Milito, Angel Labruna, Ricardo Bochini, Osvaldo Ardiles, Esteban Cambiasso, Walter Samuel, Pablo Zabaleta, Silvio Marzolini, Emiliano Martinez, Bebeto, Mario Zagallo, Careca, Ademir de Menezes, Zinzinho, Toninho Cerezo, Carlos Dunga, Carlos Casemiro, Mauro Silva, Thiago Silva
 8. America 4차 확장: Julian Alvarez, Pablo Aimar, Roberto Perfumo, Juan Pablo Sorin, Elber, Jose Altafini, Juninho Pernambucano, Ze Roberto, Gilberto Silva, Emerson, Fernandinho, Hilderaldo Bellini, Aldair, Domingos da Guia, Marquinhos, Maicon, Marcelo Vieira, Leovegildo Junior, Claudio Taffarel, Dida, Julio Cesar, Alisson Becker
+9. America 5차 확장: Hector Scarone, Jose Nasazzi, Obdulio Varela, Juan Schiaffino, Luis Suarez, Diego Forlan, Edinson Cavani, Enzo Francescoli, Federico Valverde, Diego Godin, Hector Castro, Pedro Rocha, Pedro Petrone, Pedro Cea, Jose Leandro Andrade, Paolo Montero, Jose Santamaria, Elias Figueroa, Ivan Zamorano, Arturo Vidal, Alexis Sanchez, Marcelo Salas, Claudio Bravo, Hector Chumpitaz, Teofilo Cubillas, Claudio Pizarro, Carlos Valderrama, James Rodriguez, Ivan Cordoba, Radamel Falcao, Hugo Sanchez, Rafael Marquez, Guillermo Ochoa, Javier Hernandez, Jose Chilavert, Dwight Yorke, Landon Donovan, Keylor Navas
+10. South Korea 잔여 확장: Park Chu-young, Choi Yong-soo, Hwang Hee-chan, Seol Ki-hyeon, Lee Chun-soo, Lee Chung-yong, Seo Jung-won, Lee Kang-in, Koo Ja-cheol, Lee Jae-sung, Shin Tae-yong, Hwang In-beom, Cho Kwang-rae, Kim Nam-il, Huh Jung-moo, Lee Eul-yong, Park Joo-ho, Ha Seok-ju, Song Chong-gug, Cha Du-ri, Kim Young-gwon, Kim Tae-young, Choi Jin-cheul, Jo Hyeon-woo, Kim Seung-gyu
+11. 비유럽 이름 정규화: Hangul NFKD 분해 후 NFC 재조합을 추가해 Korean profile/score override lookup이 빈 문자열로 충돌하지 않도록 수정
 
 다음 데이터 입력 우선순위:
 
-1. Asia 확장: Iran/Australia/Japan 외 아시아 핵심국 순차 큐레이션
-2. America 확장 5: Uruguay/Chile/Colombia/Mexico/기타 America 핵심 선수
-3. Asia 잔여 South Korea 선수 정리 및 현역보류/삭제후보 재검토
+1. Europe 전체 큐레이션 프로필 확장
+2. 유럽 제외 선수의 팀 우승/개인 수상 세부 항목 교차 검증
+3. 현역보류/삭제후보 선수 유지 여부 재검토
