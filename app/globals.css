@@ -489,6 +489,11 @@ input[type="range"] {
   position: relative;
 }
 
+.saved-xi-panel {
+  box-shadow: none;
+  margin-top: 16px;
+}
+
 .pitch::before {
   background: rgba(244, 239, 227, 0.72);
   content: "";
@@ -1309,39 +1314,94 @@ td strong {
 }
 
 .saved-item {
-  align-items: center;
+  align-items: start;
   background: var(--side-1-strong);
   border: 1px solid var(--line);
   border-radius: 8px;
-  display: flex;
+  display: grid;
   gap: 10px;
-  justify-content: space-between;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1fr) auto;
   padding: 10px;
 }
 
+.saved-load-button,
 .saved-item label {
   align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
   display: flex;
   gap: 10px;
+  justify-content: space-between;
   min-width: 0;
+  padding: 0;
+  text-align: left;
 }
 
+.saved-load-button span,
 .saved-item span {
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
+.saved-load-button strong,
+.saved-load-button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-load-button small,
 .saved-item small {
   color: var(--muted);
 }
 
-.saved-item button {
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+.saved-load-button em {
+  align-items: center;
+  background: rgba(200, 162, 74, 0.18);
+  border-radius: 999px;
+  color: var(--main);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-style: normal;
+  font-weight: 900;
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.saved-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.saved-preview span {
+  background: rgba(11, 61, 46, 0.08);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 5px 8px;
+}
+
+.saved-count {
+  background: rgba(200, 162, 74, 0.18);
+  border-radius: 999px;
+  color: var(--main);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 9px;
+}
+
+.saved-item .remove-button {
+  float: none;
   min-height: 34px;
-  padding: 0 10px;
 }
 
 .comparison-grid {
@@ -1423,6 +1483,27 @@ td strong {
   .candidate-list,
   .ranking-list {
     max-height: none;
+  }
+
+  .atlas-sidebar,
+  .builder-finder-panel,
+  .player-drawer {
+    position: static;
+  }
+
+  .saved-item {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-preview {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .saved-preview span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

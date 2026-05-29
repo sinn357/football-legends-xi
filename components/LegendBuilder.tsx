@@ -196,6 +196,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [builderCountry, setBuilderCountry] = useState<string | FilterValue>("ALL");
   const [builderPosition, setBuilderPosition] = useState<PositionCode | FilterValue>("ALL");
   const [candidateQuery, setCandidateQuery] = useState("");
+  const [compareQuery, setCompareQuery] = useState("");
   const [topOnly, setTopOnly] = useState(true);
   const [manualSlots, setManualSlots] = useState<Record<string, string>>({});
   const [selectedSlotId, setSelectedSlotId] = useState("st");
@@ -290,16 +291,14 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       .filter((player) => builderCountry === "ALL" || player.country === builderCountry)
       .filter((player) => builderPosition === "ALL" || player.primaryPosition === builderPosition)
       .filter((player) => !topOnly || player.topTierRank !== null)
-      .filter((player) => {
-        if (!normalizedQuery) {
-          return true;
-        }
-        return `${player.name} ${player.country} ${player.continent} ${player.primaryPosition} ${player.tags.join(" ")}`
-          .toLowerCase()
-          .includes(normalizedQuery);
-      })
+      .filter((player) => !normalizedQuery || matchesPlayerSearch(player, normalizedQuery))
       .map((player) => ({ player, rating: ratePlayerForSlot(player, selectedSlot, weights) }))
-      .sort((a, b) => b.rating - a.rating || (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999))
+      .sort(
+        (a, b) =>
+          getPlayerSearchRank(a.player, normalizedQuery) - getPlayerSearchRank(b.player, normalizedQuery) ||
+          b.rating - a.rating ||
+          (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999),
+      )
       .slice(0, 80);
   }, [
     builderContinent,
@@ -504,18 +503,50 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     }));
 
     const now = new Date();
-    const saved: SavedSquad = {
-      id: `${scope}-${formationId}-${now.getTime()}`,
-      name: `${scope} ${formation.name} #${savedSquads.length + 1}`,
-      scope,
-      formationId,
-      formationName: formation.name,
-      createdAt: now.toISOString(),
-      weights,
-      slots,
-    };
+    setSavedSquads((current) => {
+      const saved: SavedSquad = {
+        id: `${scope}-${formationId}-${now.getTime()}`,
+        name: `${scope} ${formation.name} #${current.length + 1}`,
+        scope,
+        formationId,
+        formationName: formation.name,
+        createdAt: now.toISOString(),
+        weights,
+        slots,
+      };
 
-    setSavedSquads((current) => [saved, ...current].slice(0, 20));
+      return [saved, ...current].slice(0, 20);
+    });
+  }
+
+  function loadSavedSquad(saved: SavedSquad) {
+    const nextManualSlots = saved.slots.reduce<Record<string, string>>((slots, slot) => {
+      slots[slot.slotId] = slot.playerId;
+      return slots;
+    }, {});
+    const nextPositions = saved.slots.reduce<Record<string, SlotPosition>>((positions, slot) => {
+      positions[slot.slotId] = slot.position;
+      return positions;
+    }, {});
+    const nextRoles = saved.slots.reduce<Record<string, PitchRole>>((roles, slot) => {
+      if (isPitchRole(slot.slotLabel)) {
+        roles[slot.slotId] = slot.slotLabel;
+      }
+      return roles;
+    }, {});
+
+    setFormationId(saved.formationId);
+    setWeights(saved.weights);
+    setManualSlots(nextManualSlots);
+    setSlotPositions((current) => ({ ...current, [saved.formationId]: nextPositions }));
+    setSlotRoles((current) => ({ ...current, [saved.formationId]: nextRoles }));
+    setSelectedSlotId(saved.slots[0]?.slotId ?? formations[saved.formationId]?.slots[0]?.id ?? "st");
+    setSelectedPlayerId(saved.slots[0]?.playerId ?? null);
+    setActiveTab("best-xi");
+  }
+
+  function deleteSavedSquad(savedId: string) {
+    setSavedSquads((current) => current.filter((saved) => saved.id !== savedId));
   }
 
   function toggleCompare(playerId: string) {
@@ -617,6 +648,8 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onFormationChange={setFormationId}
           onIncludeActiveHoldChange={setIncludeActiveHold}
           onIncludeDeleteCandidatesChange={setIncludeDeleteCandidates}
+          onDeleteSavedSquad={deleteSavedSquad}
+          onLoadSavedSquad={loadSavedSquad}
           onPlayerSelect={setSelectedPlayerId}
           onPositionChange={setBuilderPosition}
           onResetPositions={resetCurrentFormationPositions}
@@ -626,6 +659,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onTopOnlyChange={setTopOnly}
           pitchRef={pitchRef}
           selectedSlotId={selectedSlot.id}
+          savedSquads={savedSquads}
           setDraggingSlotId={setDraggingSlotId}
           setDropTargetSlotId={setDropTargetSlotId}
           setDropTargetRole={setDropTargetRole}
@@ -660,7 +694,9 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       {activeTab === "compare" ? (
         <CompareView
           compareIds={compareIds}
+          compareQuery={compareQuery}
           onPlayerSelect={setSelectedPlayerId}
+          onCompareQueryChange={setCompareQuery}
           onToggleCompare={toggleCompare}
           players={data.players}
           playerById={playerById}
@@ -838,9 +874,11 @@ function BestXiView({
   onCandidateQueryChange,
   onContinentChange,
   onCountryChange,
+  onDeleteSavedSquad,
   onFormationChange,
   onIncludeActiveHoldChange,
   onIncludeDeleteCandidatesChange,
+  onLoadSavedSquad,
   onPlayerSelect,
   onPositionChange,
   onResetPositions,
@@ -850,6 +888,7 @@ function BestXiView({
   onTopOnlyChange,
   onWeightChange,
   pitchRef,
+  savedSquads,
   selectedSlotId,
   setDraggingSlotId,
   setDropTargetSlotId,
@@ -885,9 +924,11 @@ function BestXiView({
   onCandidateQueryChange: (query: string) => void;
   onContinentChange: (value: Continent | FilterValue) => void;
   onCountryChange: (value: string | FilterValue) => void;
+  onDeleteSavedSquad: (savedId: string) => void;
   onFormationChange: (formationId: string) => void;
   onIncludeActiveHoldChange: (value: boolean) => void;
   onIncludeDeleteCandidatesChange: (value: boolean) => void;
+  onLoadSavedSquad: (saved: SavedSquad) => void;
   onPlayerSelect: (playerId: string) => void;
   onPositionChange: (value: PositionCode | FilterValue) => void;
   onResetPositions: () => void;
@@ -897,6 +938,7 @@ function BestXiView({
   onTopOnlyChange: (value: boolean) => void;
   onWeightChange: (key: ScoreKey, value: number) => void;
   pitchRef: RefObject<HTMLDivElement | null>;
+  savedSquads: SavedSquad[];
   selectedSlotId: string;
   setDraggingSlotId: (slotId: string | null) => void;
   setDropTargetSlotId: (slotId: string | null) => void;
@@ -1190,9 +1232,61 @@ function BestXiView({
             );
           })}
         </div>
+        <SavedSquadsPanel savedSquads={savedSquads} onDelete={onDeleteSavedSquad} onLoad={onLoadSavedSquad} />
       </section>
 
       {inspector}
+    </section>
+  );
+}
+
+function SavedSquadsPanel({
+  onDelete,
+  onLoad,
+  savedSquads,
+}: {
+  onDelete: (savedId: string) => void;
+  onLoad: (saved: SavedSquad) => void;
+  savedSquads: SavedSquad[];
+}) {
+  return (
+    <section className="saved-panel saved-xi-panel">
+      <div className="section-heading row">
+        <div>
+          <p className="eyebrow">Saved XI</p>
+          <h2>저장한 조합</h2>
+        </div>
+        <span className="saved-count">{savedSquads.length}/20</span>
+      </div>
+      {savedSquads.length === 0 ? (
+        <p className="empty-state">마음에 드는 XI를 저장하면 여기서 다시 불러올 수 있습니다.</p>
+      ) : (
+        <div className="saved-list">
+          {savedSquads.map((saved) => (
+            <article className="saved-item" key={saved.id}>
+              <button className="saved-load-button" onClick={() => onLoad(saved)} type="button">
+                <span>
+                  <strong>{saved.name}</strong>
+                  <small>
+                    {saved.scope} · {saved.formationName} · {formatSavedDate(saved.createdAt)}
+                  </small>
+                </span>
+                <em>{Math.round(saved.slots.reduce((sum, slot) => sum + slot.rating, 0) / Math.max(saved.slots.length, 1))}</em>
+              </button>
+              <div className="saved-preview" aria-label={`${saved.name} 선수 목록`}>
+                {saved.slots.slice(0, 6).map((slot) => (
+                  <span key={`${saved.id}-${slot.slotId}`}>
+                    {slot.slotLabel} {slot.playerName}
+                  </span>
+                ))}
+              </div>
+              <button className="remove-button" onClick={() => onDelete(saved.id)} type="button">
+                삭제
+              </button>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -1261,6 +1355,8 @@ function RankingsView({
 
 function CompareView({
   compareIds,
+  compareQuery,
+  onCompareQueryChange,
   onPlayerSelect,
   onToggleCompare,
   playerById,
@@ -1269,6 +1365,8 @@ function CompareView({
   weights,
 }: {
   compareIds: string[];
+  compareQuery: string;
+  onCompareQueryChange: (query: string) => void;
   onPlayerSelect: (playerId: string) => void;
   onToggleCompare: (playerId: string) => void;
   playerById: Map<string, LegendPlayer>;
@@ -1277,9 +1375,21 @@ function CompareView({
   weights: WeightMap;
 }) {
   const comparedPlayers = compareIds.map((id) => playerById.get(id)).filter(Boolean) as LegendPlayer[];
+  const normalizedQuery = compareQuery.trim().toLowerCase();
   const quickChoices = players
-    .filter((player) => player.topTierRank !== null)
-    .sort((a, b) => (a.topTierRank ?? 999) - (b.topTierRank ?? 999))
+    .filter((player) => {
+      if (!normalizedQuery) {
+        return player.topTierRank !== null;
+      }
+
+      return matchesPlayerSearch(player, normalizedQuery);
+    })
+    .sort(
+      (a, b) =>
+        getPlayerSearchRank(a, normalizedQuery) - getPlayerSearchRank(b, normalizedQuery) ||
+        (a.topTierRank ?? 999) - (b.topTierRank ?? 999) ||
+        b.overallScore - a.overallScore,
+    )
     .slice(0, 80);
 
   return (
@@ -1289,22 +1399,37 @@ function CompareView({
           <p className="eyebrow">Compare</p>
           <h2>비교 선수 선택</h2>
         </div>
+        <input
+          className="search-input"
+          onChange={(event) => onCompareQueryChange(event.target.value)}
+          placeholder="선수, 국가, 포지션 검색"
+          type="search"
+          value={compareQuery}
+        />
         <div className="candidate-list">
           {quickChoices.map((player) => (
             <article className="candidate-item" key={player.id}>
-              <button onClick={() => onToggleCompare(player.id)} type="button">
+              <button onClick={() => onPlayerSelect(player.id)} type="button">
                 <strong>{player.name}</strong>
                 <span>
                   {player.country} · {player.primaryPosition}
                 </span>
               </button>
               <div>
+                <button
+                  className={compareIds.includes(player.id) ? "active" : ""}
+                  onClick={() => onToggleCompare(player.id)}
+                  type="button"
+                >
+                  {compareIds.includes(player.id) ? "해제" : "비교"}
+                </button>
                 <button onClick={() => onPlayerSelect(player.id)} type="button">
                   정보
                 </button>
               </div>
             </article>
           ))}
+          {quickChoices.length === 0 ? <p className="empty-state">검색 결과가 없습니다.</p> : null}
         </div>
       </aside>
       <section className="comparison-table-panel">
@@ -1505,8 +1630,76 @@ function ScoreBars({ player }: { player: LegendPlayer }) {
   );
 }
 
+function matchesPlayerSearch(player: LegendPlayer, normalizedQuery: string) {
+  return getPlayerSearchFields(player).some((field) => field.includes(normalizedQuery));
+}
+
+function getPlayerSearchRank(player: LegendPlayer, normalizedQuery: string) {
+  if (!normalizedQuery) {
+    return 0;
+  }
+
+  const name = player.name.toLowerCase();
+  const country = player.country.toLowerCase();
+  const position = player.primaryPosition.toLowerCase();
+  const tags = player.tags.join(" ").toLowerCase();
+
+  if (name === normalizedQuery) {
+    return 0;
+  }
+
+  if (name.startsWith(normalizedQuery)) {
+    return 1;
+  }
+
+  if (name.includes(normalizedQuery)) {
+    return 2;
+  }
+
+  if (country.startsWith(normalizedQuery)) {
+    return 3;
+  }
+
+  if (country.includes(normalizedQuery)) {
+    return 4;
+  }
+
+  if (position === normalizedQuery) {
+    return 5;
+  }
+
+  if (tags.includes(normalizedQuery)) {
+    return 6;
+  }
+
+  return 9;
+}
+
+function getPlayerSearchFields(player: LegendPlayer) {
+  return [
+    player.name,
+    player.country,
+    player.continent,
+    player.primaryPosition,
+    ...player.tags,
+  ].map((value) => value.toLowerCase());
+}
+
 function getDefaultSlotRole(slot: FormationSlot): PitchRole {
   return (slot.accepts.find((position) => position !== "LEGEND") ?? "CM") as PitchRole;
+}
+
+function isPitchRole(value: string): value is PitchRole {
+  return positionOptions.includes(value as PositionCode) && value !== "LEGEND";
+}
+
+function formatSavedDate(value: string) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
 
 function findPitchRole(position: SlotPosition): PitchRole {
