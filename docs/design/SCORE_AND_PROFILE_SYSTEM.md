@@ -452,10 +452,11 @@ type PlayerEvidenceProfile = {
 - Italy 60명: 전체 큐레이션 프로필 적용
 - France 38명: 전체 큐레이션 프로필 적용
 - Spain 48명: 전체 큐레이션 프로필 적용
-- Europe 누적 309명: profile override 누락 0명
-- Europe 잔여 134명: 기존 generic profile 유지
+- England 53명: 전체 큐레이션 프로필 적용
+- Europe 누적 362명: profile override 누락 0명
+- Europe 잔여 81명: 기존 generic profile 유지
 
-Baseline profile은 이제 Germany/Italy/France/Spain을 제외한 Core Europe 선수에게만 남아 있다. 유럽 제외 선수와 Europe 1/2/Germany/Italy/France/Spain 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
+Baseline profile은 이제 Germany/Italy/France/Spain/England를 제외한 Core Europe 선수에게만 남아 있다. 유럽 제외 선수와 Europe 1/2/Germany/Italy/France/Spain/England 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
 
 Focused profile 적용 완료:
 
@@ -477,10 +478,11 @@ Focused profile 적용 완료:
 16. Italy 확장: Luigi Riva, Silvio Piola, Angelo Schiavio, Paolo Rossi, Christian Vieri, Gianluca Vialli, Alessandro Altobelli, Filippo Inzaghi, Luca Toni, Giuseppe Meazza, Roberto Baggio, Francesco Totti, Alessandro Del Piero, Roberto Bettega, Roberto Mancini, Gianfranco Zola, Giuseppe Signori, Antonio Di Natale, Bruno Conti, Giampiero Boniperti, Franco Causio, Roberto Donadoni, Mauro Camoranesi, Mario Corso, Raimundo Orsi, Gianni Rivera, Alessandro Mazzola, Valentino Mazzola, Giovanni Ferrari, Giacomo Bulgarelli, Gennaro Gattuso, Carlo Ancelotti, Marco Verratti, Claudio Marchisio, Antonio Conte, Nicolo Barella, Andrea Pirlo, Marco Tardelli, Demetrio Albertini, Daniele De Rossi, Franco Baresi, Fabio Cannavaro, Gaetano Scirea, Alessandro Nesta, Pietro Vierchowod, Giorgio Chiellini, Leonardo Bonucci, Ciro Ferrara, Alessandro Costacurta, Andrea Barzagli, Giuseppe Bergomi, Claudio Gentile, Gianluca Zambrotta, Paolo Maldini, Giacinto Facchetti, Antonio Cabrini, Gianluigi Buffon, Dino Zoff, Walter Zenga, Gianluigi Donnarumma
 17. France 확장: Kylian Mbappe, Thierry Henry, Karim Benzema, Jean-Pierre Papin, Just Fontaine, David Trezeguet, Olivier Giroud, Antoine Griezmann, Eric Cantona, Youri Djorkaeff, Ousmane Dembele, Franck Ribery, Robert Pires, Zinedine Zidane, Michel Platini, Raymond Kopa, Alain Giresse, Patrick Vieira, N'Golo Kante, Jean Tigana, Blaise Matuidi, Paul Pogba, Didier Deschamps, Claude Makelele, Emmanuel Petit, Marcel Desailly, Laurent Blanc, Raphael Varane, Maxime Bossis, Marius Tresor, Lilian Thuram, Willy Sagnol, Bixente Lizarazu, Patrice Evra, Eric Abidal, Theo Hernandez, Hugo Lloris, Fabien Barthez
 18. Spain 확장: David Villa, Telmo Zarra, Fernando Torres, Fernando Morientes, Carlos Santillana, Raul Gonzalez, Emilio Butragueno, Amancio Amaro, Michel, Juanito, Luis Enrique, Joaquin, Pedro Rodriguez, Francisco Gento, Luis Suarez Miramontes, Andres Iniesta, David Silva, Juan Carlos Valeron, Rafael Martin Vazquez, Jose Mari Bakero, Isco, Xavi, Luis del Sol, Jose Pirri, Cesc Fabregas, Thiago Alcantara, Koke, Gaizka Mendieta, Santi Cazorla, Rodri, Sergio Busquets, Xabi Alonso, Josep Guardiola, Sergio Ramos, Carles Puyol, Fernando Hierro, Gerard Pique, Daniel Carvajal, Michel Salgado, Chendo, Cesar Azpilicueta, Jesus Navas, Jose Antonio Camacho, Jordi Alba, Rafael Gordillo, Iker Casillas, Andoni Zubizarreta, Victor Valdes
+19. England 확장: Gary Lineker, Jimmy Greaves, Harry Kane, Alan Shearer, Michael Owen, Geoff Hurst, Roger Hunt, Andy Cole, Jamie Vardy, Kevin Keegan, Wayne Rooney, Johnny Haynes, Teddy Sheringham, Stanley Matthews, David Beckham, Bukayo Saka, Steve McManaman, Tom Finney, John Barnes, Raheem Sterling, Chris Waddle, Bobby Charlton, Paul Gascoigne, Steven Gerrard, Frank Lampard, Paul Scholes, Bryan Robson, Michael Carrick, Jordan Henderson, James Milner, Ian Callaghan, Declan Rice, Terry McDermott, Bobby Moore, John Terry, Rio Ferdinand, Billy Wright, Tony Adams, Sol Campbell, Jack Charlton, John Stones, Kyle Walker, Gary Neville, George Cohen, Jimmy Armfield, Phil Neal, Trent Alexander-Arnold, Ashley Cole, Ray Wilson, Gordon Banks, Peter Shilton, David Seaman, Ray Clemence
 
 다음 데이터 입력 우선순위:
 
-1. Core Europe 2 잔여: England, Netherlands
+1. Core Europe 2 잔여: Netherlands
 2. Core Europe 3: Portugal, Belgium
 3. 유럽 제외 선수의 팀 우승/개인 수상 세부 항목 교차 검증
 4. 현역보류/삭제후보 선수 유지 여부 재검토
