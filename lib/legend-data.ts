@@ -2417,6 +2417,171 @@ function calculateOverallScore(scores: PlayerScores) {
   );
 }
 
+function makeNonEuropeBaselineProfile(
+  name: string,
+  country: string,
+  position: PositionCode,
+  status: PlayerStatus,
+  scores: PlayerScores,
+): PlayerProfile {
+  const continent = getContinent(country);
+  const statusNote =
+    status === "active-hold"
+      ? "현역 커리어가 진행 중이라 최종 점수와 수상 목록은 추후 재검토합니다."
+      : status === "delete-candidate"
+        ? "원본 리스트에서 삭제 후보로 표시되어 유지 여부부터 재검토해야 합니다."
+        : status === "active-legend"
+          ? "현역이지만 이미 레전드로 확정된 선수입니다."
+          : status === "watch"
+            ? "원본 리스트에서 비교 검토가 필요한 선수입니다."
+            : "레전드 풀에 포함된 확정 선수입니다.";
+  const regionalContext =
+    continent === "Africa"
+      ? "아프리카 레전드 풀은 이미 개별 큐레이션을 우선 적용하고, 남은 선수는 국가별 위상과 클럽/대표팀 성과를 기준으로 보강합니다."
+      : continent === "Asia"
+        ? "아시아 레전드 풀은 유럽 빅리그 성과, 월드컵/아시안컵 영향력, 국가대표 상징성을 함께 봅니다."
+        : "아메리카 레전드 풀은 월드컵/코파 아메리카, 남미 클럽컵, 유럽 빅클럽 커리어, 국가별 역사성을 함께 봅니다.";
+  const sourceQuery = encodeURIComponent(`${name} footballer honours`);
+
+  return {
+    isCurated: false,
+    summary: `${name}는 ${country}의 ${positionLabels[position]} 레전드 후보입니다. ${regionalContext} ${statusNote}`,
+    sources: [
+      { label: `Wikipedia search - ${name}`, url: `https://en.wikipedia.org/w/index.php?search=${sourceQuery}` },
+      { label: "RSSSF international football records", url: "https://www.rsssf.org/" },
+      { label: "FIFA player and tournament archive", url: "https://www.fifa.com/" },
+    ],
+    sections: {
+      teamCareer: makeProfileSection({
+        score: scores.teamCareer,
+        title: "팀 커리어",
+        explanation:
+          "팀 커리어는 소속 클럽 전체, 클럽 우승, 대표팀 토너먼트 성과, 우승 과정에서의 역할을 분리해 채점합니다.",
+        verdict: "이 선수는 유럽 제외 전체 풀에 포함됐으므로 국가/대륙 단위 비교 대상입니다.",
+        facts: [
+          {
+            label: "현재 분류",
+            items: [`국가: ${country}`, `대륙: ${continent}`, `기본 포지션: ${position}`, `리스트 상태: ${statusNote}`],
+          },
+          {
+            label: "팀 커리어 입력 항목",
+            items: [
+              "소속했던 클럽 전체를 커리어 순서대로 입력",
+              "리그, 국내컵, 리그컵, 슈퍼컵, 대륙 대항전 우승을 팀별로 분리",
+              "대표팀 우승, 준우승, 월드컵/대륙컵 최고 성과를 분리",
+              "각 성과에서 핵심/주전/로테이션/후보였는지 표시",
+            ],
+          },
+        ],
+        bullets: [
+          "유럽 제외 선수는 국가대표 상징성이 팀 커리어 점수에 크게 작동할 수 있습니다.",
+          "클럽 우승 총량과 대표팀 역사적 성과를 섞지 않고 따로 비교합니다.",
+        ],
+        caveat: "아직 개별 선수의 모든 소속팀과 우승 목록을 완전 입력한 상태는 아닙니다. 이 기본 프로필은 상세 큐레이션 전의 구조화된 입력 틀입니다.",
+      }),
+      individualCareer: makeProfileSection({
+        score: scores.individualCareer,
+        title: "개인 수상",
+        explanation:
+          "개인 수상은 글로벌 개인상, 대륙 올해의 선수, 리그 MVP, 득점왕/도움왕, 베스트 XI, 토너먼트 수상 기록을 분리합니다.",
+        verdict: "후보/선정/수상은 서로 다른 무게로 처리합니다.",
+        facts: [
+          {
+            label: "개인 수상 입력 항목",
+            items: [
+              "Ballon d'Or, FIFA/The Best, World Soccer 등 글로벌 개인상",
+              "CAF/AFC/CONMEBOL 및 리그 올해의 선수",
+              "득점왕, 도움왕, 골든볼, 골든부트",
+              "Team of the Year, Team of the Tournament, Hall of Fame",
+              "최종 후보와 순위는 실제 수상보다 낮은 가중치로 기록",
+            ],
+          },
+        ],
+        bullets: [
+          "개인상 총량은 포지션과 시대를 보정해 봅니다.",
+          "최신 시즌 항목은 공식 발표 또는 신뢰 언론 확인 전까지 단정하지 않습니다.",
+        ],
+        caveat: "개별 수상 목록은 후속 큐레이션에서 공식/신뢰 출처로 교차 확인해 채웁니다.",
+      }),
+      primeSkill: makeProfileSection({
+        score: scores.primeSkill,
+        title: "프라임 실력",
+        explanation:
+          "프라임 실력은 누적 커리어와 분리해 전성기 1-3시즌의 순수 경기력, 포지션 내 희소성, 같은 시대 최고권 비교를 봅니다.",
+        verdict: "총점보다 프라임 점수가 높은 선수는 트로피보다 고점형 레전드로 해석합니다.",
+        facts: [
+          {
+            label: "프라임 입력 항목",
+            items: [
+              "전성기 기간",
+              "해당 기간 수상/기록/팀 성과",
+              "포지션별 핵심 무기",
+              "동시대 최고 선수와의 비교 위치",
+              "월드컵, 대륙컵, UCL/Libertadores 등 큰 경기 고점",
+            ],
+          },
+          {
+            label: "포지션 기준",
+            items: [
+              "공격수: 득점, 침투, 연계, 압박, 큰 경기 결정력",
+              "미드필더: 운반, 패스, 압박 저항, 수비 범위, 템포 조절",
+              "수비수/골키퍼: 대인 수비, 위치 선정, 리더십, 선방, 빌드업",
+            ],
+          },
+        ],
+        bullets: [
+          "프라임 실력은 앱의 가장 높은 가중치 축입니다.",
+          "팀 커리어가 낮아도 전성기 실력이 역사적이면 이 항목에서 보정됩니다.",
+        ],
+      }),
+      teamImportance: makeProfileSection({
+        score: scores.teamImportance,
+        title: "팀 내 비중",
+        explanation:
+          "팀 내 비중은 클럽과 대표팀에서 선수가 얼마나 대체 불가능했는지, 팀 성과가 그 선수 중심으로 설명되는지를 봅니다.",
+        verdict: "빅클럽 소속 여부와 팀의 실제 중심 역할은 분리해서 봅니다.",
+        facts: [
+          {
+            label: "팀 내 비중 입력 항목",
+            items: [
+              "클럽 전술 역할과 우승팀 내 서열",
+              "대표팀 주장/에이스 여부",
+              "결승전, 토너먼트, 월드컵, 승부차기 등 결정적 장면",
+              "선수가 빠졌을 때 팀 구조가 얼마나 흔들렸는지",
+            ],
+          },
+        ],
+        bullets: [
+          "국가대표 전력 차이가 큰 대륙 선수들은 대표팀 비중이 특히 중요합니다.",
+          "유명세보다 실제 팀 성과와 연결된 역할을 우선합니다.",
+        ],
+      }),
+      legacy: makeProfileSection({
+        score: scores.legacy,
+        title: "100년 뒤 존재감",
+        explanation:
+          "장기 존재감은 기록, 상징 장면, 국가/대륙 최초성, 후대 비교 기준으로 남을 가능성을 평가합니다.",
+        verdict: "장기 레거시는 인기보다 반복 소환 가능한 역사적 근거를 우선합니다.",
+        facts: [
+          {
+            label: "레거시 입력 항목",
+            items: [
+              "국가 또는 대륙 역대 최고 논쟁 포함 여부",
+              "월드컵, 코파, 아시안컵, AFCON 등 대회 상징 장면",
+              "포지션별 기준점 또는 최초/유일 기록",
+              "후대 선수와 비교될 때 기준으로 호출되는지",
+            ],
+          },
+        ],
+        bullets: [
+          "축구사 전체에서 반복 설명될 이름인지와 국가 내부에서만 강한 이름인지를 구분합니다.",
+          "세부 큐레이션 후 총점과 함께 가장 많이 보정될 수 있는 항목입니다.",
+        ],
+      }),
+    },
+  };
+}
+
 function makePlayerProfile(
   name: string,
   country: string,
@@ -2432,6 +2597,10 @@ function makePlayerProfile(
       sections: makeCuratedProfileSections(curatedProfile, scores),
       sources: curatedProfile.sources,
     };
+  }
+
+  if (getContinent(country) !== "Europe") {
+    return makeNonEuropeBaselineProfile(name, country, position, status, scores);
   }
 
   const topTierRank = topTierRankByName.get(normalizedName(name)) ?? null;

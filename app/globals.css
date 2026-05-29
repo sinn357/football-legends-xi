@@ -1118,10 +1118,19 @@ td strong {
   padding-top: 14px;
 }
 
-.profile-section div {
+.profile-section-header {
   align-items: center;
   display: flex;
+  gap: 12px;
   justify-content: space-between;
+}
+
+.profile-section-header h3 {
+  margin: 0;
+}
+
+.profile-section-header strong {
+  flex: 0 0 auto;
 }
 
 .profile-section p,
@@ -1149,6 +1158,7 @@ td strong {
 }
 
 .fact-group {
+  display: block;
   background: rgba(255, 255, 255, 0.64);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1164,6 +1174,10 @@ td strong {
 .fact-group ul {
   margin-bottom: 0;
   padding-left: 18px;
+}
+
+.fact-group li + li {
+  margin-top: 4px;
 }
 
 .source-section {

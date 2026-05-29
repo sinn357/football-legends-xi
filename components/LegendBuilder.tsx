@@ -1329,7 +1329,7 @@ function PlayerDetailDrawer({
           const section = player.profile.sections[key];
           return (
             <section className="profile-section" key={key}>
-              <div>
+              <div className="profile-section-header">
                 <h3>{section.title}</h3>
                 <strong>
                   {section.score} · {section.grade}
@@ -1363,7 +1363,7 @@ function PlayerDetailDrawer({
       </div>
       {player.profile.sources.length ? (
         <section className="profile-section source-section">
-          <div>
+          <div className="profile-section-header">
             <h3>출처</h3>
           </div>
           <ul>

@@ -431,10 +431,25 @@ type PlayerEvidenceProfile = {
 
 ## 구현 메모
 
-현재 앱은 `scores`만 가지고 있고 별도 `overallScore`가 없다. 다음 구현 단계에서는 아래 순서로 바꾼다.
+현재 앱은 `scores`와 별도 `overallScore`, `scoreMode`를 함께 가진다.
 
-1. `LegendPlayer`에 `overallScore`와 `scoreMode` 추가
-2. 카드/랭킹/비교 화면의 대표 점수를 `rating` 계산값에서 `overallScore` 중심으로 변경
-3. 가중치 조절 기능은 "사용자 시뮬레이션 점수"로 유지
-4. 공식 프로필 점수와 사용자 가중치 점수를 UI에서 구분
-5. 아프리카 선수부터 상세 정보와 점수를 새 구조로 이전
+- `overallScore`: 공식 축구사 총점
+- `scoreMode`: `anchor`, `computed`, `adjusted`
+- `scores`: 팀 커리어, 개인 수상, 프라임 실력, 팀 내 비중, 장기 존재감 세부 점수
+- 가중치 조절 기능은 "사용자 시뮬레이션 점수"로 유지한다.
+- 선수 상세 drawer에서는 공식 총점과 세부 점수를 함께 보여준다.
+
+## 현재 커버리지 상태
+
+- Africa 21명: 모두 개별 큐레이션 프로필 보유
+- Africa 상위 8명: 상세 fact group, 소속팀, 팀 우승, 개인 수상, 프라임 근거, 팀 비중, 레거시 근거 보유
+- Asia/America: 유럽 제외 전체 선수에 baseline profile 적용
+- Europe: 기존 generic profile 유지
+
+Baseline profile은 빈 정보가 아니라 다음 큐레이션을 위한 구조화된 입력 틀이다. 팀 커리어, 개인 수상, 프라임 실력, 팀 내 비중, 100년 뒤 존재감 섹션이 모두 같은 배열로 나오며, 아직 선수별 exact honours가 들어가지 않은 경우 caveat로 명시한다.
+
+다음 데이터 입력 우선순위:
+
+1. Asia 핵심: Son Heung-min, Cha Bum-kun, Park Ji-sung, Hong Myung-bo, Hidetoshi Nakata, Keisuke Honda, Shunsuke Nakamura, Shinji Kagawa, Ali Daei, Tim Cahill
+2. America 앵커: Lionel Messi, Diego Maradona, Pele, Ronaldo, Garrincha, Zico, Ronaldinho, Romario, Neymar, Alfredo Di Stefano
+3. America 확장: Argentina/Brazil 포지션별 상위권, Uruguay/Chile/Colombia/Mexico 핵심 선수
