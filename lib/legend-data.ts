@@ -240,6 +240,106 @@ const scoreOverrides: Record<string, ScoreOverride> = {
     scoreMode: "adjusted",
     scores: { teamCareer: 94, individualCareer: 94, primeSkill: 97, teamImportance: 96, legacy: 95 },
   },
+  "gabriel batistuta": {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 91, primeSkill: 93, teamImportance: 93, legacy: 92 },
+  },
+  "mario kempes": {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 92, primeSkill: 93, teamImportance: 95, legacy: 94 },
+  },
+  "angel di maria": {
+    overallScore: 92,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 97, individualCareer: 88, primeSkill: 91, teamImportance: 94, legacy: 94 },
+  },
+  "juan roman riquelme": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 90, primeSkill: 93, teamImportance: 94, legacy: 93 },
+  },
+  "daniel passarella": {
+    overallScore: 93,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 91, primeSkill: 93, teamImportance: 96, legacy: 96 },
+  },
+  "javier zanetti": {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 96, individualCareer: 88, primeSkill: 91, teamImportance: 93, legacy: 94 },
+  },
+  "ubaldo fillol": {
+    overallScore: 90,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 89, primeSkill: 91, teamImportance: 94, legacy: 92 },
+  },
+  "fernando redondo": {
+    overallScore: 89,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 93, individualCareer: 87, primeSkill: 92, teamImportance: 90, legacy: 90 },
+  },
+  "jose manuel moreno": {
+    overallScore: 92,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 90, primeSkill: 94, teamImportance: 95, legacy: 95 },
+  },
+  "adolfo pedernera": {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 88, primeSkill: 93, teamImportance: 95, legacy: 94 },
+  },
+  rivaldo: {
+    overallScore: 94,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 96, primeSkill: 96, teamImportance: 93, legacy: 95 },
+  },
+  jairzinho: {
+    overallScore: 93,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 89, individualCareer: 91, primeSkill: 94, teamImportance: 95, legacy: 95 },
+  },
+  didi: {
+    overallScore: 94,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 95, individualCareer: 94, primeSkill: 95, teamImportance: 96, legacy: 97 },
+  },
+  cafu: {
+    overallScore: 94,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 99, individualCareer: 90, primeSkill: 93, teamImportance: 96, legacy: 97 },
+  },
+  "roberto carlos": {
+    overallScore: 94,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 98, individualCareer: 92, primeSkill: 95, teamImportance: 94, legacy: 97 },
+  },
+  "nilton santos": {
+    overallScore: 94,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 96, individualCareer: 91, primeSkill: 94, teamImportance: 95, legacy: 98 },
+  },
+  "djalma santos": {
+    overallScore: 93,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 95, individualCareer: 90, primeSkill: 93, teamImportance: 94, legacy: 96 },
+  },
+  "carlos alberto": {
+    overallScore: 93,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 93, individualCareer: 90, primeSkill: 93, teamImportance: 96, legacy: 97 },
+  },
+  kaka: {
+    overallScore: 92,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 96, individualCareer: 96, primeSkill: 95, teamImportance: 90, legacy: 93 },
+  },
+  gilmar: {
+    overallScore: 91,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 97, individualCareer: 88, primeSkill: 91, teamImportance: 93, legacy: 94 },
+  },
   "차범근": {
     overallScore: 90,
     scoreMode: "adjusted",
@@ -2313,6 +2413,708 @@ const focusedNonEuropeProfileOverrides: Record<string, CuratedProfileEntry> = {
       { label: "Wikipedia - Alfredo Di Stefano", url: "https://en.wikipedia.org/wiki/Alfredo_Di_St%C3%A9fano" },
       { label: "Real Madrid - Alfredo Di Stefano", url: "https://www.realmadrid.com/" },
       { label: "UEFA - Di Stefano", url: "https://www.uefa.com/" },
+    ],
+  }),
+  "gabriel batistuta": makeFocusedProfile({
+    summary:
+      "Gabriel Batistuta는 Fiorentina의 상징성과 Argentina 대표팀 득점, Roma Scudetto를 함께 가진 1990년대 대표 스트라이커입니다.",
+    team: {
+      clubs: ["Newell's Old Boys", "River Plate", "Boca Juniors", "Fiorentina", "Roma", "Inter Milan", "Al-Arabi", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division 1989-90", "Fiorentina: Serie B 1993-94; Coppa Italia 1995-96; Supercoppa Italiana 1996", "Roma: Serie A 2000-01; Supercoppa Italiana 2001"],
+      nationalHonours: ["Argentina: Copa America 1991, 1993", "Argentina: King Fahd Cup 1992", "Argentina: FIFA World Cup appearances 1994, 1998, 2002"],
+      verdict: "클럽 우승 총량은 최상위 앵커보다 낮지만 Fiorentina 충성도와 Roma 우승 마무리가 강합니다.",
+    },
+    individual: {
+      awards: ["Copa America top scorer: 1991, 1995", "Serie A top scorer: 1994-95", "FIFA 100", "Argentina national-team historical scoring icon"],
+      records: ["Argentina all-time scoring leader before Lionel Messi", "Fiorentina all-time icon and record scorer tier", "World Cup hat-tricks in two different tournaments"],
+      verdict: "득점 기록과 1990년대 Serie A 임팩트가 개인 평가의 핵심입니다.",
+    },
+    prime: {
+      period: "1991-99 Fiorentina/Argentina",
+      evidence: ["Serie A top scorer 1994-95", "Copa America titles and top-scorer runs", "Fiorentina Coppa Italia/Supercoppa period"],
+      skills: ["Power finishing", "right-foot shooting", "aerial finishing", "back-to-goal strength", "penalty-box aggression"],
+      verdict: "순수 골 결정력과 슈팅 파워는 Argentina 스트라이커 계보 최상위권입니다.",
+    },
+    importance: {
+      roles: ["Fiorentina: franchise-defining striker", "Argentina: post-Maradona scoring reference", "Roma: title-clinching veteran scorer"],
+      moments: ["1993 Copa America final goals", "Roma 2000-01 Scudetto run", "Fiorentina return-from-Serie-B loyalty story"],
+      verdict: "대표팀에서는 득점 기준점, 클럽에서는 Fiorentina의 시대 상징이었습니다.",
+    },
+    legacy: {
+      reasons: ["Argentina pre-Messi scoring record", "Fiorentina icon status", "Serie A 1990s striker reputation", "two Copa America titles"],
+      context: ["Argentina all-time striker debate", "Batistuta vs Kempes/Aguero/Crespo lineage"],
+      verdict: "월드컵 우승은 없지만 국가대표 득점과 Fiorentina 서사 때문에 오래 남습니다.",
+    },
+    sources: [
+      { label: "Britannica - Gabriel Batistuta", url: "https://www.britannica.com/biography/Gabriel-Batistuta" },
+      { label: "Wikipedia - Gabriel Batistuta", url: "https://en.wikipedia.org/wiki/Gabriel_Batistuta" },
+    ],
+  }),
+  "mario kempes": makeFocusedProfile({
+    summary:
+      "Mario Kempes는 1978 World Cup에서 Golden Ball과 Golden Boot를 동시에 가져가며 Argentina를 첫 월드컵 우승으로 이끈 스트라이커입니다.",
+    team: {
+      clubs: ["Instituto", "Rosario Central", "Valencia", "River Plate", "Hercules", "First Vienna", "St. Polten", "Kremser SC", "Argentina national team"],
+      clubHonours: ["Valencia: Copa del Rey 1978-79; European Cup Winners' Cup 1979-80; UEFA Super Cup 1980", "River Plate: Argentine Primera Division Nacional 1981"],
+      nationalHonours: ["Argentina: FIFA World Cup 1978", "Argentina: FIFA World Cup appearances 1974, 1978, 1982"],
+      verdict: "대표팀 월드컵 우승의 직접 주역이라는 점이 클럽 우승 총량보다 훨씬 큽니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup Golden Ball: 1978", "FIFA World Cup Golden Boot: 1978", "South American Footballer of the Year: 1978", "Pichichi Trophy: 1976-77, 1977-78"],
+      records: ["Only Argentina player to win Golden Ball/Golden Boot in a World Cup title run", "Valencia and Argentina 1970s icon"],
+      verdict: "1978 월드컵 개인 지배력은 Argentina 역사에서 Maradona/Messi 다음 층위의 강한 근거입니다.",
+    },
+    prime: {
+      period: "1976-80 Valencia/Argentina",
+      evidence: ["Back-to-back La Liga scoring titles", "1978 World Cup Golden Ball/Boot/title", "Valencia European Cup Winners' Cup era"],
+      skills: ["Power dribbling", "left-foot finishing", "late box arrivals", "direct carrying", "big-game scoring"],
+      verdict: "토너먼트 한정 프라임은 Argentina 역사 최상위권입니다.",
+    },
+    importance: {
+      roles: ["Argentina: 1978 title-winning attacking centerpiece", "Valencia: European-title era star"],
+      moments: ["1978 World Cup final two goals", "1978 knockout scoring run", "Valencia Cup Winners' Cup period"],
+      verdict: "1978 Argentina에서 공격 비중은 절대적이었습니다.",
+    },
+    legacy: {
+      reasons: ["1978 World Cup winner", "Golden Ball and Golden Boot in same tournament", "Argentina first World Cup icon", "Valencia legend status"],
+      context: ["Argentina national myth before Maradona", "World Cup peak model"],
+      verdict: "100년 뒤에도 1978 월드컵을 설명하는 첫 이름으로 남습니다.",
+    },
+    sources: [
+      { label: "Valencia CF - Kempes", url: "https://www.valenciacf.com/en-kempes-el-matador-2019-07-15" },
+      { label: "Wikipedia - Mario Kempes", url: "https://en.wikipedia.org/wiki/Mario_Kempes" },
+    ],
+  }),
+  "angel di maria": makeFocusedProfile({
+    summary:
+      "Angel Di Maria는 Real Madrid의 La Decima, Argentina의 Copa America/World Cup 결승 득점, PSG 장기 우승 커리어를 모두 가진 빅매치 윙어입니다.",
+    team: {
+      clubs: ["Rosario Central", "Benfica", "Real Madrid", "Manchester United", "Paris Saint-Germain", "Juventus", "Benfica second spell", "Rosario Central second spell", "Argentina U20", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["Benfica: Primeira Liga 2009-10, 2022-23; Taca da Liga 2008-09, 2009-10; Supertaca Candido de Oliveira 2023", "Real Madrid: La Liga 2011-12; Copa del Rey 2010-11, 2013-14; UEFA Champions League 2013-14", "Paris Saint-Germain: Ligue 1 2015-16, 2017-18, 2018-19, 2019-20, 2021-22; Coupe de France and Coupe de la Ligue titles"],
+      nationalHonours: ["Argentina: FIFA World Cup 2022", "Argentina: Copa America 2021, 2024", "Argentina: Finalissima 2022", "Argentina U20: FIFA U-20 World Cup 2007", "Argentina Olympic: Olympic gold medal 2008"],
+      verdict: "클럽/대표팀 메이저 타이틀 총량은 Argentina 선수 중 최상위권입니다.",
+    },
+    individual: {
+      awards: ["UEFA Champions League Final Man of the Match: 2014", "Argentina Footballer of the Year: 2014", "FIFA FIFPro World XI: 2014", "Copa America final and World Cup final decisive-goal legacy"],
+      records: ["Scored in Olympic final 2008, Copa America final 2021, Finalissima 2022 and World Cup final 2022", "Paris Saint-Germain all-time assist leader at exit context"],
+      verdict: "정규 시즌 개인상보다 결승전 결정력이 압도적인 평가 포인트입니다.",
+    },
+    prime: {
+      period: "2013-14 Real Madrid and 2021-22 Argentina",
+      evidence: ["2014 Champions League final MVP", "2021 Copa America final goal", "2022 World Cup final goal and elite first half"],
+      skills: ["Left-foot crossing", "diagonal carries", "transition passing", "big-match shooting", "wide-to-central creation"],
+      verdict: "전성기 순수 실력은 Ballon d'Or급 시즌 한 번과 대표팀 결승 고점을 모두 가집니다.",
+    },
+    importance: {
+      roles: ["Argentina: Messi-era knockout/final problem-solver", "Real Madrid: midfield-to-wing transition weapon", "PSG: chance-creation machine"],
+      moments: ["La Decima 2014", "2021 Copa America final", "2022 World Cup final"],
+      verdict: "대표팀 역사적 우승의 결정적 장면을 반복해서 만든 선수입니다.",
+    },
+    legacy: {
+      reasons: ["World Cup winner", "Copa America winner twice", "Champions League final MVP", "multiple finals scored in"],
+      context: ["Argentina Messi-era second star debate", "big-final player archetype"],
+      verdict: "100년 뒤에는 순수 시즌 지배보다 결승전 유산으로 강하게 남습니다.",
+    },
+    sources: [
+      { label: "Benfica - Di Maria to Rosario Central", url: "https://www.slbenfica.pt/en-us/agora/noticias/2025/05/29/clube-benfica-comunicado-futebol-di-maria" },
+      { label: "CONMEBOL - Copa America 2024 tactical study", url: "https://cdn.conmebol.com/wp-content/uploads/2025/02/GET-CONMEBOL-Copa-America-USA-2024-ENG.pdf" },
+      { label: "Wikipedia - Angel Di Maria", url: "https://en.wikipedia.org/wiki/%C3%81ngel_Di_Mar%C3%ADa" },
+    ],
+  }),
+  "juan roman riquelme": makeFocusedProfile({
+    summary:
+      "Juan Roman Riquelme는 Boca Juniors의 Copa Libertadores 시대를 지배한 느린 템포의 클래식 플레이메이커입니다.",
+    team: {
+      clubs: ["Boca Juniors", "Barcelona", "Villarreal", "Boca Juniors second spell", "Argentinos Juniors", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["Boca Juniors: Copa Libertadores 2000, 2001, 2007; Intercontinental Cup 2000; Recopa Sudamericana 2008", "Boca Juniors: Argentine Primera Division Apertura 1998, Clausura 1999, Apertura 2000, Apertura 2008, Apertura 2011", "Villarreal: UEFA Intertoto Cup 2004"],
+      nationalHonours: ["Argentina Olympic: Olympic gold medal 2008", "Argentina: Copa America runner-up 2007", "Argentina: FIFA World Cup 2006 quarter-final squad"],
+      verdict: "유럽 메이저 우승은 부족하지만 Boca의 대륙 지배 커리어가 매우 강합니다.",
+    },
+    individual: {
+      awards: ["South American Footballer of the Year: 2001", "Copa Libertadores Most Valuable Player: 2007", "Argentine Footballer of the Year awards across Boca peak"],
+      records: ["Boca Juniors all-time icon", "Villarreal Champions League semi-final 2005-06 creator"],
+      verdict: "남미 클럽축구 개인 지배력은 Argentina 플레이메이커 중 최고권입니다.",
+    },
+    prime: {
+      period: "2000-07 Boca/Villarreal",
+      evidence: ["Boca Libertadores 2000/2001/2007", "Villarreal 2005-06 Champions League semi-final", "2007 Libertadores MVP run"],
+      skills: ["Tempo control", "final pass", "pause-and-release playmaking", "set pieces", "press-resistant shielding"],
+      verdict: "현대 속도와 반대되는 방식으로 경기를 지배한 특수한 프라임입니다.",
+    },
+    importance: {
+      roles: ["Boca Juniors: creative monarch", "Villarreal: European underdog system hub", "Argentina: 2006/2007 possession-era creator"],
+      moments: ["2000 Intercontinental Cup vs Real Madrid", "2007 Libertadores knockout run", "Villarreal Champions League semi-final run"],
+      verdict: "Boca에서는 팀 정체성 자체였고 Villarreal에서도 시스템의 중심이었습니다.",
+    },
+    legacy: {
+      reasons: ["three Libertadores titles", "Boca all-time idol", "classic enganche archetype", "2007 Libertadores MVP"],
+      context: ["Last great number 10/enganche debate", "Argentina playmaker lineage after Maradona before Messi"],
+      verdict: "트로피보다 플레이메이커 스타일의 마지막 거장으로 오래 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Juan Roman Riquelme", url: "https://en.wikipedia.org/wiki/Juan_Rom%C3%A1n_Riquelme" },
+      { label: "Sporting News - Riquelme Libertadores", url: "https://www.sportingnews.com/ar/futbol/news/riquelme-titulos-en-copa-libertadores/7b45a6faf2304916c7fdb06b" },
+    ],
+  }),
+  "daniel passarella": makeFocusedProfile({
+    summary:
+      "Daniel Passarella는 Argentina의 1978 World Cup 우승 주장이고, 공격력까지 갖춘 역대급 센터백입니다.",
+    team: {
+      clubs: ["Sarmiento", "River Plate", "Fiorentina", "Inter Milan", "River Plate second spell", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division Metropolitano/Nacional titles in 1975, 1977, 1979, 1980, 1981 era", "Fiorentina/Inter Milan: Serie A elite-club spells without a major comparable title haul"],
+      nationalHonours: ["Argentina: FIFA World Cup 1978", "Argentina: FIFA World Cup 1986 squad", "Argentina: Copa America appearances 1975, 1979, 1983"],
+      verdict: "1978 월드컵 주장 우승과 River 왕조가 팀 커리어의 핵심입니다.",
+    },
+    individual: {
+      awards: ["FIFA 100", "South American defender of the era recognition", "Argentine football historical XI-level recognition"],
+      records: ["One of football's highest-scoring centre-backs", "Only Argentina player connected to both 1978 and 1986 World Cup-winning squads"],
+      verdict: "수비수 개인상 제도 이전 시대라 득점 기록과 주장 우승이 개인 근거입니다.",
+    },
+    prime: {
+      period: "1975-82 River/Argentina/Fiorentina move",
+      evidence: ["1978 World Cup captaincy", "River Plate domestic title run", "elite Serie A move as a defender"],
+      skills: ["Aerial dominance", "left-foot passing", "set-piece scoring", "aggressive marking", "captaincy"],
+      verdict: "센터백 실력과 리더십, 득점력을 모두 가진 프라임입니다.",
+    },
+    importance: {
+      roles: ["Argentina: 1978 title-winning captain", "River Plate: defensive leader of title teams"],
+      moments: ["1978 World Cup trophy lift", "River domestic dominance", "1986 qualification-era role before injury/illness"],
+      verdict: "1978 Argentina에서 상징 비중은 Kempes와 함께 최고권입니다.",
+    },
+    legacy: {
+      reasons: ["1978 World Cup captain", "World Cup-winning squad 1986", "high-scoring defender archetype", "River Plate icon"],
+      context: ["Argentina all-time defender debate", "Passarella vs Figueroa/Baresi-era defensive comparison"],
+      verdict: "Argentina 수비수 역사에서는 가장 먼저 거론될 이름입니다.",
+    },
+    sources: [
+      { label: "FIFA - Passarella at the pinnacle", url: "https://inside.fifa.com/news/passarella-at-the-pinnacle-2767245" },
+      { label: "Wikipedia - Daniel Passarella", url: "https://en.wikipedia.org/wiki/Daniel_Passarella" },
+    ],
+  }),
+  "javier zanetti": makeFocusedProfile({
+    summary:
+      "Javier Zanetti는 Inter의 treble captain이자 Argentina 최다 출장권 풀백/미드필더로 남는 장수형 레전드입니다.",
+    team: {
+      clubs: ["Talleres RE", "Banfield", "Inter Milan", "Argentina Olympic", "Argentina national team"],
+      clubHonours: ["Inter Milan: UEFA Cup 1997-98", "Inter Milan: Serie A 2005-06, 2006-07, 2007-08, 2008-09, 2009-10", "Inter Milan: Coppa Italia 2004-05, 2005-06, 2009-10, 2010-11; UEFA Champions League 2009-10; FIFA Club World Cup 2010"],
+      nationalHonours: ["Argentina Olympic: silver medal 1996", "Argentina: Copa America runner-up 2004, 2007", "Argentina: FIFA Confederations Cup runner-up 1995, 2005"],
+      verdict: "대표팀 우승 부재는 있지만 Inter 클럽 커리어 총량은 Argentina 선수 중 최상위권입니다.",
+    },
+    individual: {
+      awards: ["FIFA 100", "Inter Hall of Fame", "UEFA Team of the Year-level recognition", "Serie A and Inter long-service captaincy recognition"],
+      records: ["Inter Milan all-time appearance leader", "Argentina all-time appearance leader before Lionel Messi era", "Captain of Inter's 2009-10 treble"],
+      verdict: "수비수/풀백이라 개인상은 제한적이지만 누적과 주장직이 압도적입니다.",
+    },
+    prime: {
+      period: "1998-2010 Inter/Argentina",
+      evidence: ["1998 UEFA Cup", "2009-10 Champions League treble", "long-term Serie A elite consistency"],
+      skills: ["Two-way running", "defensive duels", "ball carrying", "positional versatility", "availability and leadership"],
+      verdict: "폭발적 단일 시즌보다 10년 이상 높은 수준을 유지한 지속성 프라임입니다.",
+    },
+    importance: {
+      roles: ["Inter Milan: captain and cultural standard", "Argentina: right-back/midfield utility leader"],
+      moments: ["2010 Champions League final as captain", "Inter treble season", "UEFA Cup 1998 win"],
+      verdict: "Inter에서는 팀의 정신적 기준이자 전술적 안전판이었습니다.",
+    },
+    legacy: {
+      reasons: ["Inter treble captain", "all-time appearance records", "FIFA 100", "one-club-ish elite loyalty"],
+      context: ["All-time fullback debate", "Argentina's club-career giant despite national-team trophy gap"],
+      verdict: "클럽 축구 기준으로는 Argentina 역사상 가장 강한 수비형 레전드 중 하나입니다.",
+    },
+    sources: [
+      { label: "Inter - Javier Zanetti Hall of Fame", url: "https://www.inter.it/en/club/hall-of-fame/javier-zanetti" },
+      { label: "Wikipedia - Javier Zanetti", url: "https://en.wikipedia.org/wiki/Javier_Zanetti" },
+    ],
+  }),
+  "ubaldo fillol": makeFocusedProfile({
+    summary:
+      "Ubaldo Fillol은 Argentina의 1978 World Cup 우승 골키퍼이자 River Plate 전성기를 지킨 남미 골키퍼 레전드입니다.",
+    team: {
+      clubs: ["Quilmes", "Racing Club", "River Plate", "Argentinos Juniors", "Flamengo", "Atletico Madrid", "Racing Club second spell", "Velez Sarsfield", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division titles in 1975, 1977, 1979, 1980, 1981 era", "Flamengo: Taca Guanabara 1984", "Argentina club career: long domestic first-choice career across elite clubs"],
+      nationalHonours: ["Argentina: FIFA World Cup 1978", "Argentina: FIFA World Cup appearances 1974, 1978, 1982"],
+      verdict: "대표팀 월드컵 우승과 River의 국내 우승기가 팀 커리어의 핵심입니다.",
+    },
+    individual: {
+      awards: ["Argentine Footballer of the Year: 1977", "FIFA World Cup All-Star Team: 1978", "South American goalkeeper historical XI-level recognition"],
+      records: ["Argentina 1978 World Cup starting goalkeeper", "One of South America's benchmark goalkeepers"],
+      verdict: "골키퍼로 Argentine Footballer of the Year를 받은 점이 매우 큽니다.",
+    },
+    prime: {
+      period: "1975-78 River/Argentina",
+      evidence: ["River title run", "1977 Argentine Footballer of the Year", "1978 World Cup title"],
+      skills: ["Shot stopping", "reflex saves", "penalty-area command", "one-v-one saves", "big-game composure"],
+      verdict: "Argentina 골키퍼 프라임의 역사적 기준점입니다.",
+    },
+    importance: {
+      roles: ["Argentina: title-winning starting goalkeeper", "River Plate: defensive base during domestic dominance"],
+      moments: ["1978 World Cup final", "River Plate late-1970s title seasons"],
+      verdict: "1978 우승팀에서 골문 안정성의 핵심이었습니다.",
+    },
+    legacy: {
+      reasons: ["1978 World Cup winner", "Argentine Footballer of the Year 1977", "River Plate icon", "South American goalkeeper benchmark"],
+      context: ["Argentina all-time goalkeeper debate with Carrizo and Emiliano Martinez", "pre-modern goalkeeper reference"],
+      verdict: "Argentina 골키퍼 역사에서는 반드시 남을 이름입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Ubaldo Fillol", url: "https://en.wikipedia.org/wiki/Ubaldo_Fillol" },
+      { label: "FIFA World Cup awards", url: "https://en.wikipedia.org/wiki/FIFA_World_Cup_awards" },
+    ],
+  }),
+  "fernando redondo": makeFocusedProfile({
+    summary:
+      "Fernando Redondo는 Real Madrid의 1998/2000 Champions League 시대를 지탱한 우아한 수비형 미드필더입니다.",
+    team: {
+      clubs: ["Argentinos Juniors", "Tenerife", "Real Madrid", "AC Milan", "Argentina national team"],
+      clubHonours: ["Real Madrid: La Liga 1994-95, 1996-97; UEFA Champions League 1997-98, 1999-2000; Intercontinental Cup 1998", "AC Milan: UEFA Champions League 2002-03; Coppa Italia 2002-03; Serie A 2003-04 squad context"],
+      nationalHonours: ["Argentina: Copa America 1993", "Argentina: King Fahd Cup 1992", "Argentina: FIFA World Cup 1994 squad"],
+      verdict: "대표팀 누적은 짧지만 Real Madrid 유럽 우승 커리어가 강합니다.",
+    },
+    individual: {
+      awards: ["UEFA Club Footballer of the Year: 1999-2000", "Champions League 1999-2000 elite midfield recognition", "Real Madrid historical XI-level cult status"],
+      records: ["Old Trafford backheel assist vs Manchester United 2000", "Prototype of elegant defensive midfielder"],
+      verdict: "개인상 총량은 적지만 1999-2000 유럽 시즌 평가는 매우 높습니다.",
+    },
+    prime: {
+      period: "1997-2000 Real Madrid",
+      evidence: ["Champions League 1997-98 and 1999-2000", "UEFA Club Footballer of the Year 2000", "Manchester United 2000 quarter-final performance"],
+      skills: ["Press resistance", "left-foot passing", "defensive timing", "body feints", "deep tempo control"],
+      verdict: "수비형 미드필더 프라임은 짧지만 매우 고급입니다.",
+    },
+    importance: {
+      roles: ["Real Madrid: deep midfield controller", "Argentina: technically elite but selectively used national-team midfielder"],
+      moments: ["1998 Champions League", "2000 Old Trafford assist/performance", "2000 Champions League final run"],
+      verdict: "클럽 내 비중은 높았고 대표팀 누적은 커리어 선택과 시대 맥락 때문에 제한됐습니다.",
+    },
+    legacy: {
+      reasons: ["two Champions League titles", "UEFA Club Footballer of the Year 2000", "Old Trafford signature moment", "elegant No. 5 archetype"],
+      context: ["Cult-prime midfielder rather than trophy-volume legend", "Argentina technical midfielder lineage"],
+      verdict: "총량보다 특정 프라임의 완성도로 기억되는 선수입니다.",
+    },
+    sources: [
+      { label: "UEFA - Redondo returns to Spain", url: "https://www.uefa.com/uefachampionsleague/news/025a-0eaadfde0842-35182b59c144-1000--redondo-returns-to-spain/" },
+      { label: "Wikipedia - Fernando Redondo", url: "https://en.wikipedia.org/wiki/Fernando_Redondo" },
+    ],
+  }),
+  "jose manuel moreno": makeFocusedProfile({
+    summary:
+      "Jose Manuel Moreno는 River Plate의 La Maquina를 대표하고 네 나라 1부 리그 우승을 경험한 남미 초기 축구의 거대 공격수입니다.",
+    team: {
+      clubs: ["River Plate", "Club Espana", "Universidad Catolica", "Boca Juniors", "Defensor Sporting", "Ferro Carril Oeste", "Independiente Medellin", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division 1936, 1937, 1941, 1942", "Club Espana: Mexican Primera Division 1945-46", "Universidad Catolica: Chilean Primera Division 1949", "Independiente Medellin: Colombian league-title era context"],
+      nationalHonours: ["Argentina: South American Championship 1941, 1947", "Argentina: South American Championship 1947 best-player context"],
+      verdict: "월드컵 출전 시대 운은 없었지만 남미 클럽/대표팀 커리어는 매우 강합니다.",
+    },
+    individual: {
+      awards: ["South American Championship best player: 1947 context", "IFFHS South American historical ranking recognition", "River Plate La Maquina icon"],
+      records: ["First footballer credited with winning first-division league titles in four countries", "Key member of La Maquina attacking line"],
+      verdict: "현대 개인상 이전 시대라 역사 평가와 다국가 우승 기록이 핵심입니다.",
+    },
+    prime: {
+      period: "1936-47 River/Argentina",
+      evidence: ["River La Maquina dominance", "South American Championship 1941 and 1947", "league titles across four countries"],
+      skills: ["Inside-forward creativity", "dribbling", "finishing", "physical power", "all-round attacking influence"],
+      verdict: "초기 남미 축구 기준으로는 최고 재능 논쟁권입니다.",
+    },
+    importance: {
+      roles: ["River Plate: La Maquina attacking star", "Argentina: 1940s South American champion forward"],
+      moments: ["River 1940s domestic dominance", "1947 South American Championship", "multi-country title path"],
+      verdict: "클럽과 대표팀 모두에서 시대를 대표한 공격수였습니다.",
+    },
+    legacy: {
+      reasons: ["La Maquina", "two South American Championships", "four-country league-title record", "pre-television all-time reputation"],
+      context: ["Argentina pre-Di Stefano/Maradona/Messi greatness", "historical evidence gap but strong expert reputation"],
+      verdict: "자료 시대의 한계에도 Argentina 축구사 상위권에서 빠지기 어렵습니다.",
+    },
+    sources: [
+      { label: "Britannica - Jose Manuel Moreno", url: "https://www.britannica.com/biography/Jose-Manuel-Moreno" },
+      { label: "Wikipedia - Jose Manuel Moreno", url: "https://en.wikipedia.org/wiki/Jos%C3%A9_Manuel_Moreno" },
+    ],
+  }),
+  "adolfo pedernera": makeFocusedProfile({
+    summary:
+      "Adolfo Pedernera는 River Plate의 La Maquina와 Millonarios의 Ballet Azul을 모두 움직인 남미 역사상 대표적인 false nine/플레이메이커형 공격수입니다.",
+    team: {
+      clubs: ["River Plate", "Atlanta", "Huracan", "Millonarios", "Argentina national team"],
+      clubHonours: ["River Plate: Argentine Primera Division 1936, 1937, 1941, 1942, 1945", "Millonarios: Colombian league titles 1949, 1951, 1952, 1953; Small Club World Cup 1953"],
+      nationalHonours: ["Argentina: South American Championship 1941, 1945", "Argentina: 1940s South American power era"],
+      verdict: "두 개의 전설적 남미 클럽팀에서 중심 역할을 한 점이 팀 커리어의 핵심입니다.",
+    },
+    individual: {
+      awards: ["Konex historical recognition in Argentine sport", "La Maquina and Ballet Azul central-figure recognition", "IFFHS/Argentina historical XI-level reputation"],
+      records: ["Conductor of La Maquina and Ballet Azul", "Later coached Colombia to its first World Cup appearance in 1962"],
+      verdict: "개인상 제도 이전 시대라 팀을 작동시킨 전술적 명성이 가장 큰 근거입니다.",
+    },
+    prime: {
+      period: "1941-53 River/Millonarios",
+      evidence: ["River La Maquina title run", "Millonarios Ballet Azul dominance", "1953 Small Club World Cup"],
+      skills: ["Deep forward playmaking", "combination play", "tempo pause", "short passing", "attack orchestration"],
+      verdict: "False nine/세컨드 스트라이커 역할의 역사적 원형 중 하나입니다.",
+    },
+    importance: {
+      roles: ["River Plate: La Maquina conductor", "Millonarios: Ballet Azul brain", "Argentina: 1940s attacking star"],
+      moments: ["River 1940s dominance", "Millonarios 1949-53 Colombian league run", "1953 Small Club World Cup"],
+      verdict: "두 팀 모두에서 단순 득점자보다 공격 시스템의 구조였습니다.",
+    },
+    legacy: {
+      reasons: ["La Maquina", "Ballet Azul", "multi-country club impact", "tactical conductor reputation"],
+      context: ["Argentina historical great before television era", "Pedernera-Moreno-Di Stefano lineage"],
+      verdict: "영상 자료는 제한적이지만 남미 전술사와 클럽사에서는 계속 남습니다.",
+    },
+    sources: [
+      { label: "FIFA - Adolfo Pedernera", url: "https://inside.fifa.com/news/pedernera-the-twinkle-toed-engine-driver-2604360" },
+      { label: "Wikipedia - Adolfo Pedernera", url: "https://en.wikipedia.org/wiki/Adolfo_Pedernera" },
+    ],
+  }),
+  rivaldo: makeFocusedProfile({
+    summary:
+      "Rivaldo는 1999 Ballon d'Or, Barcelona 에이스 시절, Brazil 2002 World Cup 우승을 모두 가진 왼발 공격형 미드필더/세컨드 스트라이커입니다.",
+    team: {
+      clubs: ["Santa Cruz", "Mogi Mirim", "Corinthians loan", "Palmeiras", "Deportivo La Coruna", "Barcelona", "AC Milan", "Cruzeiro", "Olympiacos", "AEK Athens", "Bunyodkor", "Sao Paulo", "Kabuscorp", "Sao Caetano", "Mogi Mirim second spell", "Brazil Olympic", "Brazil national team"],
+      clubHonours: ["Palmeiras: Campeonato Brasileiro Serie A 1994; Campeonato Paulista 1996", "Barcelona: La Liga 1997-98, 1998-99; Copa del Rey 1997-98; UEFA Super Cup 1997", "AC Milan: UEFA Champions League 2002-03; Coppa Italia 2002-03; UEFA Super Cup 2003"],
+      nationalHonours: ["Brazil: FIFA World Cup 2002; runner-up 1998", "Brazil: Copa America 1999", "Brazil: FIFA Confederations Cup 1997", "Brazil Olympic: bronze medal 1996"],
+      verdict: "World Cup, Champions League, Ballon d'Or, Barcelona 리그 우승이 모두 있는 매우 강한 커리어입니다.",
+    },
+    individual: {
+      awards: ["Ballon d'Or: 1999", "FIFA World Player of the Year: 1999", "Copa America MVP and top scorer: 1999", "FIFA 100"],
+      records: ["Barcelona 2000-01 Valencia bicycle-kick hat-trick legacy", "Brazil 2002 three-R attacking trio core"],
+      verdict: "1999 개인상 싹쓸이와 2002 월드컵 핵심성이 개인 평가의 중심입니다.",
+    },
+    prime: {
+      period: "1997-2002 Barcelona/Brazil",
+      evidence: ["1999 Ballon d'Or/FIFA World Player", "1999 Copa America MVP", "2002 World Cup title as key scorer/creator"],
+      skills: ["Left-foot shooting", "long-range finishing", "free kicks", "second-striker movement", "improvised skill"],
+      verdict: "왼발 공격수 프라임은 Brazil 역사에서도 최상위권입니다.",
+    },
+    importance: {
+      roles: ["Barcelona: late-1990s attacking reference", "Brazil: Rivaldo-Ronaldo-Ronaldinho front-three pillar"],
+      moments: ["2002 World Cup knockout run", "2001 Valencia hat-trick", "1999 Copa America"],
+      verdict: "Brazil 2002에서 Ronaldo 다음 층위의 핵심 공격 비중을 가졌습니다.",
+    },
+    legacy: {
+      reasons: ["Ballon d'Or", "World Cup", "Champions League", "Copa America MVP", "Barcelona icon years"],
+      context: ["Brazil 1990s-2000s attacking lineage", "underrated all-time left-footed forward debate"],
+      verdict: "Brazil 초호화 공격진 속에서도 개인상과 월드컵으로 독자적 위치가 확실합니다.",
+    },
+    sources: [
+      { label: "FC Barcelona - Rivaldo", url: "https://www.fcbarcelona.com/en/football/barca-legends/jugadors/1198163/rivaldo" },
+      { label: "Wikipedia - Rivaldo", url: "https://en.wikipedia.org/wiki/Rivaldo" },
+    ],
+  }),
+  jairzinho: makeFocusedProfile({
+    summary:
+      "Jairzinho는 Brazil 1970 World Cup의 모든 경기에서 득점한 오른쪽 공격수로, Pele 1970 팀의 결정적 득점 루트였습니다.",
+    team: {
+      clubs: ["Botafogo", "Marseille", "Cruzeiro", "Portuguesa", "Noroeste", "Fast Club", "Jorge Wilstermann", "9 de Octubre", "Brazil national team"],
+      clubHonours: ["Botafogo: Campeonato Carioca 1967, 1968; Taca Brasil 1968", "Cruzeiro: Copa Libertadores 1976"],
+      nationalHonours: ["Brazil: FIFA World Cup 1970", "Brazil: FIFA World Cup appearances 1966, 1970, 1974"],
+      verdict: "대표팀 월드컵 임팩트와 Botafogo/Cruzeiro 대륙 우승 커리어가 결합됩니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup Silver Boot: 1970 context", "FIFA World Cup All-Star/technical recognition era", "Brazil 1970 all-time-team recognition"],
+      records: ["Scored in every Brazil match at the 1970 World Cup", "One of the few players to score in every match of a World Cup-winning campaign"],
+      verdict: "1970 월드컵 전경기 득점 기록이 개인 평가를 크게 끌어올립니다.",
+    },
+    prime: {
+      period: "1968-74 Botafogo/Brazil",
+      evidence: ["1970 World Cup seven goals", "Botafogo late-1960s success", "Cruzeiro Libertadores 1976 close tail"],
+      skills: ["Explosive wing runs", "direct finishing", "inside-forward movement", "physical power", "transition attacks"],
+      verdict: "월드컵 기반 오른쪽 공격수 프라임은 최고권입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1970 team's main goal-running winger", "Botafogo: post-Garrincha attacking star"],
+      moments: ["Goals in all six 1970 World Cup matches", "1970 final goal vs Italy", "Cruzeiro Libertadores 1976"],
+      verdict: "Pele의 팀으로 기억되지만 실제 득점 비중은 Jairzinho가 매우 컸습니다.",
+    },
+    legacy: {
+      reasons: ["1970 World Cup all-match scoring record", "Brazil 1970 all-time team", "World Cup winner", "Botafogo attacking lineage"],
+      context: ["All-time right-wing/inside-forward debate", "Garrincha-to-Jairzinho Brazil right-side lineage"],
+      verdict: "1970 브라질을 설명할 때 Pele, Tostao, Rivelino와 함께 반드시 등장합니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Jairzinho", url: "https://en.wikipedia.org/wiki/Jairzinho" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  didi: makeFocusedProfile({
+    summary:
+      "Didi는 Brazil의 1958/1962 World Cup 연속 우승을 조율하고 1958 Golden Ball을 받은 중앙 미드필더입니다.",
+    team: {
+      clubs: ["Madureira", "Fluminense", "Botafogo", "Real Madrid", "Sao Paulo", "Sporting Cristal", "Brazil national team"],
+      clubHonours: ["Fluminense: Campeonato Carioca 1951, 1959; Copa Rio 1952", "Botafogo: Campeonato Carioca 1961, 1962; Rio-Sao Paulo Tournament 1962", "Real Madrid: European Cup-winning squad context 1959-60"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962", "Brazil: Panamerican Championship 1952"],
+      verdict: "월드컵 2회 우승과 클럽 국내 우승이 결합된 매우 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup Golden Ball: 1958", "World Soccer World XI-level historical recognition", "FIFA 100"],
+      records: ["Creator of the folha seca free-kick reputation", "Brain of Brazil's first World Cup-winning team"],
+      verdict: "1958 Golden Ball이 Didi의 역사적 지위를 확정합니다.",
+    },
+    prime: {
+      period: "1957-62 Brazil/Botafogo",
+      evidence: ["1958 World Cup Golden Ball", "1958 and 1962 World Cup titles", "Botafogo 1961-62 domestic peak"],
+      skills: ["Long passing", "tempo control", "folha seca free kicks", "midfield orchestration", "calm under pressure"],
+      verdict: "Brazil 중앙 미드필더 프라임의 원형적 기준입니다.",
+    },
+    importance: {
+      roles: ["Brazil: midfield brain of 1958/1962 champions", "Botafogo: playmaking base beside Garrincha/Nilton Santos"],
+      moments: ["1958 World Cup knockout/final control", "1962 veteran midfield role"],
+      verdict: "Pele/Garrincha가 앞에 있어도 팀 운용의 뇌는 Didi였습니다.",
+    },
+    legacy: {
+      reasons: ["two World Cups", "1958 Golden Ball", "Brazil midfield architect", "folha seca legacy"],
+      context: ["All-time deep playmaker debate", "Brazil pre-Zico central creator lineage"],
+      verdict: "100년 뒤에도 Brazil 최초 황금기의 중원 기준점으로 남습니다.",
+    },
+    sources: [
+      { label: "FIFA - Didi 1958", url: "https://www.fifa.com/pt/articles/copa-mundo-1958-didi-caminhada-final-suecia" },
+      { label: "Wikipedia - Didi", url: "https://en.wikipedia.org/wiki/Didi_(footballer,_born_1928)" },
+    ],
+  }),
+  cafu: makeFocusedProfile({
+    summary:
+      "Cafu는 World Cup 결승 3회 연속 출전, Brazil 2002 주장 우승, AC Milan Champions League를 가진 역대급 라이트백입니다.",
+    team: {
+      clubs: ["Sao Paulo", "Real Zaragoza", "Juventude", "Palmeiras", "Roma", "AC Milan", "Brazil national team"],
+      clubHonours: ["Sao Paulo: Copa Libertadores 1992, 1993; Intercontinental Cup 1992, 1993; Campeonato Paulista 1991, 1992", "Roma: Serie A 2000-01; Supercoppa Italiana 2001", "AC Milan: Serie A 2003-04; UEFA Champions League 2006-07; UEFA Super Cup 2003, 2007; FIFA Club World Cup 2007"],
+      nationalHonours: ["Brazil: FIFA World Cup 1994, 2002; runner-up 1998", "Brazil: Copa America 1997, 1999", "Brazil: FIFA Confederations Cup 1997"],
+      verdict: "클럽/대표팀 양쪽에서 메이저 타이틀 총량이 풀백 중 최고권입니다.",
+    },
+    individual: {
+      awards: ["FIFA 100", "World Cup all-time fullback recognition", "AC Milan/Roma historical XI-level recognition"],
+      records: ["Only player to appear in three consecutive World Cup finals", "Brazil 2002 World Cup-winning captain", "Brazil cap-record holder before later generations"],
+      verdict: "풀백 개인상보다 월드컵 기록과 주장 우승이 압도적입니다.",
+    },
+    prime: {
+      period: "1994-2004 Brazil/Roma/Milan",
+      evidence: ["World Cup 1994 and 2002", "Roma Serie A 2000-01", "Milan Serie A 2003-04 and Champions League 2006-07 tail"],
+      skills: ["Endurance", "overlapping runs", "crossing", "recovery pace", "big-match composure"],
+      verdict: "라이트백의 공격/수비/지속성 모델로 최고권입니다.",
+    },
+    importance: {
+      roles: ["Brazil: captain and right-side constant", "Roma/Milan: two-way flank outlet", "Sao Paulo: early Libertadores-winning fullback"],
+      moments: ["2002 World Cup trophy lift", "1994/1998/2002 finals", "Milan 2007 Champions League"],
+      verdict: "Brazil 대표팀에서 세 월드컵 사이클을 관통한 절대적 존재였습니다.",
+    },
+    legacy: {
+      reasons: ["two World Cups", "three World Cup finals", "Champions League", "Brazil captaincy", "fullback longevity"],
+      context: ["All-time right-back debate with Djalma Santos/Carlos Alberto/Dani Alves/Lahm", "Brazil fullback tradition"],
+      verdict: "트로피와 지속성 기준으로는 역대 라이트백 최상위권입니다.",
+    },
+    sources: [
+      { label: "UEFA - Milan capture Cafu", url: "https://www.uefa.com/uefachampionsleague/news/025a-0eaade1a0e25-4382bd2a8f79-1000--milan-capture-veteran-cafu/" },
+      { label: "Wikipedia - Cafu", url: "https://en.wikipedia.org/wiki/Cafu" },
+    ],
+  }),
+  "roberto carlos": makeFocusedProfile({
+    summary:
+      "Roberto Carlos는 Real Madrid galacticos와 Brazil 2002 World Cup의 왼쪽을 대표한 역대급 공격형 레프트백입니다.",
+    team: {
+      clubs: ["Uniao Sao Joao", "Atletico Mineiro loan", "Palmeiras", "Inter Milan", "Real Madrid", "Fenerbahce", "Corinthians", "Anzhi Makhachkala", "Delhi Dynamos", "Brazil national team"],
+      clubHonours: ["Palmeiras: Campeonato Brasileiro Serie A 1993, 1994", "Real Madrid: La Liga 1996-97, 2000-01, 2002-03, 2006-07; UEFA Champions League 1997-98, 1999-2000, 2001-02; Intercontinental Cup 1998, 2002", "Fenerbahce: Turkish Super Cup 2007, 2009"],
+      nationalHonours: ["Brazil: FIFA World Cup 2002; runner-up 1998", "Brazil: Copa America 1997, 1999", "Brazil: FIFA Confederations Cup 1997"],
+      verdict: "Real Madrid와 Brazil의 메이저 우승을 모두 가진 레프트백 최고권 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["FIFA World Cup All-Star Team: 1998, 2002", "UEFA Club Defender of the Year: 2002", "Ballon d'Or runner-up: 2002", "FIFA 100"],
+      records: ["Real Madrid foreign-player appearance record era", "1997 Tournoi de France free-kick legacy"],
+      verdict: "수비수로 Ballon d'Or 2위권 평가를 받은 고점이 큽니다.",
+    },
+    prime: {
+      period: "1997-2003 Real Madrid/Brazil",
+      evidence: ["Three Champions League titles across Madrid era", "2002 World Cup title", "2002 Ballon d'Or runner-up"],
+      skills: ["Explosive overlapping", "left-foot power shooting", "free kicks", "crossing", "recovery speed"],
+      verdict: "공격형 레프트백 프라임의 역사적 기준점입니다.",
+    },
+    importance: {
+      roles: ["Real Madrid: left-side width and transition weapon", "Brazil: 2002 back-three/wingback hybrid outlet"],
+      moments: ["2002 World Cup", "2002 Champions League final season", "Tournoi de France free kick"],
+      verdict: "클럽과 대표팀 모두에서 측면 공격 구조의 핵심이었습니다.",
+    },
+    legacy: {
+      reasons: ["World Cup", "three Champions League titles", "Ballon d'Or runner-up as fullback", "free-kick/overlap icon"],
+      context: ["All-time left-back debate with Maldini/Nilton Santos/Marcelo", "modern attacking fullback prototype"],
+      verdict: "레프트백 공격성을 설명할 때 계속 기준으로 쓰일 선수입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Roberto Carlos", url: "https://en.wikipedia.org/wiki/Roberto_Carlos" },
+      { label: "Real Madrid - Roberto Carlos", url: "https://www.realmadrid.com/" },
+    ],
+  }),
+  "nilton santos": makeFocusedProfile({
+    summary:
+      "Nilton Santos는 Brazil의 1958/1962 World Cup 우승을 지킨 Botafogo 원클럽 레프트백이자 '축구 백과사전'으로 불린 수비수입니다.",
+    team: {
+      clubs: ["Botafogo", "Brazil national team"],
+      clubHonours: ["Botafogo: Campeonato Carioca 1948, 1957, 1961, 1962", "Botafogo: Rio-Sao Paulo Tournament 1962, 1964"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962", "Brazil: South American Championship 1949", "Brazil: Panamerican Championship 1952"],
+      verdict: "월드컵 2회 우승과 Botafogo 황금기의 원클럽 커리어가 결합됩니다.",
+    },
+    individual: {
+      awards: ["FIFA 100", "World Team of the 20th Century recognition", "FIFA World Cup All-Star Team: 1958 context"],
+      records: ["Member of Brazil's 1950, 1954, 1958, 1962 World Cup squads", "Botafogo stadium naming legacy"],
+      verdict: "현대 개인상은 없지만 세기의 팀급 평가와 월드컵 2회가 핵심입니다.",
+    },
+    prime: {
+      period: "1954-62 Botafogo/Brazil",
+      evidence: ["1958 and 1962 World Cup titles", "Botafogo 1961-62 domestic peak", "1958 Austria attacking goal from fullback"],
+      skills: ["Defensive reading", "left-side build-up", "technical carrying", "positioning", "early attacking fullback instincts"],
+      verdict: "수비수의 기술성과 공격 가담을 앞당긴 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: left-back of first two World Cup-winning teams", "Botafogo: defensive/technical pillar beside Garrincha and Didi"],
+      moments: ["1958 World Cup", "1962 World Cup", "Botafogo early-1960s peak"],
+      verdict: "Brazil 황금기에서 왼쪽 수비 안정성과 빌드업을 동시에 담당했습니다.",
+    },
+    legacy: {
+      reasons: ["two World Cups", "FIFA 100", "World Team of the 20th Century recognition", "Botafogo one-club identity"],
+      context: ["All-time left-back debate", "Brazil fullback tradition before Roberto Carlos/Marcelo"],
+      verdict: "100년 뒤에도 레프트백 역사 최상위 후보로 남을 가능성이 큽니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Nilton Santos", url: "https://en.wikipedia.org/wiki/N%C3%ADlton_Santos" },
+      { label: "UOL - Nilton Santos", url: "https://www.uol.com.br/esporte/futebol/copa58/selecaobrasileira/niltonsantos.jhtm" },
+    ],
+  }),
+  "djalma santos": makeFocusedProfile({
+    summary:
+      "Djalma Santos는 Brazil의 1958/1962 World Cup 우승 오른쪽 풀백이고, 네 번의 월드컵에서 높은 평가를 받은 수비수입니다.",
+    team: {
+      clubs: ["Portuguesa", "Palmeiras", "Athletico Paranaense", "Brazil national team"],
+      clubHonours: ["Portuguesa: Rio-Sao Paulo Tournament 1952, 1955", "Palmeiras: Campeonato Paulista 1959, 1963, 1966; Brazilian national titles 1960, 1967", "Athletico Paranaense: Campeonato Paranaense 1970"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962", "Brazil: Panamerican Championship 1952"],
+      verdict: "월드컵 2회 우승과 Palmeiras 국내 타이틀이 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["FIFA 100", "FIFA World Cup All-Star Team: 1954, 1958, 1962", "IFFHS/World Soccer historical fullback recognition"],
+      records: ["Played in four FIFA World Cups", "All-time right-back benchmark before Cafu/Carlos Alberto era"],
+      verdict: "월드컵 세 차례 올스타급 평가는 수비수 개인 근거로 매우 강합니다.",
+    },
+    prime: {
+      period: "1954-62 Portuguesa/Palmeiras/Brazil",
+      evidence: ["1954 World Cup All-Star reputation", "1958 and 1962 World Cup titles", "Palmeiras 1960s titles"],
+      skills: ["One-v-one defending", "tackling", "calm passing", "athletic duels", "tactical discipline"],
+      verdict: "수비 안정성 중심의 라이트백 프라임으로 최고권입니다.",
+    },
+    importance: {
+      roles: ["Brazil: right-back of first two World Cup-winning teams", "Palmeiras: defensive leader in title era"],
+      moments: ["1958 World Cup final selection/performance", "1962 World Cup title defense"],
+      verdict: "화려한 공격보다 팀 수비 신뢰도를 만든 선수였습니다.",
+    },
+    legacy: {
+      reasons: ["two World Cups", "three World Cup All-Star recognitions", "FIFA 100", "Palmeiras icon status"],
+      context: ["All-time right-back debate with Cafu/Carlos Alberto", "defensive fullback archetype"],
+      verdict: "Brazil 라이트백 전통의 가장 오래된 기준점입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Djalma Santos", url: "https://en.wikipedia.org/wiki/Djalma_Santos" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  "carlos alberto": makeFocusedProfile({
+    summary:
+      "Carlos Alberto Torres는 Brazil 1970 World Cup 우승 주장이고 결승전 마지막 골로 기억되는 역대급 라이트백/센터백입니다.",
+    team: {
+      clubs: ["Fluminense", "Santos", "Botafogo", "Flamengo", "New York Cosmos", "California Surf", "Brazil national team"],
+      clubHonours: ["Santos: Campeonato Paulista 1965, 1967, 1968, 1969, 1973; Recopa Sudamericana 1968", "New York Cosmos: NASL Soccer Bowl 1977, 1978, 1980, 1982", "Fluminense/Botafogo/Flamengo: Rio de Janeiro state-club elite career context"],
+      nationalHonours: ["Brazil: FIFA World Cup 1970", "Brazil: FIFA World Cup 1970 captain"],
+      verdict: "월드컵 주장 우승과 Santos/Cosmos 타이틀이 팀 커리어의 중심입니다.",
+    },
+    individual: {
+      awards: ["FIFA 100", "World Team of the 20th Century recognition", "Brazil 1970 captaincy legacy"],
+      records: ["Scored the final goal in the 1970 World Cup final", "Captain of one of football's greatest teams"],
+      verdict: "개인상보다 1970 주장성과 결승 골의 역사성이 압도적입니다.",
+    },
+    prime: {
+      period: "1968-74 Santos/Brazil",
+      evidence: ["1970 World Cup captaincy", "1970 final goal vs Italy", "Santos late-1960s titles"],
+      skills: ["Leadership", "right-side carrying", "long passing", "defensive authority", "shooting from deep runs"],
+      verdict: "수비수 리더십과 공격 가담을 동시에 보여준 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: 1970 captain and right-side organizer", "Santos: post-Pele-era defensive leader", "Cosmos: NASL global-era veteran star"],
+      moments: ["1970 World Cup final goal", "1970 trophy lift", "Cosmos title years"],
+      verdict: "Brazil 1970의 팀 상징성에서 Pele 다음 층위의 리더였습니다.",
+    },
+    legacy: {
+      reasons: ["1970 World Cup captain", "iconic final goal", "FIFA 100", "Santos and Cosmos titles"],
+      context: ["All-time right-back/captain debate", "Brazil 1970 visual memory"],
+      verdict: "결승 골과 주장 이미지 때문에 100년 뒤에도 강하게 남습니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Carlos Alberto Torres", url: "https://en.wikipedia.org/wiki/Carlos_Alberto_Torres" },
+      { label: "FIFA - Pele three titles", url: "https://www.fifa.com/en/articles/pele-three-world-cup-titles-only-player" },
+    ],
+  }),
+  kaka: makeFocusedProfile({
+    summary:
+      "Kaka는 2007 Ballon d'Or와 AC Milan Champions League 우승으로 Messi/Ronaldo 시대 직전 마지막 단독 세계 최고 공격형 미드필더가 된 선수입니다.",
+    team: {
+      clubs: ["Sao Paulo", "AC Milan", "Real Madrid", "AC Milan second spell", "Orlando City", "Brazil national team"],
+      clubHonours: ["AC Milan: Serie A 2003-04; Supercoppa Italiana 2004; UEFA Champions League 2006-07; UEFA Super Cup 2003, 2007; FIFA Club World Cup 2007", "Real Madrid: La Liga 2011-12; Copa del Rey 2010-11; Supercopa de Espana 2012", "Sao Paulo: Torneio Rio-Sao Paulo 2001"],
+      nationalHonours: ["Brazil: FIFA World Cup 2002", "Brazil: FIFA Confederations Cup 2005, 2009", "Brazil: FIFA World Cup appearances 2002, 2006, 2010"],
+      verdict: "World Cup, Champions League, Club World Cup, La Liga/Serie A가 모두 있는 강한 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["Ballon d'Or: 2007", "FIFA World Player of the Year: 2007", "UEFA Club Footballer of the Year: 2006-07", "FIFA Club World Cup Golden Ball: 2007"],
+      records: ["Top scorer of UEFA Champions League 2006-07", "Last Ballon d'Or winner before the Messi/Ronaldo duopoly"],
+      verdict: "2007년 개인상 독식은 공격형 미드필더 평가에서 매우 강한 근거입니다.",
+    },
+    prime: {
+      period: "2004-07 AC Milan/Brazil",
+      evidence: ["2006-07 Champions League top scorer and title", "2007 Ballon d'Or/FIFA World Player", "2007 Club World Cup"],
+      skills: ["Long-stride carrying", "vertical acceleration", "through balls", "late shooting", "transition playmaking"],
+      verdict: "공간을 찢는 중앙 드리블과 마무리를 결합한 독특한 프라임입니다.",
+    },
+    importance: {
+      roles: ["AC Milan: post-Shevchenko attacking reference", "Brazil: 2005/2009 Confederations Cup creative star", "Real Madrid: high-profile but injury-limited contributor"],
+      moments: ["2007 Champions League semi-final vs Manchester United", "2007 Club World Cup", "2005 Confederations Cup"],
+      verdict: "Milan에서는 2007 유럽 정상의 명백한 1번 공격 자원이었습니다.",
+    },
+    legacy: {
+      reasons: ["Ballon d'Or 2007", "Champions League 2006-07", "World Cup 2002", "last pre-Messi/Ronaldo world-best season"],
+      context: ["Brazil number 10 lineage after Rivaldo/Ronaldinho", "injury-shortened Madrid years limit total score"],
+      verdict: "짧지만 명확한 세계 최고 시즌 때문에 장기 기억이 강합니다.",
+    },
+    sources: [
+      { label: "AC Milan - Kaka Ballon d'Or", url: "https://www.acmilan.com/en/news/articles/history/2022-12-02/onthisday-kaka-wins-the-ballon-d-or" },
+      { label: "UEFA - Kaka world crown", url: "https://www.uefa.com/news-media/news/0250-0c50f2621f57-658fc57a2a14-1000--kaka-collects-world-crown/" },
+      { label: "Wikipedia - Kaka", url: "https://en.wikipedia.org/wiki/Kak%C3%A1" },
+    ],
+  }),
+  gilmar: makeFocusedProfile({
+    summary:
+      "Gilmar는 Brazil의 1958/1962 World Cup 연속 우승 주전 골키퍼이자 Santos의 Libertadores/Intercontinental 왕조를 지킨 골키퍼입니다.",
+    team: {
+      clubs: ["Jabaquara", "Corinthians", "Santos", "Brazil national team"],
+      clubHonours: ["Corinthians: Campeonato Paulista 1951, 1952, 1954; Rio-Sao Paulo Tournament 1953, 1954", "Santos: Copa Libertadores 1962, 1963; Intercontinental Cup 1962, 1963", "Santos: Taca Brasil/Campeonato Brasileiro-era national titles and Campeonato Paulista titles in the Pele era"],
+      nationalHonours: ["Brazil: FIFA World Cup 1958, 1962", "Brazil: South American Championship 1949 squad era context"],
+      verdict: "월드컵 2회와 Santos 세계 정상 커리어를 모두 가진 골키퍼 최고권 팀 커리어입니다.",
+    },
+    individual: {
+      awards: ["IFFHS Brazilian goalkeeper historical recognition", "Brazil/Santos all-time goalkeeper recognition", "FIFA World Cup champion goalkeeper legacy"],
+      records: ["Starting goalkeeper for Brazil's first two World Cup wins", "Goalkeeper of Pele's Santos Libertadores/Intercontinental era"],
+      verdict: "골키퍼 개인상 제도 이전이지만 팀 성과의 무게가 매우 큽니다.",
+    },
+    prime: {
+      period: "1958-63 Brazil/Santos",
+      evidence: ["1958 and 1962 World Cups", "1962 and 1963 Libertadores/Intercontinental Cups", "Santos global peak"],
+      skills: ["Positioning", "reflex saves", "calm distribution", "command", "big-match reliability"],
+      verdict: "화려함보다 역사적 팀의 골문 안정성을 만든 프라임입니다.",
+    },
+    importance: {
+      roles: ["Brazil: starting goalkeeper in back-to-back World Cup wins", "Santos: goalkeeper of Pele-era global dominance"],
+      moments: ["1958 World Cup final", "1962 World Cup title defense", "Santos Intercontinental Cup wins"],
+      verdict: "Brazil과 Santos 양쪽 황금기의 골문을 맡은 점이 결정적입니다.",
+    },
+    legacy: {
+      reasons: ["two World Cups", "two Libertadores", "two Intercontinental Cups", "Brazil/Santos all-time goalkeeper status"],
+      context: ["All-time Brazil goalkeeper debate with Taffarel/Dida/Julio Cesar/Alisson", "winner-profile goalkeeper"],
+      verdict: "우승 총량과 시대 상징성 때문에 Brazil 골키퍼 역사 최상위권입니다.",
+    },
+    sources: [
+      { label: "Wikipedia - Gilmar", url: "https://en.wikipedia.org/wiki/Gilmar" },
+      { label: "FIFA - 1958/1962 Brazil records", url: "https://www.fifa.com/pt/articles/brasil-pele-garrincha-numeros-copa-mundo-1958-1962" },
     ],
   }),
 };
