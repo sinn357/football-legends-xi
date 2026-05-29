@@ -448,10 +448,11 @@ type PlayerEvidenceProfile = {
 - 유럽 제외 총 213명: profile override 누락 0명
 - Europe 1 63명: Switzerland, Bulgaria, Croatia, Romania, Ukraine, Russia, Bosnia and Herzegovina, Poland, Serbia, Montenegro, Hungary, Austria, Czech Republic, Slovenia, Slovakia, Armenia 전체 큐레이션 프로필 적용
 - Europe 2 47명: Northern Ireland, Scotland, Wales, Ireland, Iceland, Norway, Denmark, Sweden, Finland 전체 큐레이션 프로필 적용
-- Europe 누적 110명: profile override 누락 0명
-- Europe 잔여 333명: 기존 generic profile 유지
+- Germany 53명: 전체 큐레이션 프로필 적용
+- Europe 누적 163명: profile override 누락 0명
+- Europe 잔여 280명: 기존 generic profile 유지
 
-Baseline profile은 이제 Core Europe 선수에게만 남아 있다. 유럽 제외 선수와 Europe 1/2 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
+Baseline profile은 이제 Germany를 제외한 Core Europe 선수에게만 남아 있다. 유럽 제외 선수와 Europe 1/2/Germany 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
 
 Focused profile 적용 완료:
 
@@ -469,10 +470,11 @@ Focused profile 적용 완료:
 12. Europe 1 확장: Stephane Chapuisat, Xherdan Shaqiri, Granit Xhaka, Manuel Akanji, Yann Sommer, Hristo Stoichkov, Dimitar Berbatov, Zvonimir Boban, Davor Suker, Luka Modric, Ivan Rakitic, Mario Mandzukic, Ivan Perisic, Mateo Kovacic, Marcelo Brozovic, Gheorghe Hagi, Christian Chivu, Igor Belanov, Oleg Blokhin, Andriy Shevchenko, Lev Yashin, Edin Dzeko, Miralem Pjanic, Hasan Salihamidzic, Robert Lewandowski, Zbigniew Boniek, Grzegorz Lato, Kazimierz Deyna, Wlodzimierz Lubanski, Wladyslaw Zmuda, Wojciech Szczesny, Dragan Dzajic, Nemanja Vidic, Sinisa Mihajlovic, Dejan Stankovic, Branislav Ivanovic, Predrag Mijatovic, Ferenc Puskas, Laszlo Kubala, Sandor Kocsis, Nandor Hidegkuti, Josef Bozsik, Florian Albert, Gyorgy Sarosi, Zoltan Czibor, Gyula Grosics, Ferenc Bene, Matthias Sindelar, Ernst Ocwirk, Hans Krankl, David Alaba, Pavel Nedved, Josef Masopust, Petr Cech, Oldrich Nejedly, Antonin Panenka, Antonin Puc, Tomas Rosicky, Jan Koller, Jan Oblak, Samir Handanovic, Marek Hamsik, Henrikh Mkhitaryan
 13. 유럽 이름 정규화: Polish `ł`, Balkan `đ`, Scandinavian `ø`, German `ß` 같은 NFKD 비분해 문자를 ASCII로 치환해 score/profile lookup이 원본 표기와 맞도록 수정
 14. Europe 2 확장: George Best, Danny Blanchflower, Pat Jennings, Denis Law, Ally McCoist, Kenny Dalglish, John Robertson, Jimmy Johnstone, Graeme Souness, Billy Bremner, Danny McGrain, Andrew Robertson, John Greig, Alan Hansen, Billy McNeill, John Charles, Gareth Bale, Ryan Giggs, Ian Rush, Mark Hughes, Roy Keane, Denis Irwin, Robbie Keane, Eidur Gudjohnsen, Erling Haaland, Martin Odegaard, Ole Gunnar Solskjaer, John Arne Riise, Preben Elkjaer, Allan Simonsen, Soren Lerby, Christian Eriksen, Brian Laudrup, Michael Laudrup, Andreas Christensen, Morten Olsen, Simon Kjaer, Peter Schmeichel, Zlatan Ibrahimovic, Gunnar Nordahl, Henrik Larsson, Gunnar Gren, Freddie Ljungberg, Kurt Hamrin, Nils Liedholm, Jari Litmanen, Sami Hyypia
+15. Germany 확장: Gerd Muller, Miroslav Klose, Uwe Seeler, Jurgen Klinsmann, Rudi Voller, Jupp Heynckes, Mario Gomez, Thomas Muller, Karl-Heinz Rummenigge, Helmut Rahn, Pierre Littbarski, Jurgen Grabowski, Marco Reus, Fritz Walter, Gunter Netzer, Wolfgang Overath, Bernd Schuster, Mesut Ozil, Thomas Hassler, Andreas Moller, Lothar Matthaus, Toni Kroos, Michael Ballack, Bastian Schweinsteiger, Ilkay Gundogan, Stefan Effenberg, Uli Stielike, Rainer Bonhof, Sami Khedira, Franz Beckenbauer, Matthias Sammer, Jurgen Kohler, Karl-Heinz Forster, Hans-Georg Schwarzenbeck, Klaus Augenthaler, Jerome Boateng, Mats Hummels, Philipp Lahm, Berti Vogts, Manfred Kaltz, Stefan Reuter, Joshua Kimmich, Paul Breitner, Andreas Brehme, Karl-Heinz Schnellinger, Hans-Peter Briegel, Manuel Neuer, Sepp Maier, Harald Schumacher, Jens Lehmann, Oliver Kahn, Bodo Illgner, Marc-Andre ter Stegen
 
 다음 데이터 입력 우선순위:
 
-1. Core Europe 1: Germany, Italy, France
+1. Core Europe 1 잔여: Italy, France
 2. Core Europe 2: Spain, England, Netherlands
 3. Core Europe 3: Portugal, Belgium
 4. 유럽 제외 선수의 팀 우승/개인 수상 세부 항목 교차 검증
