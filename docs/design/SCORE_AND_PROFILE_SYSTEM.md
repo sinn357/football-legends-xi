@@ -453,10 +453,13 @@ type PlayerEvidenceProfile = {
 - France 38명: 전체 큐레이션 프로필 적용
 - Spain 48명: 전체 큐레이션 프로필 적용
 - England 53명: 전체 큐레이션 프로필 적용
-- Europe 누적 362명: profile override 누락 0명
-- Europe 잔여 81명: 기존 generic profile 유지
+- Netherlands 37명: 전체 큐레이션 프로필/점수 적용
+- Portugal 27명: 전체 큐레이션 프로필/점수 적용
+- Belgium 17명: 전체 큐레이션 프로필/점수 적용
+- Europe 누적 443명: profile override 누락 0명, computed score 0명
+- Europe 잔여 0명
 
-Baseline profile은 이제 Germany/Italy/France/Spain/England를 제외한 Core Europe 선수에게만 남아 있다. 유럽 제외 선수와 Europe 1/2/Germany/Italy/France/Spain/England 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
+Baseline profile은 이제 Europe 선수에게는 남아 있지 않다. 유럽 제외 선수와 Europe 전체 선수는 모두 선수별 큐레이션 profile override를 우선 사용한다.
 
 Focused profile 적용 완료:
 
@@ -479,10 +482,12 @@ Focused profile 적용 완료:
 17. France 확장: Kylian Mbappe, Thierry Henry, Karim Benzema, Jean-Pierre Papin, Just Fontaine, David Trezeguet, Olivier Giroud, Antoine Griezmann, Eric Cantona, Youri Djorkaeff, Ousmane Dembele, Franck Ribery, Robert Pires, Zinedine Zidane, Michel Platini, Raymond Kopa, Alain Giresse, Patrick Vieira, N'Golo Kante, Jean Tigana, Blaise Matuidi, Paul Pogba, Didier Deschamps, Claude Makelele, Emmanuel Petit, Marcel Desailly, Laurent Blanc, Raphael Varane, Maxime Bossis, Marius Tresor, Lilian Thuram, Willy Sagnol, Bixente Lizarazu, Patrice Evra, Eric Abidal, Theo Hernandez, Hugo Lloris, Fabien Barthez
 18. Spain 확장: David Villa, Telmo Zarra, Fernando Torres, Fernando Morientes, Carlos Santillana, Raul Gonzalez, Emilio Butragueno, Amancio Amaro, Michel, Juanito, Luis Enrique, Joaquin, Pedro Rodriguez, Francisco Gento, Luis Suarez Miramontes, Andres Iniesta, David Silva, Juan Carlos Valeron, Rafael Martin Vazquez, Jose Mari Bakero, Isco, Xavi, Luis del Sol, Jose Pirri, Cesc Fabregas, Thiago Alcantara, Koke, Gaizka Mendieta, Santi Cazorla, Rodri, Sergio Busquets, Xabi Alonso, Josep Guardiola, Sergio Ramos, Carles Puyol, Fernando Hierro, Gerard Pique, Daniel Carvajal, Michel Salgado, Chendo, Cesar Azpilicueta, Jesus Navas, Jose Antonio Camacho, Jordi Alba, Rafael Gordillo, Iker Casillas, Andoni Zubizarreta, Victor Valdes
 19. England 확장: Gary Lineker, Jimmy Greaves, Harry Kane, Alan Shearer, Michael Owen, Geoff Hurst, Roger Hunt, Andy Cole, Jamie Vardy, Kevin Keegan, Wayne Rooney, Johnny Haynes, Teddy Sheringham, Stanley Matthews, David Beckham, Bukayo Saka, Steve McManaman, Tom Finney, John Barnes, Raheem Sterling, Chris Waddle, Bobby Charlton, Paul Gascoigne, Steven Gerrard, Frank Lampard, Paul Scholes, Bryan Robson, Michael Carrick, Jordan Henderson, James Milner, Ian Callaghan, Declan Rice, Terry McDermott, Bobby Moore, John Terry, Rio Ferdinand, Billy Wright, Tony Adams, Sol Campbell, Jack Charlton, John Stones, Kyle Walker, Gary Neville, George Cohen, Jimmy Armfield, Phil Neal, Trent Alexander-Arnold, Ashley Cole, Ray Wilson, Gordon Banks, Peter Shilton, David Seaman, Ray Clemence
+20. Netherlands 확장: Marco Van Basten, Ruud van Nistelrooy, Robin van Persie, Klaas-Jan Huntelaar, Johan Cruyff, Dennis Bergkamp, Arjen Robben, Johnny Rep, Dirk Kuyt, Rob Rensenbrink, Piet Keizer, Marc Overmars, Ruud Gullit, Wesley Sneijder, Gerald Vanenburg, Johan Neeskens, Clarence Seedorf, Arnold Muhren, Mark van Bommel, Frenkie de Jong, Frank Rijkaard, Willem Van Hanegem, Edgar Davids, Arie Haan, Wim Jansen, Ronald Koeman, Virgil van Dijk, Jaap Stam, Frank de Boer, Wim Rijsbergen, Danny Blind, Wim Suurbier, Michael Reiziger, Ruud Krol, Giovanni van Bronckhorst, Edwin van der Sar, Hans van Breukelen
+21. Portugal 확장: Jose Aguas, Fernando Gomes, Eusebio, Cristiano Ronaldo, Paulo Futre, Luis Nani, Luis Figo, Jose Augusto, Rui Costa, Deco, Bernardo Silva, Bruno Fernandes, Vitinha, Mario Coluna, João Moutinho, Paulo Sousa, Tiago Mendes, Pepe, Germano, Ricardo Carvalho, Rúben Dias, Joao Cancelo, João Pinto, Paulo Ferreira, Hilario, Vitor Baia, Rui Patricio
+22. Belgium 확장: Paul Van Himst, Romelu Lukaku, Eden Hazard, Dries Mertens, Enzo Scifo, Jan Ceulemans, Kevin De Bruyne, R. Nainggolan, Youri Tielemans, Vincent Kompany, Jan Vertonghen, Toby Alderweireld, Thomas Vermaelen, Eric Gerets, Thibaut Courtois, Jean-Marie Pfaff, Michel Preud'homme
 
 다음 데이터 입력 우선순위:
 
-1. Core Europe 2 잔여: Netherlands
-2. Core Europe 3: Portugal, Belgium
-3. 유럽 제외 선수의 팀 우승/개인 수상 세부 항목 교차 검증
-4. 현역보류/삭제후보 선수 유지 여부 재검토
+1. 유럽 제외 선수의 팀 우승/개인 수상 세부 항목 교차 검증
+2. 현역보류/삭제후보 선수 유지 여부 재검토
+3. UI에서 점수 분포와 세부 프로필 문구 검수
