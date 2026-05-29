@@ -30,6 +30,7 @@ export type ScoreKey =
   | "legacy";
 
 export type PlayerScores = Record<ScoreKey, number>;
+export type ScoreMode = "anchor" | "computed" | "adjusted";
 
 export type Continent = "America" | "Europe" | "Asia" | "Africa";
 
@@ -71,6 +72,8 @@ export type LegendPlayer = {
   topTierRank: number | null;
   sourceOrder: number;
   positionOrder: number;
+  overallScore: number;
+  scoreMode: ScoreMode;
   scores: PlayerScores;
   profile: PlayerProfile;
 };
@@ -148,15 +151,58 @@ const prestigeCountries = new Set([
   "Portugal",
 ]);
 
-const iconOverrides: Record<string, Partial<PlayerScores>> = {
-  pele: { teamCareer: 99, individualCareer: 99, primeSkill: 100, teamImportance: 99, legacy: 100 },
-  "lionel messi": { teamCareer: 100, individualCareer: 100, primeSkill: 100, teamImportance: 100, legacy: 100 },
-  "diego maradona": { teamCareer: 96, individualCareer: 98, primeSkill: 100, teamImportance: 100, legacy: 100 },
-  "cristiano ronaldo": { teamCareer: 100, individualCareer: 100, primeSkill: 99, teamImportance: 99, legacy: 100 },
-  "johan cruyff": { teamCareer: 97, individualCareer: 98, primeSkill: 100, teamImportance: 99, legacy: 100 },
-  "franz beckenbauer": { teamCareer: 100, individualCareer: 98, primeSkill: 99, teamImportance: 100, legacy: 100 },
-  ronaldo: { teamCareer: 94, individualCareer: 96, primeSkill: 100, teamImportance: 96, legacy: 99 },
-  "zinedine zidane": { teamCareer: 98, individualCareer: 98, primeSkill: 100, teamImportance: 99, legacy: 100 },
+type ScoreOverride = Partial<PlayerScores> & {
+  overallScore?: number;
+  scoreMode?: ScoreMode;
+  scores?: Partial<PlayerScores>;
+};
+
+const scoreOverrides: Record<string, ScoreOverride> = {
+  pele: {
+    overallScore: 98,
+    scoreMode: "anchor",
+    scores: { teamCareer: 98, individualCareer: 98, primeSkill: 99, teamImportance: 99, legacy: 100 },
+  },
+  "lionel messi": {
+    overallScore: 99,
+    scoreMode: "anchor",
+    scores: { teamCareer: 99, individualCareer: 100, primeSkill: 100, teamImportance: 100, legacy: 100 },
+  },
+  "diego maradona": {
+    overallScore: 98,
+    scoreMode: "anchor",
+    scores: { teamCareer: 91, individualCareer: 96, primeSkill: 100, teamImportance: 100, legacy: 100 },
+  },
+  "cristiano ronaldo": {
+    overallScore: 97,
+    scoreMode: "anchor",
+    scores: { teamCareer: 100, individualCareer: 99, primeSkill: 98, teamImportance: 98, legacy: 100 },
+  },
+  "johan cruyff": {
+    overallScore: 97,
+    scoreMode: "anchor",
+    scores: { teamCareer: 95, individualCareer: 97, primeSkill: 98, teamImportance: 99, legacy: 100 },
+  },
+  "franz beckenbauer": {
+    overallScore: 96,
+    scoreMode: "anchor",
+    scores: { teamCareer: 99, individualCareer: 97, primeSkill: 97, teamImportance: 98, legacy: 99 },
+  },
+  "ferenc puskas": {
+    overallScore: 96,
+    scoreMode: "anchor",
+    scores: { teamCareer: 95, individualCareer: 96, primeSkill: 98, teamImportance: 98, legacy: 98 },
+  },
+  ronaldo: {
+    overallScore: 96,
+    scoreMode: "anchor",
+    scores: { teamCareer: 91, individualCareer: 95, primeSkill: 100, teamImportance: 96, legacy: 99 },
+  },
+  "zinedine zidane": {
+    overallScore: 96,
+    scoreMode: "anchor",
+    scores: { teamCareer: 97, individualCareer: 96, primeSkill: 98, teamImportance: 99, legacy: 99 },
+  },
   "michel platini": { teamCareer: 96, individualCareer: 99, primeSkill: 99, teamImportance: 98, legacy: 99 },
   "paolo maldini": { teamCareer: 100, individualCareer: 96, primeSkill: 99, teamImportance: 99, legacy: 100 },
   "gianluigi buffon": { teamCareer: 98, individualCareer: 97, primeSkill: 98, teamImportance: 98, legacy: 99 },
@@ -166,25 +212,57 @@ const iconOverrides: Record<string, Partial<PlayerScores>> = {
   "marco van basten": { teamCareer: 94, individualCareer: 98, primeSkill: 100, teamImportance: 97, legacy: 98 },
   "차범근": { teamCareer: 94, individualCareer: 91, primeSkill: 95, teamImportance: 96, legacy: 97 },
   "손흥민": { teamCareer: 93, individualCareer: 92, primeSkill: 96, teamImportance: 96, legacy: 97 },
-  "abedi pele": { teamCareer: 94, individualCareer: 93, primeSkill: 95, teamImportance: 95, legacy: 95 },
+  "abedi pele": {
+    overallScore: 92,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 91, individualCareer: 92, primeSkill: 93, teamImportance: 92, legacy: 93 },
+  },
   "michael essien": { teamCareer: 92, individualCareer: 86, primeSkill: 92, teamImportance: 93, legacy: 90 },
   "samuel kuffour": { teamCareer: 91, individualCareer: 82, primeSkill: 88, teamImportance: 90, legacy: 87 },
   "jay jay okocha": { teamCareer: 82, individualCareer: 86, primeSkill: 95, teamImportance: 89, legacy: 91 },
   "nwankwo kanu": { teamCareer: 91, individualCareer: 89, primeSkill: 91, teamImportance: 88, legacy: 90 },
-  "samuel eto o": { teamCareer: 98, individualCareer: 97, primeSkill: 98, teamImportance: 98, legacy: 98 },
-  "roger milla": { teamCareer: 87, individualCareer: 90, primeSkill: 92, teamImportance: 98, legacy: 96 },
+  "samuel eto o": {
+    overallScore: 95,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 97, individualCareer: 95, primeSkill: 95, teamImportance: 95, legacy: 95 },
+  },
+  "roger milla": {
+    overallScore: 92,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 88, individualCareer: 91, primeSkill: 91, teamImportance: 95, legacy: 96 },
+  },
   "thomas n kono": { teamCareer: 86, individualCareer: 90, primeSkill: 92, teamImportance: 93, legacy: 91 },
-  "didier drogba": { teamCareer: 96, individualCareer: 94, primeSkill: 96, teamImportance: 98, legacy: 96 },
-  "yaya toure": { teamCareer: 96, individualCareer: 95, primeSkill: 97, teamImportance: 96, legacy: 96 },
+  "didier drogba": {
+    overallScore: 93,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 91, primeSkill: 94, teamImportance: 96, legacy: 94 },
+  },
+  "yaya toure": {
+    overallScore: 93,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 95, individualCareer: 93, primeSkill: 94, teamImportance: 93, legacy: 92 },
+  },
   "kolo toure": { teamCareer: 93, individualCareer: 82, primeSkill: 87, teamImportance: 89, legacy: 87 },
-  "george weah": { teamCareer: 91, individualCareer: 100, primeSkill: 98, teamImportance: 98, legacy: 100 },
+  "george weah": {
+    overallScore: 95,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 89, individualCareer: 97, primeSkill: 96, teamImportance: 95, legacy: 98 },
+  },
   "lucas radebe": { teamCareer: 78, individualCareer: 76, primeSkill: 86, teamImportance: 95, legacy: 87 },
-  "sadio mane": { teamCareer: 98, individualCareer: 96, primeSkill: 96, teamImportance: 97, legacy: 96 },
+  "sadio mane": {
+    overallScore: 93,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 94, individualCareer: 93, primeSkill: 93, teamImportance: 94, legacy: 93 },
+  },
   "kalidou koulibaly": { teamCareer: 88, individualCareer: 87, primeSkill: 92, teamImportance: 93, legacy: 91 },
   "achraf hakimi": { teamCareer: 95, individualCareer: 88, primeSkill: 93, teamImportance: 91, legacy: 91 },
   "hakim ziyach": { teamCareer: 90, individualCareer: 84, primeSkill: 90, teamImportance: 88, legacy: 86 },
   "pierre emerick aubameyang": { teamCareer: 86, individualCareer: 91, primeSkill: 94, teamImportance: 93, legacy: 91 },
-  "mohamed salah": { teamCareer: 100, individualCareer: 100, primeSkill: 99, teamImportance: 100, legacy: 99 },
+  "mohamed salah": {
+    overallScore: 95,
+    scoreMode: "adjusted",
+    scores: { teamCareer: 95, individualCareer: 96, primeSkill: 96, teamImportance: 96, legacy: 95 },
+  },
   "riyad mahrez": { teamCareer: 100, individualCareer: 94, primeSkill: 96, teamImportance: 94, legacy: 94 },
   "rabah madjer": { teamCareer: 92, individualCareer: 90, primeSkill: 93, teamImportance: 95, legacy: 94 },
 };
@@ -2061,6 +2139,7 @@ function parseLegendMarkdown(markdown: string) {
       status: parsedName.status,
       positionOrder,
     });
+    const rating = makePlayerRating(parsedName.name, scores);
 
     const player: LegendPlayer = {
       id: makePlayerId(currentCountry, parsedName.name, players.length),
@@ -2074,6 +2153,8 @@ function parseLegendMarkdown(markdown: string) {
       topTierRank: topTierRankByName.get(normalizedName(parsedName.name)) ?? null,
       sourceOrder: players.length + 1,
       positionOrder,
+      overallScore: rating.overallScore,
+      scoreMode: rating.scoreMode,
       scores,
       profile: makePlayerProfile(parsedName.name, currentCountry, currentPosition, parsedName.status, scores),
     };
@@ -2302,18 +2383,38 @@ function makeSeedScores({
     legacy: clampScore(orderBase + countryBonus + attacker + spine + statusPenalty + activeBonus),
   };
 
-  const override = iconOverrides[normalizedName(name)];
+  const override = scoreOverrides[normalizedName(name)];
   if (!override) {
     return scores;
   }
+  const scoreOverride = override.scores ?? override;
 
   return {
-    teamCareer: override.teamCareer ?? scores.teamCareer,
-    individualCareer: override.individualCareer ?? scores.individualCareer,
-    primeSkill: override.primeSkill ?? scores.primeSkill,
-    teamImportance: override.teamImportance ?? scores.teamImportance,
-    legacy: override.legacy ?? scores.legacy,
+    teamCareer: scoreOverride.teamCareer ?? scores.teamCareer,
+    individualCareer: scoreOverride.individualCareer ?? scores.individualCareer,
+    primeSkill: scoreOverride.primeSkill ?? scores.primeSkill,
+    teamImportance: scoreOverride.teamImportance ?? scores.teamImportance,
+    legacy: scoreOverride.legacy ?? scores.legacy,
   };
+}
+
+function makePlayerRating(name: string, scores: PlayerScores): { overallScore: number; scoreMode: ScoreMode } {
+  const override = scoreOverrides[normalizedName(name)];
+
+  return {
+    overallScore: override?.overallScore ?? calculateOverallScore(scores),
+    scoreMode: override?.scoreMode ?? "computed",
+  };
+}
+
+function calculateOverallScore(scores: PlayerScores) {
+  return Math.round(
+    scores.teamCareer * 0.22 +
+      scores.individualCareer * 0.22 +
+      scores.primeSkill * 0.26 +
+      scores.teamImportance * 0.18 +
+      scores.legacy * 0.12,
+  );
 }
 
 function makePlayerProfile(

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, RefObject } from "react";
-import type { Continent, LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey } from "@/lib/legend-data";
+import type { Continent, LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
 type TabId = "atlas" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
@@ -61,6 +61,12 @@ const statusLabels: Record<PlayerStatus, string> = {
   "active-legend": "현역확정",
   "delete-candidate": "삭제후보",
   watch: "검토",
+};
+
+const scoreModeLabels: Record<ScoreMode, string> = {
+  anchor: "앵커",
+  computed: "계산",
+  adjusted: "보정",
 };
 
 const positionOptions: PositionCode[] = ["ST", "SS", "RW", "LW", "AM", "CM", "DM", "CB", "RB", "LB", "GK"];
@@ -341,7 +347,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
   const selectedCountrySummary = data.countries.find((country) => country.name === atlasCountry);
   const selectedCountryTop = atlasPlayers
-    .map((player) => ({ player, rating: ratePlayer(player, weights) }))
+    .map((player) => ({ player, rating: player.overallScore }))
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 10);
 
@@ -753,7 +759,7 @@ function AtlasView({
         <section className="summary-grid compact">
           <Metric label="선수 풀" value={`${selectedCountrySummary?.count ?? 0}명`} detail="원본 리스트 기준" />
           <Metric label="포지션 수" value={`${Object.keys(selectedCountrySummary?.positions ?? {}).length}`} detail="분류된 포지션" />
-          <Metric label="Top 10 평균" value={`${average(selectedCountryTop.map((item) => item.rating))}`} detail="현재 가중치" />
+          <Metric label="Top 10 평균" value={`${average(selectedCountryTop.map((item) => item.rating))}`} detail="공식 총점" />
         </section>
 
         <div className="nation-dashboard">
@@ -1306,6 +1312,11 @@ function PlayerDetailDrawer({
         </button>
       </div>
       <p className="drawer-summary">{player.profile.summary}</p>
+      <div className="official-score-panel">
+        <span>공식 총점</span>
+        <strong>{player.overallScore}</strong>
+        <em>{scoreModeLabels[player.scoreMode]}</em>
+      </div>
       <div className="drawer-actions">
         <button className="primary-inline" onClick={() => onToggleCompare(player.id)} type="button">
           비교에 추가
@@ -1385,7 +1396,7 @@ function PlayerMiniCard({ onClick, player, rating }: { onClick: () => void; play
     <button className="player-mini-card" onClick={onClick} type="button">
       <strong>{player.name}</strong>
       <span>
-        {player.primaryPosition} · {rating}
+        {player.primaryPosition} · 공식 {player.overallScore} · 기준 {rating}
       </span>
       <em>{statusLabels[player.status]}</em>
     </button>

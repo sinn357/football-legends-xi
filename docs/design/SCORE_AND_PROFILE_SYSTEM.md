@@ -406,14 +406,16 @@ type PlayerEvidenceProfile = {
 
 이미 상세 프로필을 넣은 상위 8명은 먼저 총점 기준에 맞춰 리스케일한다.
 
-1. George Weah
-2. Samuel Eto'o
-3. Mohamed Salah
-4. Didier Drogba
-5. Yaya Toure
-6. Sadio Mane
-7. Abedi Pele
-8. Roger Milla
+| 선수 | 총점 | mode | 팀 커리어 | 개인 수상 | 프라임 실력 | 팀 내 비중 | 100년 뒤 존재감 | 판단 근거 |
+|---|---:|---|---:|---:|---:|---:|---:|---|
+| George Weah | 95 | adjusted | 89 | 97 | 96 | 95 | 98 | Ballon d'Or/FIFA 올해의 선수 유일성, Liberia 상징성은 최고급이나 팀 우승 총량은 최상위 앵커보다 낮음 |
+| Samuel Eto'o | 95 | adjusted | 97 | 95 | 95 | 95 | 95 | Barcelona/Inter 연속 트레블, AFCON/Olympic Gold, African POTY 4회로 팀 커리어 최상위 |
+| Mohamed Salah | 95 | adjusted | 95 | 96 | 96 | 96 | 95 | Premier League 기록과 Liverpool 역사 지위는 최고급이나 대표팀 우승 부재 때문에 96+는 보류 |
+| Didier Drogba | 93 | adjusted | 94 | 91 | 94 | 96 | 94 | Chelsea 결승 서사와 Cote d'Ivoire 비중은 매우 높지만 개인상 총량은 Weah/Eto'o/Salah보다 낮음 |
+| Yaya Toure | 93 | adjusted | 95 | 93 | 94 | 93 | 92 | Barcelona/City/Cote d'Ivoire 팀 커리어와 미드필더 고점은 강하나 장기 대중 레거시는 공격수들보다 약함 |
+| Sadio Mane | 93 | adjusted | 94 | 93 | 93 | 94 | 93 | Liverpool 왕조와 Senegal 첫 AFCON 우승 핵심, 다만 프라임/개인상 천장은 95권보다 낮게 둠 |
+| Abedi Pele | 92 | adjusted | 91 | 92 | 93 | 92 | 93 | Marseille UCL, African POTY 3연속, Ghana 플레이메이커 원형으로 92권 |
+| Roger Milla | 92 | adjusted | 88 | 91 | 91 | 95 | 96 | 클럽 커리어는 낮지만 1990 World Cup/Cameroon/CAF 50년 서사 때문에 레거시와 팀 비중을 높게 둠 |
 
 그 다음 나머지 아프리카 선수는 국가별로 처리한다.
 

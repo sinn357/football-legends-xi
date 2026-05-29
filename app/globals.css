@@ -1075,6 +1075,37 @@ td strong {
   line-height: 1.65;
 }
 
+.official-score-panel {
+  align-items: center;
+  background: #173f35;
+  border-radius: 8px;
+  color: #fff;
+  display: grid;
+  gap: 2px;
+  grid-template-columns: 1fr auto;
+  margin: 14px 0;
+  padding: 12px 14px;
+}
+
+.official-score-panel span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.official-score-panel strong {
+  font-size: 32px;
+  grid-row: span 2;
+  line-height: 1;
+}
+
+.official-score-panel em {
+  color: #f0c66c;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
 .drawer-actions {
   align-items: center;
   display: flex;
