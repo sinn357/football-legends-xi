@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -14,6 +14,16 @@ type LegendTier = {
   id: LegendTierId;
   label: string;
   range: string;
+};
+
+type EraId = "foundations" | "classic" | "global-tv" | "modern" | "current" | "unplaced";
+
+type EraOption = {
+  id: EraId;
+  label: string;
+  range: string;
+  start: number;
+  end: number;
 };
 
 type FormationSlot = {
@@ -104,6 +114,15 @@ const legendTiers: LegendTier[] = [
   { id: "borderline", label: "Cult / Borderline Legend", range: "80-84" },
   { id: "watchlist", label: "Watchlist", range: "75-79" },
   { id: "archive", label: "Archive / Remove Candidate", range: "0-74" },
+];
+
+const eraOptions: EraOption[] = [
+  { id: "foundations", label: "Foundations", range: "1930-1959", start: 1930, end: 1959 },
+  { id: "classic", label: "Classic Era", range: "1960-1979", start: 1960, end: 1979 },
+  { id: "global-tv", label: "Global TV Era", range: "1980-1999", start: 1980, end: 1999 },
+  { id: "modern", label: "Modern Elite", range: "2000-2015", start: 2000, end: 2015 },
+  { id: "current", label: "Current Era", range: "2016-2026", start: 2016, end: 2026 },
+  { id: "unplaced", label: "Unplaced", range: "needs years", start: 0, end: 0 },
 ];
 
 const positionOptions: PositionCode[] = ["ST", "SS", "RW", "LW", "AM", "CM", "DM", "CB", "RB", "LB", "GK"];
@@ -246,6 +265,8 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [battleCountryA, setBattleCountryA] = useState(defaultCountry);
   const [battleContinentB, setBattleContinentB] = useState<Continent | FilterValue>("America");
   const [battleCountryB, setBattleCountryB] = useState(defaultBattleCountry);
+  const [eraA, setEraA] = useState<EraId>("classic");
+  const [eraB, setEraB] = useState<EraId>("modern");
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -567,6 +588,54 @@ export function LegendBuilder({ data }: { data: LegendData }) {
         ? battleLeftProfile.country
         : battleRightProfile.country;
 
+  const eraCounts = useMemo(
+    () =>
+      data.players.reduce<Record<EraId, number>>(
+        (counts, player) => {
+          counts[getPlayerEra(player).id] += 1;
+          return counts;
+        },
+        {
+          foundations: 0,
+          classic: 0,
+          "global-tv": 0,
+          modern: 0,
+          current: 0,
+          unplaced: 0,
+        },
+      ),
+    [data.players],
+  );
+  const eraLeftProfile = useMemo(
+    () => buildBattleEraProfile(eraA, data.players, weights),
+    [data.players, eraA, weights],
+  );
+  const eraRightProfile = useMemo(
+    () => buildBattleEraProfile(eraB, data.players, weights),
+    [data.players, eraB, weights],
+  );
+  const eraRows = useMemo(
+    () =>
+      positionOptions.map((position) => {
+        const left = eraLeftProfile.rows.find((row) => row.position === position) ?? createEmptyDepthRow(position);
+        const right = eraRightProfile.rows.find((row) => row.position === position) ?? createEmptyDepthRow(position);
+        const gap = left.average - right.average;
+        return {
+          advantage: Math.abs(gap) <= 1 ? "EVEN" : gap > 0 ? "A" : "B",
+          left,
+          position,
+          right,
+        } satisfies PositionBattleRow;
+      }),
+    [eraLeftProfile.rows, eraRightProfile.rows],
+  );
+  const eraWinner =
+    eraLeftProfile.xiAverage === eraRightProfile.xiAverage
+      ? "Even"
+      : eraLeftProfile.xiAverage > eraRightProfile.xiAverage
+        ? eraLeftProfile.country
+        : eraRightProfile.country;
+
   const atlasPlayers = useMemo(
     () =>
       data.players
@@ -831,6 +900,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["hall", "Hall"],
           ["depth", "Depth"],
           ["battle", "Battle"],
+          ["era", "Era"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -976,6 +1046,26 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           rightProfile={battleRightProfile}
           rows={battleRows}
           winner={battleWinner}
+        />
+      ) : null}
+
+      {activeTab === "era" ? (
+        <EraBattleView
+          counts={eraCounts}
+          eraA={eraA}
+          eraB={eraB}
+          inspector={inspector}
+          leftProfile={eraLeftProfile}
+          onEraAChange={setEraA}
+          onEraBChange={setEraB}
+          onPlayerSelect={setSelectedPlayerId}
+          onSwapEras={() => {
+            setEraA(eraB);
+            setEraB(eraA);
+          }}
+          rightProfile={eraRightProfile}
+          rows={eraRows}
+          winner={eraWinner}
         />
       ) : null}
 
@@ -1924,12 +2014,172 @@ function BattleCountryPicker({
   );
 }
 
+function EraBattleView({
+  counts,
+  eraA,
+  eraB,
+  inspector,
+  leftProfile,
+  onEraAChange,
+  onEraBChange,
+  onPlayerSelect,
+  onSwapEras,
+  rightProfile,
+  rows,
+  winner,
+}: {
+  counts: Record<EraId, number>;
+  eraA: EraId;
+  eraB: EraId;
+  inspector: ReactNode;
+  leftProfile: BattleCountryProfile;
+  onEraAChange: (value: EraId) => void;
+  onEraBChange: (value: EraId) => void;
+  onPlayerSelect: (playerId: string) => void;
+  onSwapEras: () => void;
+  rightProfile: BattleCountryProfile;
+  rows: PositionBattleRow[];
+  winner: string;
+}) {
+  const matchups = Array.from({ length: 5 }, (_, index) => ({
+    left: leftProfile.topPlayers[index],
+    right: rightProfile.topPlayers[index],
+  })).filter((matchup) => matchup.left || matchup.right);
+
+  return (
+    <section className="battle-grid era-grid">
+      <aside className="battle-sidebar">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Era Battle</p>
+            <h2>시대 대결</h2>
+          </div>
+          <EraPicker counts={counts} era={eraA} label="시대 A" onEraChange={onEraAChange} />
+          <button className="ghost-button compact-button" onClick={onSwapEras} type="button">
+            좌우 바꾸기
+          </button>
+          <EraPicker counts={counts} era={eraB} label="시대 B" onEraChange={onEraBChange} />
+        </section>
+
+        <section className="battle-verdict-card">
+          <p className="eyebrow">Verdict</p>
+          <h2>{winner}</h2>
+          <span>
+            XI 평균 {leftProfile.xiAverage} : {rightProfile.xiAverage}
+          </span>
+        </section>
+
+        <section className="era-note-card">
+          <p className="eyebrow">Era Rule</p>
+          <h2>대표 연도 기준</h2>
+          <p>프로필의 프라임/커리어 설명과 수상 목록에서 연도를 추출해 중앙값으로 시대를 배정합니다.</p>
+        </section>
+      </aside>
+
+      <section className="battle-main">
+        <div className="battle-scoreboard">
+          <BattleProfileCard onPlayerSelect={onPlayerSelect} profile={leftProfile} />
+          <div className="battle-versus">
+            <strong>VS</strong>
+            <span>{winner === "Even" ? "균형" : `${winner} 우세`}</span>
+          </div>
+          <BattleProfileCard onPlayerSelect={onPlayerSelect} profile={rightProfile} />
+        </div>
+
+        <section className="battle-position-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Position Advantage</p>
+              <h2>포지션별 시대 우위</h2>
+            </div>
+            <div className="ranking-summary">
+              <span>{rows.filter((row) => row.advantage === "A").length} : {rows.filter((row) => row.advantage === "B").length}</span>
+              <strong>{rows.filter((row) => row.advantage === "EVEN").length} 동률</strong>
+            </div>
+          </div>
+          <div className="battle-position-list">
+            {rows.map((row) => (
+              <article className="battle-position-row" key={row.position}>
+                <BattlePositionSide row={row.left} side={row.advantage === "A" ? "win" : row.advantage === "EVEN" ? "even" : "lose"} />
+                <span className="battle-position-code">{row.position}</span>
+                <BattlePositionSide row={row.right} side={row.advantage === "B" ? "win" : row.advantage === "EVEN" ? "even" : "lose"} />
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="battle-lower-grid">
+          <article className="battle-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Auto XI</p>
+              <h2>{leftProfile.country}</h2>
+            </div>
+            <BattleXiList onPlayerSelect={onPlayerSelect} starters={leftProfile.xiStarters} />
+          </article>
+          <article className="battle-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Matchups</p>
+              <h2>대표 매치업</h2>
+            </div>
+            <div className="battle-matchup-list">
+              {matchups.map((matchup, index) => (
+                <div className="battle-matchup-row" key={`${matchup.left?.id ?? "left"}-${matchup.right?.id ?? "right"}-${index}`}>
+                  {matchup.left ? <button onClick={() => onPlayerSelect(matchup.left.id)} type="button">{matchup.left.name}<span>{matchup.left.overallScore}</span></button> : <span />}
+                  <em>{index + 1}</em>
+                  {matchup.right ? <button onClick={() => onPlayerSelect(matchup.right.id)} type="button">{matchup.right.name}<span>{matchup.right.overallScore}</span></button> : <span />}
+                </div>
+              ))}
+            </div>
+          </article>
+          <article className="battle-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Auto XI</p>
+              <h2>{rightProfile.country}</h2>
+            </div>
+            <BattleXiList onPlayerSelect={onPlayerSelect} starters={rightProfile.xiStarters} />
+          </article>
+        </section>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
+function EraPicker({
+  counts,
+  era,
+  label,
+  onEraChange,
+}: {
+  counts: Record<EraId, number>;
+  era: EraId;
+  label: string;
+  onEraChange: (value: EraId) => void;
+}) {
+  return (
+    <div className="battle-picker">
+      <p>{label}</p>
+      <label className="field">
+        <span>시대</span>
+        <select value={era} onChange={(event) => onEraChange(event.target.value as EraId)}>
+          {eraOptions.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label} ({item.range}) · {counts[item.id]}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+}
+
 function BattleProfileCard({
   onOpenBestXi,
   onPlayerSelect,
   profile,
 }: {
-  onOpenBestXi: (country: string, continent?: Continent) => void;
+  onOpenBestXi?: (country: string, continent?: Continent) => void;
   onPlayerSelect: (playerId: string) => void;
   profile: BattleCountryProfile;
 }) {
@@ -1956,9 +2206,11 @@ function BattleProfileCard({
           </button>
         ))}
       </div>
-      <button className="primary-inline" onClick={() => onOpenBestXi(profile.country, profile.summary?.continent)} type="button">
-        이 국가로 XI 만들기
-      </button>
+      {onOpenBestXi ? (
+        <button className="primary-inline" onClick={() => onOpenBestXi(profile.country, profile.summary?.continent)} type="button">
+          이 국가로 XI 만들기
+        </button>
+      ) : null}
     </article>
   );
 }
@@ -3182,6 +3434,93 @@ function buildBattleCountryProfile(
     xiAverage: average(xiStarters.map((starter) => starter.rating)),
     xiStarters,
   };
+}
+
+function buildBattleEraProfile(eraId: EraId, players: LegendPlayer[], weights: WeightMap): BattleCountryProfile {
+  const era = eraOptions.find((item) => item.id === eraId) ?? eraOptions[0];
+  const eraPlayers = players
+    .filter((player) => getPlayerEra(player).id === era.id)
+    .sort((a, b) => b.overallScore - a.overallScore || a.positionOrder - b.positionOrder || a.name.localeCompare(b.name));
+  const rows = positionOptions.map((position) => {
+    const positionPlayers = eraPlayers.filter((player) => player.primaryPosition === position);
+    const topPlayers = positionPlayers.slice(0, 3);
+    return {
+      average: average(topPlayers.map((player) => player.overallScore)),
+      count: positionPlayers.length,
+      players: positionPlayers,
+      position,
+      topScore: positionPlayers[0]?.overallScore ?? 0,
+    };
+  });
+  const eraFormation = formations["4-3-3"];
+  const eraSquad = buildSquad(eraPlayers, eraPlayers, eraFormation.slots, weights, {});
+  const xiStarters = eraFormation.slots
+    .map((slot) => {
+      const selected = eraSquad[slot.id];
+      return selected ? { slot, player: selected.player, rating: selected.rating } : null;
+    })
+    .filter(Boolean) as Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+  const nonEmptyRows = rows.filter((row) => row.count > 0);
+
+  return {
+    average: average(eraPlayers.slice(0, 10).map((player) => player.overallScore)),
+    country: `${era.label} (${era.range})`,
+    players: eraPlayers,
+    rows,
+    strengths: [...nonEmptyRows].sort((a, b) => b.average - a.average || b.count - a.count).slice(0, 3),
+    topPlayers: eraPlayers.slice(0, 10),
+    topScore: eraPlayers[0]?.overallScore ?? 0,
+    weaknesses: [...nonEmptyRows].sort((a, b) => a.average - b.average || a.count - b.count).slice(0, 3),
+    xiAverage: average(xiStarters.map((starter) => starter.rating)),
+    xiStarters,
+  };
+}
+
+function getPlayerEra(player: LegendPlayer): EraOption {
+  const year = getPlayerRepresentativeYear(player);
+  if (!year) {
+    return eraOptions.find((era) => era.id === "unplaced") ?? eraOptions[eraOptions.length - 1];
+  }
+
+  return eraOptions.find((era) => year >= era.start && year <= era.end) ?? eraOptions.find((era) => era.id === "unplaced") ?? eraOptions[eraOptions.length - 1];
+}
+
+function getPlayerRepresentativeYear(player: LegendPlayer) {
+  const primeYears = extractYearsFromText([
+    player.profile.sections.primeSkill.explanation,
+    ...player.profile.sections.primeSkill.bullets,
+    ...(player.profile.sections.primeSkill.facts?.flatMap((fact) => fact.items) ?? []),
+  ].join(" "));
+  const candidateYears = primeYears.length ? primeYears : extractYearsFromText(getPlayerProfileText(player));
+
+  if (!candidateYears.length) {
+    return null;
+  }
+
+  const sorted = [...candidateYears].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+function extractYearsFromText(value: string) {
+  const matches = value.match(/\b(?:19|20)\d{2}\b/g) ?? [];
+  return matches
+    .map((year) => Number(year))
+    .filter((year) => year >= 1930 && year <= 2026);
+}
+
+function getPlayerProfileText(player: LegendPlayer) {
+  const sections = Object.values(player.profile.sections);
+  return [
+    player.profile.summary,
+    ...sections.flatMap((section) => [
+      section.title,
+      section.verdict ?? "",
+      section.explanation,
+      section.caveat ?? "",
+      ...section.bullets,
+      ...(section.facts?.flatMap((fact) => [fact.label, ...fact.items]) ?? []),
+    ]),
+  ].join(" ");
 }
 
 function getFitLevel(fit: number) {

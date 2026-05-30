@@ -205,7 +205,7 @@ select,
   box-shadow: 0 16px 40px rgba(4, 25, 19, 0.18);
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   margin-bottom: 18px;
   padding: 8px;
 }
@@ -1343,6 +1343,7 @@ td strong {
 }
 
 .battle-verdict-card,
+.era-note-card,
 .battle-profile-card,
 .battle-position-panel,
 .battle-xi-panel {
@@ -1361,6 +1362,12 @@ td strong {
 .battle-verdict-card span {
   color: var(--muted);
   font-weight: 800;
+}
+
+.era-note-card p:last-child {
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 0;
 }
 
 .battle-scoreboard {
