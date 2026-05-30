@@ -2936,6 +2936,56 @@ td strong {
   line-height: 1.35;
 }
 
+.sim-series-leaders {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 12px 0;
+}
+
+.sim-series-leaders button {
+  background: rgba(255, 250, 240, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  text-align: left;
+}
+
+.sim-series-leaders button:hover {
+  border-color: var(--main);
+  transform: translateY(-1px);
+}
+
+.sim-series-leaders span {
+  color: var(--main);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sim-series-leaders strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.sim-series-leaders small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.sim-series-leaders em {
+  color: var(--gold);
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 900;
+}
+
 .sim-report-card {
   background: var(--side-1-strong);
   border: 1px solid var(--line);
@@ -3761,6 +3811,7 @@ td strong {
   .timeline-spotlight-grid,
   .sim-scoreboard,
   .sim-metric-grid,
+  .sim-series-leaders,
   .sim-series-grid,
   .sim-report-grid,
   .timeline-player-strip {
@@ -3854,6 +3905,7 @@ td strong {
   .sim-scoreboard,
   .sim-metric-grid,
   .sim-series-grid,
+  .sim-series-leaders,
   .sim-series-list article,
   .sim-report-grid,
   .sim-rating-list button,

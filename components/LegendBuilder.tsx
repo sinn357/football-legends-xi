@@ -20,6 +20,16 @@ type SimSeriesMatch = {
   result: SimulatedMatchResult;
 };
 
+type SimSeriesPlayerLeader = {
+  assists: number;
+  averageRating: number;
+  goals: number;
+  matches: number;
+  playerId: string;
+  playerName: string;
+  teamId: string;
+};
+
 type LegendTier = {
   id: LegendTierId;
   label: string;
@@ -4421,6 +4431,24 @@ function MatchSimulatorView({
                     );
                   })}
                 </div>
+                <div className="sim-series-leaders">
+                  {seriesSummary.leaders.map((leader) => (
+                    <button key={`${leader.label}-${leader.player.playerId}`} onClick={() => onPlayerSelect(leader.player.playerId)} type="button">
+                      <span>{leader.label}</span>
+                      <strong>{leader.player.playerName}</strong>
+                      <small>
+                        {leader.teamName} · {leader.detail}
+                      </small>
+                      <em>{leader.value}</em>
+                    </button>
+                  ))}
+                </div>
+                <div className="sim-report-grid">
+                  <ReportList title="Series Read" items={seriesSummary.insights} />
+                  <ReportList title="Control" items={seriesSummary.controlNotes} />
+                  <ReportList title="Players" items={seriesSummary.playerNotes} />
+                  <ReportList title="Swing" items={seriesSummary.swingNotes} />
+                </div>
               </section>
             ) : null}
             <div className="sim-metric-grid">
@@ -4725,6 +4753,7 @@ function runSimulationSeries(
 }
 
 function getSeriesSummary(seriesResults: SimSeriesMatch[], teamA: SimulationTeamInput, teamB: SimulationTeamInput, mode: SimMatchMode) {
+  const playerMap = new Map<string, SimSeriesPlayerLeader & { ratingTotal: number }>();
   const totals = seriesResults.reduce(
     (summary, match) => {
       const statsA = match.result.stats[teamA.id];
@@ -4733,6 +4762,14 @@ function getSeriesSummary(seriesResults: SimSeriesMatch[], teamA: SimulationTeam
       summary.teamBGoals += statsB.goals;
       summary.teamAXg += statsA.xg;
       summary.teamBXg += statsB.xg;
+      summary.teamAPossession += statsA.possession;
+      summary.teamBPossession += statsB.possession;
+      summary.teamAPressingWins += statsA.pressingWins;
+      summary.teamBPressingWins += statsB.pressingWins;
+      summary.teamAShots += statsA.shots;
+      summary.teamBShots += statsB.shots;
+      summary.teamAShotsOnTarget += statsA.shotsOnTarget;
+      summary.teamBShotsOnTarget += statsB.shotsOnTarget;
 
       if (match.result.winnerTeamId === teamA.id) {
         summary.teamAWins += 1;
@@ -4740,17 +4777,45 @@ function getSeriesSummary(seriesResults: SimSeriesMatch[], teamA: SimulationTeam
         summary.teamBWins += 1;
       }
 
+      match.result.playerRatings.forEach((rating) => {
+        const current = playerMap.get(rating.playerId) ?? {
+          assists: 0,
+          averageRating: 0,
+          goals: 0,
+          matches: 0,
+          playerId: rating.playerId,
+          playerName: rating.playerName,
+          ratingTotal: 0,
+          teamId: rating.teamId,
+        };
+        current.assists += rating.assists;
+        current.goals += rating.goals;
+        current.matches += 1;
+        current.ratingTotal += rating.rating;
+        current.averageRating = current.ratingTotal / current.matches;
+        playerMap.set(rating.playerId, current);
+      });
+
       return summary;
     },
     {
       teamAGoals: 0,
+      teamAPossession: 0,
+      teamAPressingWins: 0,
+      teamAShots: 0,
+      teamAShotsOnTarget: 0,
       teamAWins: 0,
       teamAXg: 0,
       teamBGoals: 0,
+      teamBPossession: 0,
+      teamBPressingWins: 0,
+      teamBShots: 0,
+      teamBShotsOnTarget: 0,
       teamBWins: 0,
       teamBXg: 0,
     },
   );
+  const matchCount = Math.max(seriesResults.length, 1);
   const winnerTeam =
     mode === "home-away"
       ? totals.teamAGoals === totals.teamBGoals
@@ -4763,13 +4828,129 @@ function getSeriesSummary(seriesResults: SimSeriesMatch[], teamA: SimulationTeam
         : totals.teamAWins > totals.teamBWins
           ? teamA
           : teamB;
+  const teamAPossessionAverage = Math.round(totals.teamAPossession / matchCount);
+  const teamBPossessionAverage = Math.round(totals.teamBPossession / matchCount);
+  const teamAEfficiency = totals.teamAXg > 0 ? totals.teamAGoals / totals.teamAXg : 0;
+  const teamBEfficiency = totals.teamBXg > 0 ? totals.teamBGoals / totals.teamBXg : 0;
+  const sortedPlayers = Array.from(playerMap.values()).sort((a, b) => {
+    const impactA = a.averageRating + a.goals * 0.35 + a.assists * 0.25;
+    const impactB = b.averageRating + b.goals * 0.35 + b.assists * 0.25;
+    return impactB - impactA;
+  });
+  const topScorers = [...sortedPlayers].sort((a, b) => b.goals - a.goals || b.averageRating - a.averageRating);
+  const topCreators = [...sortedPlayers].sort((a, b) => b.assists - a.assists || b.averageRating - a.averageRating);
+  const topRatings = [...sortedPlayers].sort((a, b) => b.averageRating - a.averageRating || b.goals + b.assists - (a.goals + a.assists));
+  const mvp = sortedPlayers[0] ?? null;
+  const topScorer = topScorers[0] ?? null;
+  const topCreator = topCreators[0] ?? null;
+  const ratingLeader = topRatings[0] ?? null;
+  const leaders = [
+    mvp
+      ? {
+          detail: `${mvp.goals}G · ${mvp.assists}A`,
+          label: "MVP",
+          player: mvp,
+          teamName: getSimulationTeamName(mvp.teamId, teamA, teamB),
+          value: mvp.averageRating.toFixed(1),
+        }
+      : null,
+    topScorer
+      ? {
+          detail: `${topScorer.averageRating.toFixed(1)} avg · ${topScorer.assists}A`,
+          label: "Scorer",
+          player: topScorer,
+          teamName: getSimulationTeamName(topScorer.teamId, teamA, teamB),
+          value: `${topScorer.goals}G`,
+        }
+      : null,
+    topCreator
+      ? {
+          detail: `${topCreator.averageRating.toFixed(1)} avg · ${topCreator.goals}G`,
+          label: "Creator",
+          player: topCreator,
+          teamName: getSimulationTeamName(topCreator.teamId, teamA, teamB),
+          value: `${topCreator.assists}A`,
+        }
+      : null,
+    ratingLeader
+      ? {
+          detail: `${ratingLeader.goals}G · ${ratingLeader.assists}A · ${ratingLeader.matches} apps`,
+          label: "Rating",
+          player: ratingLeader,
+          teamName: getSimulationTeamName(ratingLeader.teamId, teamA, teamB),
+          value: ratingLeader.averageRating.toFixed(1),
+        }
+      : null,
+  ].filter((leader): leader is NonNullable<typeof leader> => Boolean(leader));
+  const swingMatch = seriesResults
+    .map((match) => {
+      const statsA = match.result.stats[teamA.id];
+      const statsB = match.result.stats[teamB.id];
+      return {
+        label: match.label,
+        score: `${statsA.goals}-${statsB.goals}`,
+        swing: Math.abs(statsA.goals - statsB.goals) * 2 + Math.abs(statsA.xg - statsB.xg),
+        xg: `${statsA.xg.toFixed(2)}-${statsB.xg.toFixed(2)}`,
+      };
+    })
+    .sort((a, b) => b.swing - a.swing)[0];
+  const xgLeader =
+    totals.teamAXg === totals.teamBXg
+      ? "xG는 사실상 균형이었다."
+      : totals.teamAXg > totals.teamBXg
+        ? `${teamA.name}가 xG를 ${totals.teamAXg.toFixed(2)}-${totals.teamBXg.toFixed(2)}로 앞섰다.`
+        : `${teamB.name}가 xG를 ${totals.teamBXg.toFixed(2)}-${totals.teamAXg.toFixed(2)}로 앞섰다.`;
+  const shotLeader =
+    totals.teamAShots === totals.teamBShots
+      ? "슈팅 생산량은 동률이었다."
+      : totals.teamAShots > totals.teamBShots
+        ? `${teamA.name}가 슈팅 ${totals.teamAShots}-${totals.teamBShots}로 더 많은 장면을 만들었다.`
+        : `${teamB.name}가 슈팅 ${totals.teamBShots}-${totals.teamAShots}로 더 많은 장면을 만들었다.`;
+  const pressLeader =
+    totals.teamAPressingWins === totals.teamBPressingWins
+      ? "압박 탈취는 큰 차이가 없었다."
+      : totals.teamAPressingWins > totals.teamBPressingWins
+        ? `${teamA.name}가 압박 탈취 ${totals.teamAPressingWins}-${totals.teamBPressingWins}로 전진 수비 우위를 보였다.`
+        : `${teamB.name}가 압박 탈취 ${totals.teamBPressingWins}-${totals.teamAPressingWins}로 전진 수비 우위를 보였다.`;
 
   return {
     ...totals,
+    controlNotes: [
+      `${teamA.name} 평균 점유 ${teamAPossessionAverage}% · ${teamB.name} 평균 점유 ${teamBPossessionAverage}%.`,
+      shotLeader,
+      pressLeader,
+      `${teamA.name} 유효슈팅 ${totals.teamAShotsOnTarget} · ${teamB.name} 유효슈팅 ${totals.teamBShotsOnTarget}.`,
+    ],
+    insights: [
+      winnerTeam ? `${winnerTeam.name}가 ${mode === "home-away" ? "합산 득점" : "승수"} 기준으로 시리즈를 가져갔다.` : "시리즈는 무승부로 끝났다.",
+      xgLeader,
+      `${teamA.name} 결정력 ${teamAEfficiency.toFixed(2)} G/xG · ${teamB.name} 결정력 ${teamBEfficiency.toFixed(2)} G/xG.`,
+      swingMatch ? `${swingMatch.label}가 가장 큰 분기점이었다. 스코어 ${swingMatch.score}, xG ${swingMatch.xg}.` : "뚜렷한 분기점은 없었다.",
+    ],
+    leaders,
     method: mode === "home-away" ? "합산 득점 기준" : mode === "best-of-3" ? "승수 기준" : "단판 결과",
+    playerNotes: sortedPlayers.slice(0, 4).map((player, index) => `${index + 1}. ${player.playerName} (${getSimulationTeamName(player.teamId, teamA, teamB)}) ${player.averageRating.toFixed(1)} avg · ${player.goals}G ${player.assists}A.`),
+    swingNotes: seriesResults.map((match) => {
+      const statsA = match.result.stats[teamA.id];
+      const statsB = match.result.stats[teamB.id];
+      const winnerName = match.result.winnerTeamId ? getSimulationTeamName(match.result.winnerTeamId, teamA, teamB) : "Draw";
+      return `${match.label}: ${statsA.goals}-${statsB.goals}, winner ${winnerName}, xG ${statsA.xg.toFixed(2)}-${statsB.xg.toFixed(2)}.`;
+    }),
     title: mode === "home-away" ? "Home & Away 결과" : mode === "best-of-3" ? "Best of 3 결과" : "Single Match 결과",
     winnerName: winnerTeam?.name ?? "Draw",
   };
+}
+
+function getSimulationTeamName(teamId: string, teamA: SimulationTeamInput, teamB: SimulationTeamInput) {
+  if (teamId === teamA.id) {
+    return teamA.name;
+  }
+
+  if (teamId === teamB.id) {
+    return teamB.name;
+  }
+
+  return teamId;
 }
 
 function ShortlistView({
