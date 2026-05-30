@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "draft" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "draft" | "challenge" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -99,6 +99,18 @@ type DraftPick = {
   teamIndex: number;
 };
 
+type ChallengeId = "world-max" | "non-europe" | "africa-asia" | "americas" | "under-90" | "modern" | "classic";
+
+type ChallengeOption = {
+  description: string;
+  difficulty: string;
+  formationId: string;
+  id: ChallengeId;
+  label: string;
+  target: number;
+  test: (player: LegendPlayer) => boolean;
+};
+
 const scoreLabels: Record<ScoreKey, string> = {
   teamCareer: "팀 커리어",
   individualCareer: "개인 수상",
@@ -129,6 +141,72 @@ const eraOptions: EraOption[] = [
   { id: "modern", label: "Modern Elite", range: "2000-2015", start: 2000, end: 2015 },
   { id: "current", label: "Current Era", range: "2016-2026", start: 2016, end: 2026 },
   { id: "unplaced", label: "Unplaced", range: "needs years", start: 0, end: 0 },
+];
+
+const challengeOptions: ChallengeOption[] = [
+  {
+    id: "world-max",
+    label: "World Max XI",
+    description: "국가와 시대 제한 없이 현재 가중치에서 가장 높은 자동 XI를 만듭니다.",
+    difficulty: "Baseline",
+    formationId: "4-3-3",
+    target: 96,
+    test: () => true,
+  },
+  {
+    id: "non-europe",
+    label: "No Europe XI",
+    description: "유럽 선수를 모두 제외하고 월드 클래스 XI를 구성합니다.",
+    difficulty: "Hard",
+    formationId: "4-2-3-1",
+    target: 92,
+    test: (player) => player.continent !== "Europe",
+  },
+  {
+    id: "africa-asia",
+    label: "Africa + Asia Union",
+    description: "아프리카와 아시아 선수만으로 균형 잡힌 XI를 만듭니다.",
+    difficulty: "Expert",
+    formationId: "4-3-3",
+    target: 87,
+    test: (player) => player.continent === "Africa" || player.continent === "Asia",
+  },
+  {
+    id: "americas",
+    label: "Americas Only",
+    description: "남북미 선수만으로 공격력과 창조성을 극대화합니다.",
+    difficulty: "Medium",
+    formationId: "3-4-3",
+    target: 93,
+    test: (player) => player.continent === "America",
+  },
+  {
+    id: "under-90",
+    label: "Sub-90 Legends",
+    description: "90점 미만 선수만 골라 저평가 레전드 XI를 만듭니다.",
+    difficulty: "Expert",
+    formationId: "4-4-2",
+    target: 86,
+    test: (player) => player.overallScore < 90,
+  },
+  {
+    id: "modern",
+    label: "Modern + Current",
+    description: "2000년대 이후 프라임 선수 중심으로 현시대형 XI를 만듭니다.",
+    difficulty: "Medium",
+    formationId: "4-2-3-1",
+    target: 94,
+    test: (player) => ["modern", "current"].includes(getPlayerEra(player).id),
+  },
+  {
+    id: "classic",
+    label: "Classic Memory",
+    description: "1979년 이전 대표 연도 선수만으로 클래식 XI를 구성합니다.",
+    difficulty: "Hard",
+    formationId: "3-5-2",
+    target: 90,
+    test: (player) => ["foundations", "classic"].includes(getPlayerEra(player).id),
+  },
 ];
 
 const positionOptions: PositionCode[] = ["ST", "SS", "RW", "LW", "AM", "CM", "DM", "CB", "RB", "LB", "GK"];
@@ -281,6 +359,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [draftTier, setDraftTier] = useState<LegendTierId | FilterValue>("ALL");
   const [draftQuery, setDraftQuery] = useState("");
   const [draftPicks, setDraftPicks] = useState<DraftPick[]>([]);
+  const [challengeId, setChallengeId] = useState<ChallengeId>("non-europe");
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -993,6 +1072,62 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     });
   }
 
+  function openStartersInBestXi(startersToOpen: Array<{ slot: FormationSlot; player: LegendPlayer }>, source: string, sourceFormationId: string) {
+    const sourceFormation = formations[sourceFormationId] ?? formations["4-3-3"];
+    const nextManualSlots = startersToOpen.reduce<Record<string, string>>((slots, starter) => {
+      slots[starter.slot.id] = starter.player.id;
+      return slots;
+    }, {});
+
+    setFormationId(sourceFormationId);
+    setBuilderContinent("ALL");
+    setBuilderCountry("ALL");
+    setBuilderPosition("ALL");
+    setBuilderTier("ALL");
+    setCandidateQuery(source);
+    setTopOnly(false);
+    setManualSlots(nextManualSlots);
+    setSelectedSlotId(startersToOpen[0]?.slot.id ?? sourceFormation.slots[0]?.id ?? "st");
+    setSelectedPlayerId(startersToOpen[0]?.player.id ?? null);
+    setActiveTab("best-xi");
+  }
+
+  function saveStartersAsSquad(
+    startersToSave: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>,
+    source: string,
+    sourceFormationId: string,
+  ) {
+    if (!startersToSave.length) {
+      return;
+    }
+
+    const sourceFormation = formations[sourceFormationId] ?? formations["4-3-3"];
+    const now = new Date();
+    const slots: SavedSlot[] = startersToSave.map(({ player, rating, slot }) => ({
+      slotId: slot.id,
+      slotLabel: slot.label,
+      playerId: player.id,
+      playerName: player.name,
+      rating,
+      position: { left: slot.left, top: slot.top },
+    }));
+
+    setSavedSquads((current) => {
+      const saved: SavedSquad = {
+        id: `${source}-${sourceFormationId}-${now.getTime()}`,
+        name: `${source} ${sourceFormation.name}`,
+        scope: source,
+        formationId: sourceFormationId,
+        formationName: sourceFormation.name,
+        createdAt: now.toISOString(),
+        weights,
+        slots,
+      };
+
+      return [saved, ...current].slice(0, 20);
+    });
+  }
+
   function toggleCompare(playerId: string) {
     setCompareIds((current) => {
       if (current.includes(playerId)) {
@@ -1032,6 +1167,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["battle", "Battle"],
           ["era", "Era"],
           ["draft", "Draft"],
+          ["challenge", "Challenge"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -1249,6 +1385,24 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           rounds={draftRounds}
           teamCount={draftTeamCount}
           tier={draftTier}
+          weights={weights}
+        />
+      ) : null}
+
+      {activeTab === "challenge" ? (
+        <LegendChallengeView
+          challengeId={challengeId}
+          inspector={inspector}
+          onChallengeChange={setChallengeId}
+          onOpenBestXi={(startersToOpen, challenge) => openStartersInBestXi(startersToOpen, challenge.label, challenge.formationId)}
+          onPlayerSelect={setSelectedPlayerId}
+          onRandomChallenge={() => {
+            const currentIndex = challengeOptions.findIndex((challenge) => challenge.id === challengeId);
+            const nextIndex = (currentIndex + 1 + Math.floor(Math.random() * (challengeOptions.length - 1))) % challengeOptions.length;
+            setChallengeId(challengeOptions[nextIndex].id);
+          }}
+          onSaveSquad={(startersToSave, challenge) => saveStartersAsSquad(startersToSave, challenge.label, challenge.formationId)}
+          players={data.players}
           weights={weights}
         />
       ) : null}
@@ -2766,6 +2920,219 @@ function LegendDraftView({
   );
 }
 
+function LegendChallengeView({
+  challengeId,
+  inspector,
+  onChallengeChange,
+  onOpenBestXi,
+  onPlayerSelect,
+  onRandomChallenge,
+  onSaveSquad,
+  players,
+  weights,
+}: {
+  challengeId: ChallengeId;
+  inspector: ReactNode;
+  onChallengeChange: (challengeId: ChallengeId) => void;
+  onOpenBestXi: (starters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>, challenge: ChallengeOption) => void;
+  onPlayerSelect: (playerId: string) => void;
+  onRandomChallenge: () => void;
+  onSaveSquad: (starters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>, challenge: ChallengeOption) => void;
+  players: LegendPlayer[];
+  weights: WeightMap;
+}) {
+  const [exportText, setExportText] = useState("");
+  const challenge = challengeOptions.find((item) => item.id === challengeId) ?? challengeOptions[0];
+  const formation = formations[challenge.formationId] ?? formations["4-3-3"];
+  const challengePool = useMemo(
+    () =>
+      players
+        .filter(challenge.test)
+        .map((player) => ({ player, rating: ratePlayer(player, weights) }))
+        .sort((a, b) => b.rating - a.rating || (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999) || a.player.name.localeCompare(b.player.name)),
+    [challenge, players, weights],
+  );
+  const squad = useMemo(
+    () => buildSquad(challengePool.map(({ player }) => player), challengePool.map(({ player }) => player), formation.slots, weights, {}),
+    [challengePool, formation.slots, weights],
+  );
+  const starters = formation.slots
+    .map((slot) => {
+      const selected = squad[slot.id];
+      return selected ? { slot, player: selected.player, rating: selected.rating } : null;
+    })
+    .filter(Boolean) as Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+  const starterIds = new Set(starters.map((starter) => starter.player.id));
+  const bench = challengePool.filter(({ player }) => !starterIds.has(player.id)).slice(0, 12);
+  const averageRating = average(starters.map((starter) => starter.rating));
+  const targetGap = averageRating - challenge.target;
+  const continentMix = continentOptions
+    .map((continent) => ({
+      continent,
+      count: starters.filter((starter) => starter.player.continent === continent).length,
+    }))
+    .filter((item) => item.count > 0);
+  const topCountries = Object.entries(
+    starters.reduce<Record<string, number>>((counts, starter) => {
+      counts[starter.player.country] = (counts[starter.player.country] ?? 0) + 1;
+      return counts;
+    }, {}),
+  )
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 4);
+
+  return (
+    <section className="challenge-grid">
+      <aside className="challenge-sidebar">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Legend Challenge</p>
+            <h2>제약 조건 XI</h2>
+          </div>
+          <label className="field">
+            <span>챌린지</span>
+            <select value={challenge.id} onChange={(event) => onChallengeChange(event.target.value as ChallengeId)}>
+              {challengeOptions.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} · {item.difficulty}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="primary-button" onClick={onRandomChallenge} type="button">
+            랜덤 챌린지
+          </button>
+          <p className="challenge-description">{challenge.description}</p>
+        </section>
+
+        <section className="challenge-score-card">
+          <p className="eyebrow">Target</p>
+          <h2>{averageRating}</h2>
+          <span className={targetGap >= 0 ? "challenge-pass" : "challenge-fail"}>
+            목표 {challenge.target} · {targetGap >= 0 ? `+${targetGap}` : targetGap}
+          </span>
+          <div className="draft-progress">
+            <i>
+              <b style={{ width: `${clamp(Math.round((averageRating / Math.max(challenge.target, 1)) * 100), 0, 100)}%` }} />
+            </i>
+          </div>
+        </section>
+
+        <section className="challenge-meta-card">
+          <p className="eyebrow">Pool</p>
+          <h2>{challengePool.length} players</h2>
+          <div className="challenge-chip-list">
+            <span>{formation.name}</span>
+            <span>{challenge.difficulty}</span>
+            <span>{starters.length}/11 starters</span>
+          </div>
+        </section>
+      </aside>
+
+      <section className="challenge-main">
+        <section className="challenge-hero-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">{challenge.difficulty}</p>
+              <h2>{challenge.label}</h2>
+            </div>
+            <div className="pitch-actions">
+              <button className="small-button" disabled={!starters.length} onClick={() => setExportText(formatChallengeExport(challenge, formation.name, starters, averageRating))} type="button">
+                텍스트 내보내기
+              </button>
+              <button className="small-button" disabled={!starters.length} onClick={() => onSaveSquad(starters, challenge)} type="button">
+                XI 저장
+              </button>
+              <button className="primary-inline" disabled={!starters.length} onClick={() => onOpenBestXi(starters, challenge)} type="button">
+                Best XI로 열기
+              </button>
+            </div>
+          </div>
+          <div className="challenge-summary-grid">
+            <article>
+              <span>평균</span>
+              <strong>{averageRating}</strong>
+              <small>{targetGap >= 0 ? "목표 달성" : "목표 미달"}</small>
+            </article>
+            <article>
+              <span>후보 풀</span>
+              <strong>{challengePool.length}</strong>
+              <small>조건 충족 선수</small>
+            </article>
+            <article>
+              <span>포메이션</span>
+              <strong>{formation.name}</strong>
+              <small>{starters.length}명 배치</small>
+            </article>
+          </div>
+        </section>
+
+        <section className="challenge-board-grid">
+          <article className="challenge-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Auto XI</p>
+              <h2>챌린지 베스트</h2>
+            </div>
+            <BattleXiList onPlayerSelect={onPlayerSelect} starters={starters} />
+          </article>
+          <article className="challenge-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Balance</p>
+              <h2>구성 분석</h2>
+            </div>
+            <div className="challenge-analysis-list">
+              {continentMix.map((item) => (
+                <span key={item.continent}>
+                  {item.continent}
+                  <strong>{item.count}</strong>
+                </span>
+              ))}
+              {topCountries.map(([country, count]) => (
+                <span key={country}>
+                  {country}
+                  <strong>{count}</strong>
+                </span>
+              ))}
+            </div>
+          </article>
+        </section>
+
+        {exportText ? (
+          <section className="challenge-export-panel">
+            <div className="section-heading row">
+              <div>
+                <p className="eyebrow">Export</p>
+                <h2>챌린지 XI 텍스트</h2>
+              </div>
+              <button className="small-button" onClick={() => setExportText("")} type="button">
+                닫기
+              </button>
+            </div>
+            <textarea readOnly value={exportText} />
+          </section>
+        ) : null}
+
+        <section className="challenge-bench-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Bench</p>
+              <h2>남은 주요 후보</h2>
+            </div>
+            <span className="saved-count">{bench.length}</span>
+          </div>
+          <div className="challenge-bench-grid">
+            {bench.map(({ player, rating }) => (
+              <PlayerMiniCard key={player.id} onClick={() => onPlayerSelect(player.id)} player={player} rating={rating} />
+            ))}
+          </div>
+        </section>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
 function BestXiView({
   activeDragSlotRef,
   averageRating,
@@ -3937,6 +4304,23 @@ function formatDraftExport(
   });
 
   return [...header, ...teamBlocks].join("\n").trim();
+}
+
+function formatChallengeExport(
+  challenge: ChallengeOption,
+  formationName: string,
+  starters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>,
+  averageRating: number,
+) {
+  const lines = starters.map(({ player, rating, slot }) => `${slot.label}: ${player.name} (${player.country}, ${player.primaryPosition}, ${rating})`);
+  return [
+    `Legend Challenge: ${challenge.label}`,
+    `Formation: ${formationName}`,
+    `Average: ${averageRating} / Target ${challenge.target}`,
+    `Difficulty: ${challenge.difficulty}`,
+    "",
+    ...lines,
+  ].join("\n");
 }
 
 function createEmptyDepthRow(position: PositionCode): DepthPositionRow {

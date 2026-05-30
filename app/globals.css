@@ -205,7 +205,7 @@ select,
   box-shadow: 0 16px 40px rgba(4, 25, 19, 0.18);
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   margin-bottom: 18px;
   padding: 8px;
 }
@@ -317,6 +317,7 @@ select,
 .depth-grid,
 .battle-grid,
 .draft-grid,
+.challenge-grid,
 .builder-grid,
 .rankings-grid,
 .compare-grid {
@@ -342,6 +343,10 @@ select,
 }
 
 .draft-grid {
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+}
+
+.challenge-grid {
   grid-template-columns: 300px minmax(0, 1fr) 360px;
 }
 
@@ -381,6 +386,7 @@ select,
 .battle-sidebar,
 .battle-main,
 .draft-sidebar,
+.challenge-sidebar,
 .atlas-sidebar,
 .atlas-main,
 .top-list-panel,
@@ -398,6 +404,7 @@ select,
 .battle-sidebar,
 .battle-main,
 .draft-sidebar,
+.challenge-sidebar,
 .atlas-main,
 .top-list-panel,
 .candidate-panel,
@@ -415,6 +422,7 @@ select,
 .depth-sidebar,
 .battle-sidebar,
 .draft-sidebar,
+.challenge-sidebar,
 .builder-finder-panel,
 .ranking-finder-panel,
 .player-drawer {
@@ -1359,7 +1367,13 @@ td strong {
 .draft-board-panel,
 .draft-candidate-panel,
 .draft-export-panel,
-.draft-team-card {
+.draft-team-card,
+.challenge-score-card,
+.challenge-meta-card,
+.challenge-hero-panel,
+.challenge-xi-panel,
+.challenge-export-panel,
+.challenge-bench-panel {
   background: var(--side-1-strong);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1384,10 +1398,125 @@ td strong {
 }
 
 .draft-main,
-.draft-sidebar {
+.draft-sidebar,
+.challenge-main,
+.challenge-sidebar {
   align-content: start;
   display: grid;
   gap: 18px;
+}
+
+.challenge-description {
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 0;
+}
+
+.challenge-score-card h2 {
+  color: var(--main);
+  font-size: 42px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.challenge-pass,
+.challenge-fail {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.challenge-pass {
+  color: var(--green-dark);
+}
+
+.challenge-fail {
+  color: var(--red);
+}
+
+.challenge-meta-card h2 {
+  color: var(--main);
+  margin-bottom: 10px;
+}
+
+.challenge-chip-list,
+.challenge-analysis-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.challenge-chip-list span,
+.challenge-analysis-list span {
+  background: rgba(11, 61, 46, 0.08);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.challenge-analysis-list span {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.challenge-analysis-list strong {
+  color: var(--main);
+}
+
+.challenge-summary-grid,
+.challenge-board-grid,
+.challenge-bench-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.challenge-summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.challenge-summary-grid article {
+  background: rgba(11, 61, 46, 0.06);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.challenge-summary-grid span,
+.challenge-summary-grid small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.challenge-summary-grid strong {
+  color: var(--main);
+  font-size: 24px;
+}
+
+.challenge-board-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+}
+
+.challenge-export-panel textarea {
+  background: rgba(11, 61, 46, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 220px;
+  padding: 12px;
+  resize: vertical;
+  width: 100%;
+}
+
+.challenge-bench-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .draft-action-grid {
@@ -2857,6 +2986,7 @@ td strong {
   .depth-grid,
   .battle-grid,
   .draft-grid,
+  .challenge-grid,
   .builder-grid,
   .rankings-grid,
   .compare-grid,
@@ -2882,7 +3012,8 @@ td strong {
 
   .battle-scoreboard,
   .battle-lower-grid,
-  .draft-team-grid {
+  .draft-team-grid,
+  .challenge-board-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2904,6 +3035,7 @@ td strong {
   .depth-sidebar,
   .battle-sidebar,
   .draft-sidebar,
+  .challenge-sidebar,
   .builder-finder-panel,
   .ranking-finder-panel,
   .player-drawer {
@@ -2955,6 +3087,8 @@ td strong {
   .draft-action-grid,
   .draft-candidate-item,
   .draft-team-actions,
+  .challenge-summary-grid,
+  .challenge-bench-grid,
   .country-xi-list,
   .comparison-grid,
   .compare-cards {
