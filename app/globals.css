@@ -205,7 +205,7 @@ select,
   box-shadow: 0 16px 40px rgba(4, 25, 19, 0.18);
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   margin-bottom: 18px;
   padding: 8px;
 }
@@ -314,6 +314,7 @@ select,
 
 .atlas-grid,
 .hall-grid,
+.depth-grid,
 .builder-grid,
 .rankings-grid,
 .compare-grid {
@@ -327,6 +328,10 @@ select,
 }
 
 .hall-grid {
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+}
+
+.depth-grid {
   grid-template-columns: 300px minmax(0, 1fr) 360px;
 }
 
@@ -361,6 +366,8 @@ select,
 .saved-panel,
 .hall-sidebar,
 .hall-main,
+.depth-sidebar,
+.depth-main,
 .atlas-sidebar,
 .atlas-main,
 .top-list-panel,
@@ -373,6 +380,8 @@ select,
 .atlas-sidebar,
 .hall-sidebar,
 .hall-main,
+.depth-sidebar,
+.depth-main,
 .atlas-main,
 .top-list-panel,
 .candidate-panel,
@@ -387,6 +396,7 @@ select,
 
 .atlas-sidebar,
 .hall-sidebar,
+.depth-sidebar,
 .builder-finder-panel,
 .ranking-finder-panel,
 .player-drawer {
@@ -1065,6 +1075,237 @@ td strong {
   font-style: normal;
   font-weight: 900;
   line-height: 1;
+}
+
+.depth-sidebar {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+}
+
+.depth-snapshot-panel,
+.depth-insight-card,
+.depth-filtered-panel {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.depth-snapshot-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.depth-snapshot-list span {
+  background: rgba(11, 61, 46, 0.06);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 8px;
+  color: var(--muted);
+  display: grid;
+  font-size: 12px;
+  gap: 4px;
+  min-height: 70px;
+  padding: 10px;
+}
+
+.depth-snapshot-list strong {
+  color: var(--main);
+  font-size: 21px;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.depth-insight-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.depth-insight-card h3 {
+  color: var(--main);
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.depth-insight-list {
+  display: grid;
+  gap: 7px;
+}
+
+.depth-insight-list span {
+  align-items: center;
+  border-top: 1px solid rgba(216, 204, 183, 0.7);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 42px 1fr 42px;
+  padding-top: 7px;
+}
+
+.depth-insight-list strong {
+  color: var(--main);
+  font-size: 13px;
+}
+
+.depth-insight-list em {
+  color: var(--green-dark);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.depth-insight-list small {
+  color: var(--muted);
+  text-align: right;
+}
+
+.depth-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.depth-chip-row span {
+  background: rgba(200, 162, 74, 0.16);
+  border-radius: 999px;
+  color: var(--main);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.depth-board {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  margin-bottom: 18px;
+}
+
+.depth-position-card {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  min-height: 260px;
+  padding: 14px;
+}
+
+.depth-position-card.empty {
+  background: rgba(255, 250, 240, 0.72);
+}
+
+.depth-position-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.depth-position-head span {
+  align-items: center;
+  background: rgba(200, 162, 74, 0.18);
+  border-radius: 999px;
+  color: var(--main);
+  display: inline-flex;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 44px;
+}
+
+.depth-position-head strong {
+  color: var(--main);
+  font-size: 24px;
+}
+
+.depth-strength-bar {
+  background: #e1d3ba;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.depth-strength-bar b {
+  background: linear-gradient(90deg, var(--main-soft), var(--gold));
+  display: block;
+  height: 100%;
+}
+
+.depth-position-card > small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.depth-player-stack {
+  display: grid;
+  gap: 7px;
+}
+
+.depth-player-stack button {
+  align-items: center;
+  background: rgba(244, 239, 227, 0.62);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  min-height: 48px;
+  padding: 8px;
+  text-align: left;
+}
+
+.depth-player-stack button:hover,
+.depth-player-stack button:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.depth-player-stack em {
+  align-items: center;
+  background: rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--main);
+  display: inline-flex;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  height: 26px;
+  justify-content: center;
+  width: 26px;
+}
+
+.depth-player-stack span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.depth-player-stack strong {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.depth-player-stack small {
+  color: var(--muted);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.depth-player-stack p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.depth-filtered-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
 }
 
 .score-bars {
@@ -2080,6 +2321,7 @@ td strong {
   .data-grid,
   .atlas-grid,
   .hall-grid,
+  .depth-grid,
   .builder-grid,
   .rankings-grid,
   .compare-grid,
@@ -2099,6 +2341,10 @@ td strong {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .depth-insight-grid {
+    grid-template-columns: 1fr;
+  }
+
   .country-insights-grid {
     grid-template-columns: 1fr;
   }
@@ -2110,6 +2356,7 @@ td strong {
 
   .atlas-sidebar,
   .hall-sidebar,
+  .depth-sidebar,
   .builder-finder-panel,
   .ranking-finder-panel,
   .player-drawer {
@@ -2155,6 +2402,7 @@ td strong {
   .summary-grid,
   .summary-grid.compact,
   .hall-spotlight,
+  .depth-snapshot-list,
   .country-xi-list,
   .comparison-grid,
   .compare-cards {

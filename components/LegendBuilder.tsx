@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -52,6 +52,14 @@ type SavedSquad = {
   createdAt: string;
   weights: WeightMap;
   slots: SavedSlot[];
+};
+
+type DepthPositionRow = {
+  average: number;
+  count: number;
+  players: LegendPlayer[];
+  position: PositionCode;
+  topScore: number;
 };
 
 const scoreLabels: Record<ScoreKey, string> = {
@@ -208,6 +216,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [hallPosition, setHallPosition] = useState<PositionCode | FilterValue>("ALL");
   const [hallTier, setHallTier] = useState<LegendTierId | FilterValue>("ALL");
   const [hallQuery, setHallQuery] = useState("");
+  const [depthContinent, setDepthContinent] = useState<Continent | FilterValue>("America");
+  const [depthCountry, setDepthCountry] = useState(defaultCountry);
+  const [depthPosition, setDepthPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [depthQuery, setDepthQuery] = useState("");
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -288,6 +300,19 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     }
   }, [atlasContinent, atlasCountry, data.countries, defaultCountry]);
 
+  useEffect(() => {
+    if (depthContinent === "ALL") {
+      if (!data.countries.some((country) => country.name === depthCountry)) {
+        setDepthCountry(defaultCountry);
+      }
+      return;
+    }
+
+    if (!data.countries.some((country) => country.name === depthCountry && country.continent === depthContinent)) {
+      setDepthCountry(data.countries.find((country) => country.continent === depthContinent)?.name ?? defaultCountry);
+    }
+  }, [data.countries, defaultCountry, depthContinent, depthCountry]);
+
   const builderCountries = useMemo(
     () =>
       data.countries.filter((country) => builderContinent === "ALL" || country.continent === builderContinent),
@@ -298,6 +323,12 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     () =>
       data.countries.filter((country) => hallContinent === "ALL" || country.continent === hallContinent),
     [data.countries, hallContinent],
+  );
+
+  const depthCountries = useMemo(
+    () =>
+      data.countries.filter((country) => depthContinent === "ALL" || country.continent === depthContinent),
+    [data.countries, depthContinent],
   );
 
   const rankingCountries = useMemo(
@@ -415,6 +446,47 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     average: average(hallPlayers.map((player) => player.overallScore)),
     count: hallPlayers.length,
     topScore: hallPlayers[0]?.overallScore ?? 0,
+  };
+
+  const depthCountryPlayers = useMemo(
+    () =>
+      data.players
+        .filter((player) => player.country === depthCountry)
+        .sort((a, b) => b.overallScore - a.overallScore || a.positionOrder - b.positionOrder || a.name.localeCompare(b.name)),
+    [data.players, depthCountry],
+  );
+
+  const depthPlayers = useMemo(() => {
+    const normalizedQuery = depthQuery.trim().toLowerCase();
+    return depthCountryPlayers
+      .filter((player) => depthPosition === "ALL" || player.primaryPosition === depthPosition)
+      .filter((player) => !normalizedQuery || matchesPlayerSearch(player, normalizedQuery));
+  }, [depthCountryPlayers, depthPosition, depthQuery]);
+
+  const depthRows = useMemo<DepthPositionRow[]>(
+    () =>
+      positionOptions.map((position) => {
+        const players = depthCountryPlayers.filter((player) => player.primaryPosition === position);
+        const topPlayers = players.slice(0, 3);
+        return {
+          average: average(topPlayers.map((player) => player.overallScore)),
+          count: players.length,
+          players,
+          position,
+          topScore: players[0]?.overallScore ?? 0,
+        };
+      }),
+    [depthCountryPlayers],
+  );
+
+  const depthCountrySummary = data.countries.find((country) => country.name === depthCountry);
+  const strongestDepthRows = depthRows.filter((row) => row.count > 0).sort((a, b) => b.average - a.average || b.count - a.count).slice(0, 3);
+  const weakestDepthRows = depthRows.filter((row) => row.count > 0).sort((a, b) => a.average - b.average || a.count - b.count).slice(0, 3);
+  const emptyDepthRows = depthRows.filter((row) => row.count === 0);
+  const depthSummary = {
+    average: average(depthCountryPlayers.slice(0, 10).map((player) => player.overallScore)),
+    count: depthCountryPlayers.length,
+    topScore: depthCountryPlayers[0]?.overallScore ?? 0,
   };
 
   const atlasPlayers = useMemo(
@@ -679,6 +751,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
         {[
           ["atlas", "Atlas"],
           ["hall", "Hall"],
+          ["depth", "Depth"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -747,6 +820,44 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           summary={hallSummary}
           tier={hallTier}
           tierCounts={hallTierCounts}
+        />
+      ) : null}
+
+      {activeTab === "depth" ? (
+        <CountryDepthView
+          continent={depthContinent}
+          countries={depthCountries}
+          country={depthCountry}
+          countrySummary={depthCountrySummary}
+          emptyRows={emptyDepthRows}
+          filteredPlayers={depthPlayers}
+          inspector={inspector}
+          onContinentChange={(value) => {
+            setDepthContinent(value);
+            setDepthCountry(data.countries.find((country) => value === "ALL" || country.continent === value)?.name ?? defaultCountry);
+          }}
+          onCountryChange={setDepthCountry}
+          onOpenBestXi={() => {
+            setBuilderContinent(depthCountrySummary?.continent ?? "ALL");
+            setBuilderCountry(depthCountry);
+            setTopOnly(false);
+            setActiveTab("best-xi");
+          }}
+          onPlayerSelect={setSelectedPlayerId}
+          onPositionChange={setDepthPosition}
+          onQueryChange={setDepthQuery}
+          onResetFilters={() => {
+            setDepthContinent("America");
+            setDepthCountry(defaultCountry);
+            setDepthPosition("ALL");
+            setDepthQuery("");
+          }}
+          position={depthPosition}
+          query={depthQuery}
+          rows={depthRows}
+          strongestRows={strongestDepthRows}
+          summary={depthSummary}
+          weakestRows={weakestDepthRows}
         />
       ) : null}
 
@@ -1270,6 +1381,233 @@ function HallPlayerCard({ onClick, player }: { onClick: () => void; player: Lege
         <em>{player.overallScore}</em>
       </div>
     </button>
+  );
+}
+
+function CountryDepthView({
+  continent,
+  countries,
+  country,
+  countrySummary,
+  emptyRows,
+  filteredPlayers,
+  inspector,
+  onContinentChange,
+  onCountryChange,
+  onOpenBestXi,
+  onPlayerSelect,
+  onPositionChange,
+  onQueryChange,
+  onResetFilters,
+  position,
+  query,
+  rows,
+  strongestRows,
+  summary,
+  weakestRows,
+}: {
+  continent: Continent | FilterValue;
+  countries: LegendData["countries"];
+  country: string;
+  countrySummary?: LegendData["countries"][number];
+  emptyRows: DepthPositionRow[];
+  filteredPlayers: LegendPlayer[];
+  inspector: ReactNode;
+  onContinentChange: (value: Continent | FilterValue) => void;
+  onCountryChange: (value: string) => void;
+  onOpenBestXi: () => void;
+  onPlayerSelect: (playerId: string) => void;
+  onPositionChange: (value: PositionCode | FilterValue) => void;
+  onQueryChange: (query: string) => void;
+  onResetFilters: () => void;
+  position: PositionCode | FilterValue;
+  query: string;
+  rows: DepthPositionRow[];
+  strongestRows: DepthPositionRow[];
+  summary: {
+    average: number;
+    count: number;
+    topScore: number;
+  };
+  weakestRows: DepthPositionRow[];
+}) {
+  const filteredPreview = filteredPlayers.slice(0, 24);
+
+  return (
+    <section className="depth-grid">
+      <aside className="depth-sidebar">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Country Depth</p>
+            <h2>국가 선택</h2>
+          </div>
+          <label className="field">
+            <span>대륙</span>
+            <select value={continent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
+              <option value="ALL">전체</option>
+              {continentOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>국가</span>
+            <select value={country} onChange={(event) => onCountryChange(event.target.value)}>
+              {countries.map((item) => (
+                <option key={item.name} value={item.name}>
+                  {item.name} ({item.count})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>포지션</span>
+            <select value={position} onChange={(event) => onPositionChange(event.target.value as PositionCode | FilterValue)}>
+              <option value="ALL">전체</option>
+              {positionOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>검색</span>
+            <input
+              className="search-input"
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="선수, 포지션 검색"
+              type="search"
+              value={query}
+            />
+          </label>
+          <button className="primary-button" onClick={onOpenBestXi} type="button">
+            이 국가로 XI 만들기
+          </button>
+          <button className="ghost-button compact-button" onClick={onResetFilters} type="button">
+            브라질 기준으로 초기화
+          </button>
+        </section>
+
+        <section className="depth-snapshot-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Snapshot</p>
+            <h2>{country}</h2>
+          </div>
+          <div className="depth-snapshot-list">
+            <span>
+              <strong>{summary.count}</strong>
+              선수 풀
+            </span>
+            <span>
+              <strong>{summary.average}</strong>
+              Top 10 평균
+            </span>
+            <span>
+              <strong>{countrySummary?.continent ?? "-"}</strong>
+              대륙
+            </span>
+            <span>
+              <strong>{emptyRows.length}</strong>
+              공백 포지션
+            </span>
+          </div>
+        </section>
+      </aside>
+
+      <section className="depth-main">
+        <div className="section-heading row">
+          <div>
+            <p className="eyebrow">{countrySummary?.continent ?? continent}</p>
+            <h2>{country} Depth Chart</h2>
+          </div>
+          <div className="ranking-summary">
+            <span>{summary.count}명</span>
+            <span>Top 10 평균 {summary.average}</span>
+            <strong>최고 {summary.topScore}</strong>
+          </div>
+        </div>
+
+        <section className="depth-insight-grid">
+          <DepthInsightCard label="강점 포지션" rows={strongestRows} />
+          <DepthInsightCard label="보강 필요" rows={weakestRows} />
+          <article className="depth-insight-card">
+            <p className="eyebrow">Empty Slots</p>
+            <h3>공백 포지션</h3>
+            <div className="depth-chip-row">
+              {emptyRows.length ? emptyRows.map((row) => <span key={row.position}>{row.position}</span>) : <span>없음</span>}
+            </div>
+          </article>
+        </section>
+
+        <section className="depth-board">
+          {rows.map((row) => (
+            <article className={row.count ? "depth-position-card" : "depth-position-card empty"} key={row.position}>
+              <div className="depth-position-head">
+                <span>{row.position}</span>
+                <strong>{row.count}</strong>
+              </div>
+              <div className="depth-strength-bar" aria-label={`${row.position} strength`}>
+                <b style={{ width: `${row.average}%` }} />
+              </div>
+              <small>Top 3 평균 {row.average || "-"}</small>
+              <div className="depth-player-stack">
+                {row.players.slice(0, 6).map((player, index) => (
+                  <button key={player.id} onClick={() => onPlayerSelect(player.id)} type="button">
+                    <em>{index + 1}</em>
+                    <span>
+                      <strong>{player.name}</strong>
+                      <small>
+                        {getLegendTier(player.overallScore).label} · {player.overallScore}
+                      </small>
+                    </span>
+                  </button>
+                ))}
+                {row.count === 0 ? <p>등록 선수 없음</p> : null}
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <section className="depth-filtered-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Filtered Board</p>
+              <h2>선택 조건 선수</h2>
+            </div>
+            <span className="saved-count">{filteredPlayers.length}명</span>
+          </div>
+          <div className="depth-filtered-grid">
+            {filteredPreview.map((player) => (
+              <HallPlayerCard key={player.id} onClick={() => onPlayerSelect(player.id)} player={player} />
+            ))}
+            {filteredPreview.length === 0 ? <p className="empty-state">조건에 맞는 선수가 없습니다.</p> : null}
+          </div>
+        </section>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
+function DepthInsightCard({ label, rows }: { label: string; rows: DepthPositionRow[] }) {
+  return (
+    <article className="depth-insight-card">
+      <p className="eyebrow">{label}</p>
+      <h3>{rows[0]?.position ?? "-"}</h3>
+      <div className="depth-insight-list">
+        {rows.map((row) => (
+          <span key={row.position}>
+            <strong>{row.position}</strong>
+            <em>{row.average}</em>
+            <small>{row.count}명</small>
+          </span>
+        ))}
+      </div>
+    </article>
   );
 }
 
