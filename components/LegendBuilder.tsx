@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "draft" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -91,6 +91,12 @@ type PositionBattleRow = {
   left: DepthPositionRow;
   position: PositionCode;
   right: DepthPositionRow;
+};
+
+type DraftPick = {
+  pickNumber: number;
+  playerId: string;
+  teamIndex: number;
 };
 
 const scoreLabels: Record<ScoreKey, string> = {
@@ -267,6 +273,14 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [battleCountryB, setBattleCountryB] = useState(defaultBattleCountry);
   const [eraA, setEraA] = useState<EraId>("classic");
   const [eraB, setEraB] = useState<EraId>("modern");
+  const [draftTeamCount, setDraftTeamCount] = useState(2);
+  const [draftRounds, setDraftRounds] = useState(11);
+  const [draftContinent, setDraftContinent] = useState<Continent | FilterValue>("ALL");
+  const [draftCountry, setDraftCountry] = useState<string | FilterValue>("ALL");
+  const [draftPosition, setDraftPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [draftTier, setDraftTier] = useState<LegendTierId | FilterValue>("ALL");
+  const [draftQuery, setDraftQuery] = useState("");
+  const [draftPicks, setDraftPicks] = useState<DraftPick[]>([]);
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -398,6 +412,12 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     () =>
       data.countries.filter((country) => battleContinentB === "ALL" || country.continent === battleContinentB),
     [battleContinentB, data.countries],
+  );
+
+  const draftCountries = useMemo(
+    () =>
+      data.countries.filter((country) => draftContinent === "ALL" || country.continent === draftContinent),
+    [data.countries, draftContinent],
   );
 
   const rankingCountries = useMemo(
@@ -635,6 +655,46 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       : eraLeftProfile.xiAverage > eraRightProfile.xiAverage
         ? eraLeftProfile.country
         : eraRightProfile.country;
+
+  const draftPickedIds = useMemo(() => new Set(draftPicks.map((pick) => pick.playerId)), [draftPicks]);
+  const draftCandidates = useMemo(() => {
+    const normalizedQuery = draftQuery.trim().toLowerCase();
+    return data.players
+      .filter((player) => !draftPickedIds.has(player.id))
+      .filter((player) => draftContinent === "ALL" || player.continent === draftContinent)
+      .filter((player) => draftCountry === "ALL" || player.country === draftCountry)
+      .filter((player) => draftPosition === "ALL" || player.primaryPosition === draftPosition)
+      .filter((player) => draftTier === "ALL" || getLegendTier(player.overallScore).id === draftTier)
+      .filter((player) => !normalizedQuery || matchesPlayerSearch(player, normalizedQuery))
+      .map((player) => ({ player, rating: ratePlayer(player, weights) }))
+      .sort(
+        (a, b) =>
+          getPlayerSearchRank(a.player, normalizedQuery) - getPlayerSearchRank(b.player, normalizedQuery) ||
+          b.rating - a.rating ||
+          (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999) ||
+          a.player.name.localeCompare(b.player.name),
+      )
+      .slice(0, 120);
+  }, [data.players, draftContinent, draftCountry, draftPickedIds, draftPosition, draftQuery, draftTier, weights]);
+
+  function draftPlayer(playerId: string) {
+    setDraftPicks((current) => {
+      const maxPicks = draftTeamCount * draftRounds;
+      if (current.length >= maxPicks || current.some((pick) => pick.playerId === playerId)) {
+        return current;
+      }
+
+      return [
+        ...current,
+        {
+          pickNumber: current.length + 1,
+          playerId,
+          teamIndex: getSnakeDraftTeamIndex(current.length, draftTeamCount),
+        },
+      ];
+    });
+    setSelectedPlayerId(playerId);
+  }
 
   const atlasPlayers = useMemo(
     () =>
@@ -901,6 +961,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["depth", "Depth"],
           ["battle", "Battle"],
           ["era", "Era"],
+          ["draft", "Draft"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -1066,6 +1127,57 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           rightProfile={eraRightProfile}
           rows={eraRows}
           winner={eraWinner}
+        />
+      ) : null}
+
+      {activeTab === "draft" ? (
+        <LegendDraftView
+          candidates={draftCandidates}
+          continent={draftContinent}
+          countries={draftCountries}
+          country={draftCountry}
+          inspector={inspector}
+          onAutoPick={() => {
+            const nextCandidate = draftCandidates[0];
+            if (nextCandidate) {
+              draftPlayer(nextCandidate.player.id);
+            }
+          }}
+          onContinentChange={(value) => {
+            setDraftContinent(value);
+            setDraftCountry("ALL");
+          }}
+          onCountryChange={setDraftCountry}
+          onPickPlayer={draftPlayer}
+          onPlayerSelect={setSelectedPlayerId}
+          onPositionChange={setDraftPosition}
+          onQueryChange={setDraftQuery}
+          onResetDraft={() => setDraftPicks([])}
+          onResetFilters={() => {
+            setDraftContinent("ALL");
+            setDraftCountry("ALL");
+            setDraftPosition("ALL");
+            setDraftTier("ALL");
+            setDraftQuery("");
+          }}
+          onRoundsChange={(value) => {
+            setDraftRounds(value);
+            setDraftPicks((current) => current.slice(0, draftTeamCount * value));
+          }}
+          onTeamCountChange={(value) => {
+            setDraftTeamCount(value);
+            setDraftPicks([]);
+          }}
+          onTierChange={setDraftTier}
+          onUndoPick={() => setDraftPicks((current) => current.slice(0, -1))}
+          picks={draftPicks}
+          playerById={playerById}
+          position={draftPosition}
+          query={draftQuery}
+          rounds={draftRounds}
+          teamCount={draftTeamCount}
+          tier={draftTier}
+          weights={weights}
         />
       ) : null}
 
@@ -2247,6 +2359,306 @@ function BattleXiList({
   );
 }
 
+function LegendDraftView({
+  candidates,
+  continent,
+  countries,
+  country,
+  inspector,
+  onAutoPick,
+  onContinentChange,
+  onCountryChange,
+  onPickPlayer,
+  onPlayerSelect,
+  onPositionChange,
+  onQueryChange,
+  onResetDraft,
+  onResetFilters,
+  onRoundsChange,
+  onTeamCountChange,
+  onTierChange,
+  onUndoPick,
+  picks,
+  playerById,
+  position,
+  query,
+  rounds,
+  teamCount,
+  tier,
+  weights,
+}: {
+  candidates: Array<{ player: LegendPlayer; rating: number }>;
+  continent: Continent | FilterValue;
+  countries: LegendData["countries"];
+  country: string | FilterValue;
+  inspector: ReactNode;
+  onAutoPick: () => void;
+  onContinentChange: (value: Continent | FilterValue) => void;
+  onCountryChange: (value: string | FilterValue) => void;
+  onPickPlayer: (playerId: string) => void;
+  onPlayerSelect: (playerId: string) => void;
+  onPositionChange: (value: PositionCode | FilterValue) => void;
+  onQueryChange: (query: string) => void;
+  onResetDraft: () => void;
+  onResetFilters: () => void;
+  onRoundsChange: (value: number) => void;
+  onTeamCountChange: (value: number) => void;
+  onTierChange: (value: LegendTierId | FilterValue) => void;
+  onUndoPick: () => void;
+  picks: DraftPick[];
+  playerById: Map<string, LegendPlayer>;
+  position: PositionCode | FilterValue;
+  query: string;
+  rounds: number;
+  teamCount: number;
+  tier: LegendTierId | FilterValue;
+  weights: WeightMap;
+}) {
+  const maxPicks = teamCount * rounds;
+  const isComplete = picks.length >= maxPicks;
+  const currentRound = Math.min(Math.floor(picks.length / teamCount) + 1, rounds);
+  const currentTeamIndex = isComplete ? null : getSnakeDraftTeamIndex(picks.length, teamCount);
+  const selectedPlayers = picks.map((pick) => playerById.get(pick.playerId)).filter(Boolean) as LegendPlayer[];
+  const draftAverage = average(selectedPlayers.map((player) => ratePlayer(player, weights)));
+  const teamSummaries = Array.from({ length: teamCount }, (_, teamIndex) => {
+    const teamPicks = picks.filter((pick) => pick.teamIndex === teamIndex);
+    const players = teamPicks.map((pick) => playerById.get(pick.playerId)).filter(Boolean) as LegendPlayer[];
+    const positionCounts = positionOptions.reduce<Record<string, number>>((counts, item) => {
+      counts[item] = players.filter((player) => player.primaryPosition === item).length;
+      return counts;
+    }, {});
+    const formation = formations["4-3-3"];
+    const squad = buildSquad(players, players, formation.slots, weights, {});
+    const starters = formation.slots
+      .map((slot) => {
+        const selected = squad[slot.id];
+        return selected ? { slot, player: selected.player, rating: selected.rating } : null;
+      })
+      .filter(Boolean) as Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+
+    return {
+      average: average(players.map((player) => ratePlayer(player, weights))),
+      players,
+      positionCounts,
+      starters,
+      teamIndex,
+      topPlayer: players.slice().sort((a, b) => ratePlayer(b, weights) - ratePlayer(a, weights))[0],
+      xiAverage: average(starters.map((starter) => starter.rating)),
+    };
+  });
+  const leader = teamSummaries
+    .filter((team) => team.players.length > 0)
+    .sort((a, b) => b.xiAverage - a.xiAverage || b.average - a.average)[0];
+
+  return (
+    <section className="draft-grid">
+      <aside className="draft-sidebar">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Legend Draft</p>
+            <h2>스네이크 드래프트</h2>
+          </div>
+          <label className="field">
+            <span>팀 수</span>
+            <select value={teamCount} onChange={(event) => onTeamCountChange(Number(event.target.value))}>
+              {[2, 3, 4].map((item) => (
+                <option key={item} value={item}>
+                  {item}팀
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>라운드</span>
+            <select value={rounds} onChange={(event) => onRoundsChange(Number(event.target.value))}>
+              {[5, 7, 11, 15].map((item) => (
+                <option key={item} value={item}>
+                  {item}라운드
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="draft-action-grid">
+            <button className="primary-inline" disabled={!candidates.length || isComplete} onClick={onAutoPick} type="button">
+              자동 픽
+            </button>
+            <button className="small-button" disabled={!picks.length} onClick={onUndoPick} type="button">
+              되돌리기
+            </button>
+            <button className="small-button" disabled={!picks.length} onClick={onResetDraft} type="button">
+              초기화
+            </button>
+          </div>
+        </section>
+
+        <section className="draft-status-card">
+          <p className="eyebrow">Pick Clock</p>
+          <h2>{isComplete ? "Draft Complete" : `Team ${(currentTeamIndex ?? 0) + 1}`}</h2>
+          <div className="draft-progress">
+            <span>
+              {picks.length}/{maxPicks}
+            </span>
+            <i>
+              <b style={{ width: `${Math.round((picks.length / maxPicks) * 100)}%` }} />
+            </i>
+          </div>
+          <small>
+            {isComplete ? `우세 팀 ${leader ? `Team ${leader.teamIndex + 1}` : "-"}` : `${currentRound}라운드 · 스네이크 순서`}
+          </small>
+        </section>
+
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Pool Filter</p>
+            <h2>후보 찾기</h2>
+          </div>
+          <label className="field">
+            <span>검색</span>
+            <input className="search-input" onChange={(event) => onQueryChange(event.target.value)} placeholder="선수, 국가, 포지션 검색" type="search" value={query} />
+          </label>
+          <label className="field">
+            <span>대륙</span>
+            <select value={continent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
+              <option value="ALL">전체</option>
+              {continentOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>국가</span>
+            <select value={country} onChange={(event) => onCountryChange(event.target.value)}>
+              <option value="ALL">전체</option>
+              {countries.map((item) => (
+                <option key={item.name} value={item.name}>
+                  {item.name} ({item.count})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>포지션</span>
+            <select value={position} onChange={(event) => onPositionChange(event.target.value as PositionCode | FilterValue)}>
+              <option value="ALL">전체</option>
+              {positionOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>레전드 티어</span>
+            <select value={tier} onChange={(event) => onTierChange(event.target.value as LegendTierId | FilterValue)}>
+              <option value="ALL">전체</option>
+              {legendTiers.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} ({item.range})
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="ghost-button compact-button" onClick={onResetFilters} type="button">
+            필터 초기화
+          </button>
+        </section>
+      </aside>
+
+      <section className="draft-main">
+        <section className="draft-board-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Draft Board</p>
+              <h2>팀별 픽 현황</h2>
+            </div>
+            <div className="ranking-summary">
+              <span>평균 {draftAverage}</span>
+              <strong>{leader ? `Leader Team ${leader.teamIndex + 1}` : "No Pick"}</strong>
+            </div>
+          </div>
+          <div className="draft-team-grid">
+            {teamSummaries.map((team) => (
+              <article className={currentTeamIndex === team.teamIndex ? "draft-team-card active" : "draft-team-card"} key={team.teamIndex}>
+                <div className="draft-team-head">
+                  <div>
+                    <p className="eyebrow">Team {team.teamIndex + 1}</p>
+                    <h3>{team.topPlayer?.name ?? "첫 픽 대기"}</h3>
+                  </div>
+                  <span>{team.xiAverage || team.average || "-"}</span>
+                </div>
+                <div className="draft-position-strip">
+                  {["ST", "AM", "CM", "DM", "CB", "GK"].map((item) => (
+                    <em key={item}>
+                      {item} {team.positionCounts[item] ?? 0}
+                    </em>
+                  ))}
+                </div>
+                <div className="draft-pick-list">
+                  {picks
+                    .filter((pick) => pick.teamIndex === team.teamIndex)
+                    .map((pick) => {
+                      const player = playerById.get(pick.playerId);
+                      if (!player) {
+                        return null;
+                      }
+
+                      return (
+                        <button key={pick.pickNumber} onClick={() => onPlayerSelect(player.id)} type="button">
+                          <span>#{pick.pickNumber}</span>
+                          <strong>{player.name}</strong>
+                          <em>{player.primaryPosition}</em>
+                        </button>
+                      );
+                    })}
+                  {team.players.length === 0 ? <p className="empty-state">아직 선택한 선수가 없습니다.</p> : null}
+                </div>
+                {team.starters.length ? <BattleXiList onPlayerSelect={onPlayerSelect} starters={team.starters} /> : null}
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="draft-candidate-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Available Pool</p>
+              <h2>다음 픽 후보</h2>
+            </div>
+            <span className="saved-count">{candidates.length} shown</span>
+          </div>
+          <div className="draft-candidate-list">
+            {candidates.length ? (
+              candidates.map(({ player, rating }, index) => (
+                <article className="draft-candidate-item" key={player.id}>
+                  <button onClick={() => onPlayerSelect(player.id)} type="button">
+                    <span>{index + 1}</span>
+                    <div>
+                      <strong>{player.name}</strong>
+                      <small>
+                        {player.country} · {player.continent} · {player.primaryPosition} · {getLegendTier(player.overallScore).label}
+                      </small>
+                    </div>
+                    <em>{rating}</em>
+                  </button>
+                  <button className="primary-inline" disabled={isComplete} onClick={() => onPickPlayer(player.id)} type="button">
+                    픽
+                  </button>
+                </article>
+              ))
+            ) : (
+              <p className="empty-state">조건에 맞는 남은 선수가 없습니다.</p>
+            )}
+          </div>
+        </section>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
 function BestXiView({
   activeDragSlotRef,
   averageRating,
@@ -3259,6 +3671,12 @@ function ScoreBars({ player }: { player: LegendPlayer }) {
       ))}
     </div>
   );
+}
+
+function getSnakeDraftTeamIndex(pickIndex: number, teamCount: number) {
+  const roundIndex = Math.floor(pickIndex / teamCount);
+  const slotIndex = pickIndex % teamCount;
+  return roundIndex % 2 === 0 ? slotIndex : teamCount - 1 - slotIndex;
 }
 
 function getPrimaryScoreKey(player: LegendPlayer) {

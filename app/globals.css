@@ -205,7 +205,7 @@ select,
   box-shadow: 0 16px 40px rgba(4, 25, 19, 0.18);
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   margin-bottom: 18px;
   padding: 8px;
 }
@@ -316,6 +316,7 @@ select,
 .hall-grid,
 .depth-grid,
 .battle-grid,
+.draft-grid,
 .builder-grid,
 .rankings-grid,
 .compare-grid {
@@ -337,6 +338,10 @@ select,
 }
 
 .battle-grid {
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+}
+
+.draft-grid {
   grid-template-columns: 300px minmax(0, 1fr) 360px;
 }
 
@@ -375,6 +380,7 @@ select,
 .depth-main,
 .battle-sidebar,
 .battle-main,
+.draft-sidebar,
 .atlas-sidebar,
 .atlas-main,
 .top-list-panel,
@@ -391,6 +397,7 @@ select,
 .depth-main,
 .battle-sidebar,
 .battle-main,
+.draft-sidebar,
 .atlas-main,
 .top-list-panel,
 .candidate-panel,
@@ -407,6 +414,7 @@ select,
 .hall-sidebar,
 .depth-sidebar,
 .battle-sidebar,
+.draft-sidebar,
 .builder-finder-panel,
 .ranking-finder-panel,
 .player-drawer {
@@ -1346,7 +1354,11 @@ td strong {
 .era-note-card,
 .battle-profile-card,
 .battle-position-panel,
-.battle-xi-panel {
+.battle-xi-panel,
+.draft-status-card,
+.draft-board-panel,
+.draft-candidate-panel,
+.draft-team-card {
   background: var(--side-1-strong);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1368,6 +1380,197 @@ td strong {
   color: var(--muted);
   line-height: 1.55;
   margin-bottom: 0;
+}
+
+.draft-main,
+.draft-sidebar {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+}
+
+.draft-action-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.draft-action-grid .primary-inline {
+  grid-column: 1 / -1;
+  justify-content: center;
+  min-height: 40px;
+}
+
+.draft-status-card h2 {
+  color: var(--main);
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.draft-progress {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.draft-progress span,
+.draft-status-card small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.draft-progress i {
+  background: rgba(11, 61, 46, 0.1);
+  border-radius: 999px;
+  display: block;
+  height: 9px;
+  overflow: hidden;
+}
+
+.draft-progress b {
+  background: linear-gradient(90deg, var(--main), var(--gold));
+  display: block;
+  height: 100%;
+}
+
+.draft-team-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.draft-team-card {
+  display: grid;
+  gap: 12px;
+}
+
+.draft-team-card.active {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 2px rgba(200, 162, 74, 0.22);
+}
+
+.draft-team-head {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.draft-team-head h3 {
+  color: var(--main);
+  margin-bottom: 0;
+}
+
+.draft-team-head span {
+  align-items: center;
+  background: var(--main);
+  border-radius: 999px;
+  color: var(--side-1-strong);
+  display: inline-flex;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 38px;
+  min-width: 38px;
+  padding: 0 10px;
+}
+
+.draft-position-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.draft-position-strip em {
+  background: rgba(11, 61, 46, 0.08);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  padding: 5px 8px;
+}
+
+.draft-pick-list {
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.draft-pick-list button,
+.draft-candidate-item > button:first-child {
+  align-items: center;
+  background: rgba(244, 239, 227, 0.62);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+
+.draft-pick-list button {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  min-height: 40px;
+  padding: 7px 9px;
+}
+
+.draft-pick-list span,
+.draft-candidate-item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.draft-pick-list strong,
+.draft-candidate-item strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.draft-pick-list em,
+.draft-candidate-item em {
+  color: var(--main);
+  font-style: normal;
+  font-weight: 900;
+  text-align: right;
+}
+
+.draft-team-card .battle-xi-list {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.draft-candidate-list {
+  display: grid;
+  gap: 8px;
+  max-height: 620px;
+  overflow: auto;
+}
+
+.draft-candidate-item {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 64px;
+}
+
+.draft-candidate-item > button:first-child {
+  grid-template-columns: 36px minmax(0, 1fr) 44px;
+  min-height: 54px;
+  padding: 8px 10px;
+}
+
+.draft-candidate-item small {
+  color: var(--muted);
+  display: block;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .battle-scoreboard {
@@ -2618,6 +2821,7 @@ td strong {
   .hall-grid,
   .depth-grid,
   .battle-grid,
+  .draft-grid,
   .builder-grid,
   .rankings-grid,
   .compare-grid,
@@ -2642,7 +2846,8 @@ td strong {
   }
 
   .battle-scoreboard,
-  .battle-lower-grid {
+  .battle-lower-grid,
+  .draft-team-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2663,6 +2868,7 @@ td strong {
   .hall-sidebar,
   .depth-sidebar,
   .battle-sidebar,
+  .draft-sidebar,
   .builder-finder-panel,
   .ranking-finder-panel,
   .player-drawer {
@@ -2711,6 +2917,8 @@ td strong {
   .depth-snapshot-list,
   .battle-metric-grid,
   .battle-position-row,
+  .draft-action-grid,
+  .draft-candidate-item,
   .country-xi-list,
   .comparison-grid,
   .compare-cards {
