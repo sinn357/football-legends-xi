@@ -6,7 +6,23 @@ import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, Score
 import { defaultTactics, simulateMatch } from "@/lib/simulation";
 import type { RandomnessLevel, SimulatedMatchResult, SimulationTactics, SimulationTeamInput } from "@/lib/simulation";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "shortlist" | "sim" | "tournament" | "best-xi" | "rankings" | "compare";
+type TabId =
+  | "atlas"
+  | "hall"
+  | "depth"
+  | "battle"
+  | "era"
+  | "timeline"
+  | "draft"
+  | "challenge"
+  | "quiz"
+  | "shortlist"
+  | "sim"
+  | "tournament"
+  | "season"
+  | "best-xi"
+  | "rankings"
+  | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -66,6 +82,50 @@ type TournamentRun = {
   matches: TournamentMatch[];
   seed: string;
   size: TournamentSize;
+};
+
+type SeasonMatch = {
+  awayTeam: SimulationTeamInput;
+  homeTeam: SimulationTeamInput;
+  id: string;
+  label: string;
+  result: SimulatedMatchResult;
+  round: number;
+};
+
+type SeasonStanding = {
+  draws: number;
+  ga: number;
+  gd: number;
+  gf: number;
+  losses: number;
+  played: number;
+  points: number;
+  rank: number;
+  team: SimulationTeamInput;
+  wins: number;
+  xgAgainst: number;
+  xgFor: number;
+};
+
+type SeasonPlayerLeader = SimSeriesPlayerLeader & {
+  ratingTotal: number;
+  teamName: string;
+};
+
+type SeasonRun = {
+  champion: SimulationTeamInput;
+  countries: string[];
+  createdAt: string;
+  leaders: {
+    assists: SeasonPlayerLeader[];
+    goals: SeasonPlayerLeader[];
+    mvp: SeasonPlayerLeader[];
+    rating: SeasonPlayerLeader[];
+  };
+  matches: SeasonMatch[];
+  seed: string;
+  standings: SeasonStanding[];
 };
 
 type LegendTier = {
@@ -438,6 +498,8 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [tournamentSize, setTournamentSize] = useState<TournamentSize>(4);
   const [tournamentCountries, setTournamentCountries] = useState<string[]>(defaultTournamentCountries);
   const [tournamentRun, setTournamentRun] = useState<TournamentRun | null>(null);
+  const [seasonCountries, setSeasonCountries] = useState<string[]>(defaultTournamentCountries.slice(0, 4));
+  const [seasonRun, setSeasonRun] = useState<SeasonRun | null>(null);
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -1318,6 +1380,28 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     setTournamentRun(run);
   }
 
+  function updateSeasonCountry(index: number, country: string) {
+    setSeasonCountries((current) => current.map((item, itemIndex) => (itemIndex === index ? country : item)));
+    setSeasonRun(null);
+  }
+
+  function runSeason() {
+    const countries = ensureUniqueTournamentCountries(seasonCountries, data.countries, 4);
+    const teams = countries.map((country, index) =>
+      createSimulationTeam(`season-${index + 1}`, "country", country, "", starters, data.players, savedSquads, playerById, weights, formation.name),
+    );
+
+    if (teams.some((team) => team.slots.length < 7)) {
+      return;
+    }
+
+    const seed = `season-${Date.now()}`;
+    const run = createSeasonRun(teams, countries, seed, simRandomness);
+
+    setSeasonCountries(countries);
+    setSeasonRun(run);
+  }
+
   function toggleShortlist(playerId: string) {
     setShortlistIds((current) => {
       if (current.includes(playerId)) {
@@ -1381,6 +1465,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["shortlist", "Shortlist"],
           ["sim", "Sim"],
           ["tournament", "Tournament"],
+          ["season", "Season"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -1700,6 +1785,18 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           run={tournamentRun}
           selectedCountries={tournamentCountries}
           size={tournamentSize}
+        />
+      ) : null}
+
+      {activeTab === "season" ? (
+        <SeasonView
+          countries={data.countries}
+          inspector={inspector}
+          onCountryChange={updateSeasonCountry}
+          onPlayerSelect={setSelectedPlayerId}
+          onRun={runSeason}
+          run={seasonRun}
+          selectedCountries={seasonCountries}
         />
       ) : null}
 
@@ -4936,6 +5033,204 @@ function TournamentMatchCard({ featured = false, match }: { featured?: boolean; 
   );
 }
 
+function SeasonView({
+  countries,
+  inspector,
+  onCountryChange,
+  onPlayerSelect,
+  onRun,
+  run,
+  selectedCountries,
+}: {
+  countries: LegendData["countries"];
+  inspector: ReactNode;
+  onCountryChange: (index: number, country: string) => void;
+  onPlayerSelect: (playerId: string) => void;
+  onRun: () => void;
+  run: SeasonRun | null;
+  selectedCountries: string[];
+}) {
+  const activeCountries = selectedCountries.slice(0, 4);
+  const duplicateCount = activeCountries.length - new Set(activeCountries).size;
+  const rounds = run
+    ? Array.from(new Set(run.matches.map((match) => match.round))).map((round) => ({
+        matches: run.matches.filter((match) => match.round === round),
+        round,
+      }))
+    : [];
+
+  return (
+    <section className="season-grid">
+      <aside className="sim-sidebar">
+        <div className="section-heading">
+          <p className="eyebrow">Season</p>
+          <h2>4팀 미니 리그</h2>
+        </div>
+        <p className="sim-inline-empty">4개 국가 Auto XI가 홈/원정 더블 라운드로빈 12경기를 치릅니다.</p>
+        <div className="tournament-seed-list">
+          {activeCountries.map((country, index) => (
+            <label className="field" key={`season-seed-${index}`}>
+              <span>Club {index + 1}</span>
+              <select value={country} onChange={(event) => onCountryChange(index, event.target.value)}>
+                {countries.map((item) => (
+                  <option key={`${index}-${item.name}`} value={item.name}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+        </div>
+        <button className="primary-button" disabled={duplicateCount > 0} onClick={onRun} type="button">
+          시즌 실행
+        </button>
+        {duplicateCount > 0 ? <p className="sim-inline-empty">같은 국가는 한 번만 참가할 수 있습니다.</p> : null}
+      </aside>
+
+      <section className="season-main">
+        {run ? (
+          <>
+            <div className="tournament-champion">
+              <span>Champion</span>
+              <strong>{run.champion.name}</strong>
+              <small>
+                {run.matches.length} matches · {run.countries.join(" · ")} · {formatSavedDate(run.createdAt)}
+              </small>
+            </div>
+            <section className="season-table-panel">
+              <div className="section-heading row">
+                <div>
+                  <p className="eyebrow">League Table</p>
+                  <h2>최종 순위표</h2>
+                </div>
+                <span className="saved-count">Pts / GD / GF</span>
+              </div>
+              <div className="season-table-wrap">
+                <table className="season-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Team</th>
+                      <th>P</th>
+                      <th>W</th>
+                      <th>D</th>
+                      <th>L</th>
+                      <th>GF</th>
+                      <th>GA</th>
+                      <th>GD</th>
+                      <th>Pts</th>
+                      <th>xG</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {run.standings.map((row) => (
+                      <tr key={row.team.id}>
+                        <td>{row.rank}</td>
+                        <td>{row.team.name}</td>
+                        <td>{row.played}</td>
+                        <td>{row.wins}</td>
+                        <td>{row.draws}</td>
+                        <td>{row.losses}</td>
+                        <td>{row.gf}</td>
+                        <td>{row.ga}</td>
+                        <td>{row.gd > 0 ? `+${row.gd}` : row.gd}</td>
+                        <td>{row.points}</td>
+                        <td>{row.xgFor.toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section className="sim-panel">
+              <div className="section-heading">
+                <p className="eyebrow">Awards</p>
+                <h2>시즌 개인상</h2>
+              </div>
+              <div className="sim-series-leaders">
+                <SeasonLeaderCard label="MVP" leaders={run.leaders.mvp} metric={(leader) => leader.averageRating.toFixed(1)} onPlayerSelect={onPlayerSelect} />
+                <SeasonLeaderCard label="Scorer" leaders={run.leaders.goals} metric={(leader) => `${leader.goals}G`} onPlayerSelect={onPlayerSelect} />
+                <SeasonLeaderCard label="Creator" leaders={run.leaders.assists} metric={(leader) => `${leader.assists}A`} onPlayerSelect={onPlayerSelect} />
+                <SeasonLeaderCard label="Rating" leaders={run.leaders.rating} metric={(leader) => leader.averageRating.toFixed(1)} onPlayerSelect={onPlayerSelect} />
+              </div>
+            </section>
+            <section className="season-rounds">
+              {rounds.map(({ matches, round }) => (
+                <div className="season-round" key={round}>
+                  <div className="section-heading compact-heading">
+                    <p className="eyebrow">Round {round}</p>
+                    <h3>{matches.length} matches</h3>
+                  </div>
+                  <div className="tournament-bracket">
+                    {matches.map((match) => (
+                      <SeasonMatchCard key={match.id} match={match} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </section>
+          </>
+        ) : (
+          <section className="sim-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Ready</p>
+              <h2>국가 4개를 고르고 시즌을 실행하세요</h2>
+            </div>
+            <p className="empty-state">승점표, 득점/도움/평점 리더보드, 라운드별 결과가 한 번에 생성됩니다.</p>
+          </section>
+        )}
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
+function SeasonLeaderCard({
+  label,
+  leaders,
+  metric,
+  onPlayerSelect,
+}: {
+  label: string;
+  leaders: SeasonPlayerLeader[];
+  metric: (leader: SeasonPlayerLeader) => string;
+  onPlayerSelect: (playerId: string) => void;
+}) {
+  const leader = leaders[0] ?? null;
+
+  return (
+    <button disabled={!leader} onClick={() => leader && onPlayerSelect(leader.playerId)} type="button">
+      <span>{label}</span>
+      <strong>{leader?.playerName ?? "-"}</strong>
+      <small>{leader ? `${leader.teamName} · ${leader.goals}G ${leader.assists}A · ${leader.matches} apps` : "No result"}</small>
+      <em>{leader ? metric(leader) : "-"}</em>
+    </button>
+  );
+}
+
+function SeasonMatchCard({ match }: { match: SeasonMatch }) {
+  const statsHome = match.result.stats[match.homeTeam.id];
+  const statsAway = match.result.stats[match.awayTeam.id];
+
+  return (
+    <article className="tournament-match-card">
+      <span>{match.label}</span>
+      <div>
+        <strong className={match.result.winnerTeamId === match.homeTeam.id ? "winner" : ""}>{match.homeTeam.name}</strong>
+        <em>{statsHome.goals}</em>
+      </div>
+      <div>
+        <strong className={match.result.winnerTeamId === match.awayTeam.id ? "winner" : ""}>{match.awayTeam.name}</strong>
+        <em>{statsAway.goals}</em>
+      </div>
+      <small>
+        xG {statsHome.xg.toFixed(2)}-{statsAway.xg.toFixed(2)} · Poss {statsHome.possession}-{statsAway.possession}
+      </small>
+    </article>
+  );
+}
+
 function ReportList({ items, title }: { items: string[]; title: string }) {
   return (
     <article className="sim-report-card">
@@ -5127,6 +5422,154 @@ function getTournamentWinner(result: SimulatedMatchResult, teamA: SimulationTeam
 
 function getTeamOverallAverage(team: SimulationTeamInput) {
   return team.slots.reduce((sum, slot) => sum + slot.player.overallScore, 0) / Math.max(team.slots.length, 1);
+}
+
+function createSeasonRun(teams: SimulationTeamInput[], countries: string[], seed: string, randomness: RandomnessLevel): SeasonRun {
+  const schedule: Array<{ awayIndex: number; homeIndex: number; round: number }> = [
+    { awayIndex: 1, homeIndex: 0, round: 1 },
+    { awayIndex: 3, homeIndex: 2, round: 1 },
+    { awayIndex: 2, homeIndex: 0, round: 2 },
+    { awayIndex: 3, homeIndex: 1, round: 2 },
+    { awayIndex: 3, homeIndex: 0, round: 3 },
+    { awayIndex: 2, homeIndex: 1, round: 3 },
+    { awayIndex: 0, homeIndex: 1, round: 4 },
+    { awayIndex: 2, homeIndex: 3, round: 4 },
+    { awayIndex: 0, homeIndex: 2, round: 5 },
+    { awayIndex: 1, homeIndex: 3, round: 5 },
+    { awayIndex: 0, homeIndex: 3, round: 6 },
+    { awayIndex: 1, homeIndex: 2, round: 6 },
+  ];
+  const standingMap = new Map<string, SeasonStanding>();
+  const playerMap = new Map<string, SeasonPlayerLeader>();
+  const teamNameMap = new Map(teams.map((team) => [team.id, team.name]));
+
+  teams.forEach((team) => {
+    standingMap.set(team.id, {
+      draws: 0,
+      ga: 0,
+      gd: 0,
+      gf: 0,
+      losses: 0,
+      played: 0,
+      points: 0,
+      rank: 0,
+      team,
+      wins: 0,
+      xgAgainst: 0,
+      xgFor: 0,
+    });
+  });
+
+  const matches = schedule.map(({ awayIndex, homeIndex, round }, index) => {
+    const homeTeam = teams[homeIndex];
+    const awayTeam = teams[awayIndex];
+    const result = simulateMatch(homeTeam, awayTeam, defaultTactics, defaultTactics, {
+      homeTeamId: homeTeam.id,
+      randomness,
+      seed: `${seed}-round-${round}-match-${index + 1}`,
+    });
+    const homeStats = result.stats[homeTeam.id];
+    const awayStats = result.stats[awayTeam.id];
+    const homeStanding = standingMap.get(homeTeam.id);
+    const awayStanding = standingMap.get(awayTeam.id);
+
+    if (homeStanding && awayStanding) {
+      homeStanding.played += 1;
+      awayStanding.played += 1;
+      homeStanding.gf += homeStats.goals;
+      homeStanding.ga += awayStats.goals;
+      awayStanding.gf += awayStats.goals;
+      awayStanding.ga += homeStats.goals;
+      homeStanding.xgFor += homeStats.xg;
+      homeStanding.xgAgainst += awayStats.xg;
+      awayStanding.xgFor += awayStats.xg;
+      awayStanding.xgAgainst += homeStats.xg;
+
+      if (homeStats.goals > awayStats.goals) {
+        homeStanding.wins += 1;
+        homeStanding.points += 3;
+        awayStanding.losses += 1;
+      } else if (awayStats.goals > homeStats.goals) {
+        awayStanding.wins += 1;
+        awayStanding.points += 3;
+        homeStanding.losses += 1;
+      } else {
+        homeStanding.draws += 1;
+        awayStanding.draws += 1;
+        homeStanding.points += 1;
+        awayStanding.points += 1;
+      }
+    }
+
+    result.playerRatings.forEach((rating) => {
+      const current = playerMap.get(rating.playerId) ?? {
+        assists: 0,
+        averageRating: 0,
+        goals: 0,
+        matches: 0,
+        playerId: rating.playerId,
+        playerName: rating.playerName,
+        ratingTotal: 0,
+        teamId: rating.teamId,
+        teamName: teamNameMap.get(rating.teamId) ?? rating.teamId,
+      };
+      current.assists += rating.assists;
+      current.goals += rating.goals;
+      current.matches += 1;
+      current.ratingTotal += rating.rating;
+      current.averageRating = current.ratingTotal / current.matches;
+      playerMap.set(rating.playerId, current);
+    });
+
+    return {
+      awayTeam,
+      homeTeam,
+      id: `season-${round}-${index + 1}`,
+      label: `Round ${round}`,
+      result,
+      round,
+    };
+  });
+
+  const standings = Array.from(standingMap.values())
+    .map((standing) => ({
+      ...standing,
+      gd: standing.gf - standing.ga,
+      xgAgainst: roundTo(standing.xgAgainst, 2),
+      xgFor: roundTo(standing.xgFor, 2),
+    }))
+    .sort(
+      (a, b) =>
+        b.points - a.points ||
+        b.gd - a.gd ||
+        b.gf - a.gf ||
+        b.xgFor - a.xgFor ||
+        getTeamOverallAverage(b.team) - getTeamOverallAverage(a.team),
+    )
+    .map((standing, index) => ({
+      ...standing,
+      rank: index + 1,
+    }));
+  const players = Array.from(playerMap.values());
+  const mvp = [...players].sort((a, b) => b.averageRating + b.goals * 0.35 + b.assists * 0.25 - (a.averageRating + a.goals * 0.35 + a.assists * 0.25));
+  const goals = [...players].sort((a, b) => b.goals - a.goals || b.averageRating - a.averageRating);
+  const assists = [...players].sort((a, b) => b.assists - a.assists || b.averageRating - a.averageRating);
+  const rating = [...players].sort((a, b) => b.averageRating - a.averageRating || b.goals + b.assists - (a.goals + a.assists));
+
+  return {
+    champion: standings[0].team,
+    countries,
+    createdAt: new Date().toISOString(),
+    leaders: {
+      assists,
+      goals,
+      mvp,
+      rating,
+    },
+    matches,
+    seed,
+    standings,
+  };
 }
 
 function createSimHistoryEntry(

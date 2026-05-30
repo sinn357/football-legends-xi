@@ -2951,6 +2951,13 @@ td strong {
   grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.55fr) minmax(320px, 0.9fr);
 }
 
+.season-grid {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.58fr) minmax(320px, 0.9fr);
+}
+
 .tournament-seed-list {
   display: grid;
   gap: 10px;
@@ -3069,6 +3076,65 @@ td strong {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
+}
+
+.season-main {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.season-table-panel,
+.season-round {
+  background: rgba(255, 250, 240, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.season-table-wrap {
+  overflow-x: auto;
+}
+
+.season-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 760px;
+  width: 100%;
+}
+
+.season-table th,
+.season-table td {
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  padding: 10px 8px;
+  text-align: right;
+}
+
+.season-table th {
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.season-table th:nth-child(2),
+.season-table td:nth-child(2) {
+  min-width: 190px;
+  text-align: left;
+}
+
+.season-table td:nth-child(1),
+.season-table td:nth-child(10) {
+  color: var(--main);
+  font-weight: 900;
+}
+
+.season-rounds {
+  display: grid;
+  gap: 14px;
 }
 
 .sim-scoreboard {
@@ -4012,6 +4078,7 @@ td strong {
   .shortlist-grid,
   .sim-grid,
   .tournament-grid,
+  .season-grid,
   .timeline-grid,
   .builder-grid,
   .rankings-grid,
