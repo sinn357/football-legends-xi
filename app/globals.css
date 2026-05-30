@@ -819,32 +819,6 @@ td strong {
   font-size: 14px;
 }
 
-.status {
-  border-radius: 999px;
-  display: inline-flex;
-  font-size: 12px;
-  font-weight: 800;
-  padding: 5px 8px;
-  white-space: nowrap;
-}
-
-.status.confirmed,
-.status.active-legend {
-  background: rgba(11, 61, 46, 0.12);
-  color: var(--green-dark);
-}
-
-.status.active-hold,
-.status.watch {
-  background: rgba(194, 138, 44, 0.16);
-  color: #7a5315;
-}
-
-.status.delete-candidate {
-  background: rgba(183, 67, 67, 0.12);
-  color: var(--red);
-}
-
 .tier-badge {
   align-items: center;
   border-radius: 999px;

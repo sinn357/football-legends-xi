@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
-import type { Continent, LegendData, LegendPlayer, PlayerStatus, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
+import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
 type TabId = "atlas" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
@@ -60,14 +60,6 @@ const scoreLabels: Record<ScoreKey, string> = {
   primeSkill: "프라임 실력",
   teamImportance: "팀 내 비중",
   legacy: "100년 뒤 존재감",
-};
-
-const statusLabels: Record<PlayerStatus, string> = {
-  confirmed: "확정",
-  "active-hold": "현역보류",
-  "active-legend": "현역확정",
-  "delete-candidate": "삭제후보",
-  watch: "검토",
 };
 
 const scoreModeLabels: Record<ScoreMode, string> = {
@@ -206,8 +198,6 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [atlasCountry, setAtlasCountry] = useState(defaultCountry);
   const [formationId, setFormationId] = useState("4-3-3");
   const [weights, setWeights] = useState<WeightMap>(initialWeights);
-  const [includeActiveHold, setIncludeActiveHold] = useState(true);
-  const [includeDeleteCandidates, setIncludeDeleteCandidates] = useState(false);
   const [builderContinent, setBuilderContinent] = useState<Continent | FilterValue>("ALL");
   const [builderCountry, setBuilderCountry] = useState<string | FilterValue>("ALL");
   const [builderPosition, setBuilderPosition] = useState<PositionCode | FilterValue>("ALL");
@@ -293,14 +283,6 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     }
   }, [atlasContinent, atlasCountry, data.countries, defaultCountry]);
 
-  const statusFilteredPlayers = useMemo(
-    () =>
-      data.players
-        .filter((player) => includeActiveHold || player.status !== "active-hold")
-        .filter((player) => includeDeleteCandidates || player.status !== "delete-candidate"),
-    [data.players, includeActiveHold, includeDeleteCandidates],
-  );
-
   const builderCountries = useMemo(
     () =>
       data.countries.filter((country) => builderContinent === "ALL" || country.continent === builderContinent),
@@ -315,7 +297,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
   const candidatePlayers = useMemo(() => {
     const normalizedQuery = candidateQuery.trim().toLowerCase();
-    return statusFilteredPlayers
+    return data.players
       .filter((player) => builderContinent === "ALL" || player.continent === builderContinent)
       .filter((player) => builderCountry === "ALL" || player.country === builderCountry)
       .filter((player) => builderPosition === "ALL" || player.primaryPosition === builderPosition)
@@ -337,7 +319,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     builderTier,
     candidateQuery,
     selectedSlot,
-    statusFilteredPlayers,
+    data.players,
     topOnly,
     weights,
   ]);
@@ -360,7 +342,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
   const rankingPool = useMemo(() => {
     const normalizedQuery = rankingQuery.trim().toLowerCase();
-    return statusFilteredPlayers
+    return data.players
       .filter((player) => rankingContinent === "ALL" || player.continent === rankingContinent)
       .filter((player) => rankingCountry === "ALL" || player.country === rankingCountry)
       .filter((player) => rankingPosition === "ALL" || player.primaryPosition === rankingPosition)
@@ -373,7 +355,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           b.rating - a.rating ||
           (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999),
       );
-  }, [rankingContinent, rankingCountry, rankingPosition, rankingQuery, rankingTier, statusFilteredPlayers, weights]);
+  }, [data.players, rankingContinent, rankingCountry, rankingPosition, rankingQuery, rankingTier, weights]);
 
   const rankingPlayers = rankingPool.slice(0, 150);
   const rankingSummary = {
@@ -696,8 +678,6 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           compareIds={compareIds}
           formation={{ name: formation.name, slots: effectiveSlots }}
           formationId={formationId}
-          includeActiveHold={includeActiveHold}
-          includeDeleteCandidates={includeDeleteCandidates}
           exportedSquadText={exportedSquadText}
           manualSlots={manualSlots}
           onAssignPlayer={assignPlayerToSelectedSlot}
@@ -708,8 +688,6 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           }}
           onCountryChange={setBuilderCountry}
           onFormationChange={setFormationId}
-          onIncludeActiveHoldChange={setIncludeActiveHold}
-          onIncludeDeleteCandidatesChange={setIncludeDeleteCandidates}
           onDeleteSavedSquad={deleteSavedSquad}
           onExport={exportCurrentSquad}
           onExportDismiss={() => setExportedSquadText("")}
@@ -1016,8 +994,6 @@ function BestXiView({
   formation,
   formationId,
   getSlotPositionsForDrag,
-  includeActiveHold,
-  includeDeleteCandidates,
   inspector,
   manualSlots,
   onAssignPlayer,
@@ -1028,8 +1004,6 @@ function BestXiView({
   onExport,
   onExportDismiss,
   onFormationChange,
-  onIncludeActiveHoldChange,
-  onIncludeDeleteCandidatesChange,
   onLoadSavedSquad,
   onPlayerSelect,
   onPositionChange,
@@ -1072,8 +1046,6 @@ function BestXiView({
   formation: { name: string; slots: FormationSlot[] };
   formationId: string;
   getSlotPositionsForDrag: () => Record<string, SlotPosition>;
-  includeActiveHold: boolean;
-  includeDeleteCandidates: boolean;
   inspector: ReactNode;
   manualSlots: Record<string, string>;
   onAssignPlayer: (playerId: string) => void;
@@ -1084,8 +1056,6 @@ function BestXiView({
   onExport: () => void;
   onExportDismiss: () => void;
   onFormationChange: (formationId: string) => void;
-  onIncludeActiveHoldChange: (value: boolean) => void;
-  onIncludeDeleteCandidatesChange: (value: boolean) => void;
   onLoadSavedSquad: (saved: SavedSquad) => void;
   onPlayerSelect: (playerId: string) => void;
   onPositionChange: (value: PositionCode | FilterValue) => void;
@@ -1220,18 +1190,6 @@ function BestXiView({
             <label>
               <input checked={topOnly} onChange={(event) => onTopOnlyChange(event.target.checked)} type="checkbox" />
               Top 50 기본 리스트
-            </label>
-            <label>
-              <input checked={includeActiveHold} onChange={(event) => onIncludeActiveHoldChange(event.target.checked)} type="checkbox" />
-              현역보류 포함
-            </label>
-            <label>
-              <input
-                checked={includeDeleteCandidates}
-                onChange={(event) => onIncludeDeleteCandidatesChange(event.target.checked)}
-                type="checkbox"
-              />
-              삭제후보 포함
             </label>
           </div>
           <div className="slider-stack compact">
@@ -1860,7 +1818,6 @@ function PlayerDetailDrawer({
         <span>{player.country}</span>
         <span>{player.primaryPosition}</span>
         <span className={`tier-badge ${getLegendTier(player.overallScore).id}`}>{getLegendTier(player.overallScore).label}</span>
-        <span>{statusLabels[player.status]}</span>
       </div>
       <div className="official-score-panel">
         <span>공식 총점</span>
@@ -1873,7 +1830,6 @@ function PlayerDetailDrawer({
         <button className="primary-inline" onClick={() => onToggleCompare(player.id)} type="button">
           비교에 추가
         </button>
-        <span className={`status ${player.status}`}>{statusLabels[player.status]}</span>
       </div>
       <div className="inspector-score-grid" aria-label="세부 점수">
         {profileKeys.map((key) => (
@@ -1991,7 +1947,6 @@ function PlayerMiniCard({ onClick, player, rating }: { onClick: () => void; play
         {player.primaryPosition} · 공식 {player.overallScore} · 기준 {rating}
       </span>
       <span className={`tier-badge ${getLegendTier(player.overallScore).id}`}>{getLegendTier(player.overallScore).label}</span>
-      <em>{statusLabels[player.status]}</em>
     </button>
   );
 }
