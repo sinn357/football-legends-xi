@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "depth" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -60,6 +60,27 @@ type DepthPositionRow = {
   players: LegendPlayer[];
   position: PositionCode;
   topScore: number;
+};
+
+type BattleCountryProfile = {
+  average: number;
+  country: string;
+  players: LegendPlayer[];
+  rows: DepthPositionRow[];
+  strengths: DepthPositionRow[];
+  summary?: LegendData["countries"][number];
+  topPlayers: LegendPlayer[];
+  topScore: number;
+  weaknesses: DepthPositionRow[];
+  xiAverage: number;
+  xiStarters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+};
+
+type PositionBattleRow = {
+  advantage: "A" | "B" | "EVEN";
+  left: DepthPositionRow;
+  position: PositionCode;
+  right: DepthPositionRow;
 };
 
 const scoreLabels: Record<ScoreKey, string> = {
@@ -201,6 +222,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const activeDragSlotRef = useRef<string | null>(null);
   const dragStartPositionsRef = useRef<Record<string, SlotPosition>>({});
   const defaultCountry = data.countries.find((country) => country.name === "Brazil")?.name ?? data.countries[0]?.name ?? "";
+  const defaultBattleCountry = data.countries.find((country) => country.name === "Argentina")?.name ?? data.countries[1]?.name ?? defaultCountry;
   const [activeTab, setActiveTab] = useState<TabId>("atlas");
   const [atlasContinent, setAtlasContinent] = useState<Continent | null>("America");
   const [atlasCountry, setAtlasCountry] = useState(defaultCountry);
@@ -220,6 +242,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [depthCountry, setDepthCountry] = useState(defaultCountry);
   const [depthPosition, setDepthPosition] = useState<PositionCode | FilterValue>("ALL");
   const [depthQuery, setDepthQuery] = useState("");
+  const [battleContinentA, setBattleContinentA] = useState<Continent | FilterValue>("America");
+  const [battleCountryA, setBattleCountryA] = useState(defaultCountry);
+  const [battleContinentB, setBattleContinentB] = useState<Continent | FilterValue>("America");
+  const [battleCountryB, setBattleCountryB] = useState(defaultBattleCountry);
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -313,6 +339,16 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     }
   }, [data.countries, defaultCountry, depthContinent, depthCountry]);
 
+  useEffect(() => {
+    if (battleContinentA !== "ALL" && !data.countries.some((country) => country.name === battleCountryA && country.continent === battleContinentA)) {
+      setBattleCountryA(data.countries.find((country) => country.continent === battleContinentA)?.name ?? defaultCountry);
+    }
+
+    if (battleContinentB !== "ALL" && !data.countries.some((country) => country.name === battleCountryB && country.continent === battleContinentB)) {
+      setBattleCountryB(data.countries.find((country) => country.continent === battleContinentB)?.name ?? defaultBattleCountry);
+    }
+  }, [battleContinentA, battleContinentB, battleCountryA, battleCountryB, data.countries, defaultBattleCountry, defaultCountry]);
+
   const builderCountries = useMemo(
     () =>
       data.countries.filter((country) => builderContinent === "ALL" || country.continent === builderContinent),
@@ -329,6 +365,18 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     () =>
       data.countries.filter((country) => depthContinent === "ALL" || country.continent === depthContinent),
     [data.countries, depthContinent],
+  );
+
+  const battleCountriesA = useMemo(
+    () =>
+      data.countries.filter((country) => battleContinentA === "ALL" || country.continent === battleContinentA),
+    [battleContinentA, data.countries],
+  );
+
+  const battleCountriesB = useMemo(
+    () =>
+      data.countries.filter((country) => battleContinentB === "ALL" || country.continent === battleContinentB),
+    [battleContinentB, data.countries],
   );
 
   const rankingCountries = useMemo(
@@ -488,6 +536,36 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     count: depthCountryPlayers.length,
     topScore: depthCountryPlayers[0]?.overallScore ?? 0,
   };
+
+  const battleLeftProfile = useMemo(
+    () => buildBattleCountryProfile(battleCountryA, data.players, data.countries, weights),
+    [battleCountryA, data.countries, data.players, weights],
+  );
+  const battleRightProfile = useMemo(
+    () => buildBattleCountryProfile(battleCountryB, data.players, data.countries, weights),
+    [battleCountryB, data.countries, data.players, weights],
+  );
+  const battleRows = useMemo(
+    () =>
+      positionOptions.map((position) => {
+        const left = battleLeftProfile.rows.find((row) => row.position === position) ?? createEmptyDepthRow(position);
+        const right = battleRightProfile.rows.find((row) => row.position === position) ?? createEmptyDepthRow(position);
+        const gap = left.average - right.average;
+        return {
+          advantage: Math.abs(gap) <= 1 ? "EVEN" : gap > 0 ? "A" : "B",
+          left,
+          position,
+          right,
+        } satisfies PositionBattleRow;
+      }),
+    [battleLeftProfile.rows, battleRightProfile.rows],
+  );
+  const battleWinner =
+    battleLeftProfile.xiAverage === battleRightProfile.xiAverage
+      ? "Even"
+      : battleLeftProfile.xiAverage > battleRightProfile.xiAverage
+        ? battleLeftProfile.country
+        : battleRightProfile.country;
 
   const atlasPlayers = useMemo(
     () =>
@@ -752,6 +830,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["atlas", "Atlas"],
           ["hall", "Hall"],
           ["depth", "Depth"],
+          ["battle", "Battle"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -858,6 +937,45 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           strongestRows={strongestDepthRows}
           summary={depthSummary}
           weakestRows={weakestDepthRows}
+        />
+      ) : null}
+
+      {activeTab === "battle" ? (
+        <NationBattleView
+          countriesA={battleCountriesA}
+          countriesB={battleCountriesB}
+          countryA={battleCountryA}
+          countryB={battleCountryB}
+          continentA={battleContinentA}
+          continentB={battleContinentB}
+          inspector={inspector}
+          leftProfile={battleLeftProfile}
+          onContinentAChange={(value) => {
+            setBattleContinentA(value);
+            setBattleCountryA(data.countries.find((country) => value === "ALL" || country.continent === value)?.name ?? defaultCountry);
+          }}
+          onContinentBChange={(value) => {
+            setBattleContinentB(value);
+            setBattleCountryB(data.countries.find((country) => value === "ALL" || country.continent === value)?.name ?? defaultBattleCountry);
+          }}
+          onCountryAChange={setBattleCountryA}
+          onCountryBChange={setBattleCountryB}
+          onOpenBestXi={(country, continent) => {
+            setBuilderContinent(continent ?? "ALL");
+            setBuilderCountry(country);
+            setTopOnly(false);
+            setActiveTab("best-xi");
+          }}
+          onPlayerSelect={setSelectedPlayerId}
+          onSwapCountries={() => {
+            setBattleContinentA(battleContinentB);
+            setBattleCountryA(battleCountryB);
+            setBattleContinentB(battleContinentA);
+            setBattleCountryB(battleCountryA);
+          }}
+          rightProfile={battleRightProfile}
+          rows={battleRows}
+          winner={battleWinner}
         />
       ) : null}
 
@@ -1608,6 +1726,272 @@ function DepthInsightCard({ label, rows }: { label: string; rows: DepthPositionR
         ))}
       </div>
     </article>
+  );
+}
+
+function NationBattleView({
+  continentA,
+  continentB,
+  countriesA,
+  countriesB,
+  countryA,
+  countryB,
+  inspector,
+  leftProfile,
+  onContinentAChange,
+  onContinentBChange,
+  onCountryAChange,
+  onCountryBChange,
+  onOpenBestXi,
+  onPlayerSelect,
+  onSwapCountries,
+  rightProfile,
+  rows,
+  winner,
+}: {
+  continentA: Continent | FilterValue;
+  continentB: Continent | FilterValue;
+  countriesA: LegendData["countries"];
+  countriesB: LegendData["countries"];
+  countryA: string;
+  countryB: string;
+  inspector: ReactNode;
+  leftProfile: BattleCountryProfile;
+  onContinentAChange: (value: Continent | FilterValue) => void;
+  onContinentBChange: (value: Continent | FilterValue) => void;
+  onCountryAChange: (value: string) => void;
+  onCountryBChange: (value: string) => void;
+  onOpenBestXi: (country: string, continent?: Continent) => void;
+  onPlayerSelect: (playerId: string) => void;
+  onSwapCountries: () => void;
+  rightProfile: BattleCountryProfile;
+  rows: PositionBattleRow[];
+  winner: string;
+}) {
+  const matchups = Array.from({ length: 5 }, (_, index) => ({
+    left: leftProfile.topPlayers[index],
+    right: rightProfile.topPlayers[index],
+  })).filter((matchup) => matchup.left || matchup.right);
+
+  return (
+    <section className="battle-grid">
+      <aside className="battle-sidebar">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Nation Battle</p>
+            <h2>국가 대결</h2>
+          </div>
+          <BattleCountryPicker
+            continent={continentA}
+            countries={countriesA}
+            country={countryA}
+            label="국가 A"
+            onContinentChange={onContinentAChange}
+            onCountryChange={onCountryAChange}
+          />
+          <button className="ghost-button compact-button" onClick={onSwapCountries} type="button">
+            좌우 바꾸기
+          </button>
+          <BattleCountryPicker
+            continent={continentB}
+            countries={countriesB}
+            country={countryB}
+            label="국가 B"
+            onContinentChange={onContinentBChange}
+            onCountryChange={onCountryBChange}
+          />
+        </section>
+
+        <section className="battle-verdict-card">
+          <p className="eyebrow">Verdict</p>
+          <h2>{winner}</h2>
+          <span>
+            XI 평균 {leftProfile.xiAverage} : {rightProfile.xiAverage}
+          </span>
+        </section>
+      </aside>
+
+      <section className="battle-main">
+        <div className="battle-scoreboard">
+          <BattleProfileCard onOpenBestXi={onOpenBestXi} onPlayerSelect={onPlayerSelect} profile={leftProfile} />
+          <div className="battle-versus">
+            <strong>VS</strong>
+            <span>{winner === "Even" ? "균형" : `${winner} 우세`}</span>
+          </div>
+          <BattleProfileCard onOpenBestXi={onOpenBestXi} onPlayerSelect={onPlayerSelect} profile={rightProfile} />
+        </div>
+
+        <section className="battle-position-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Position Advantage</p>
+              <h2>포지션별 우위</h2>
+            </div>
+            <div className="ranking-summary">
+              <span>{rows.filter((row) => row.advantage === "A").length} : {rows.filter((row) => row.advantage === "B").length}</span>
+              <strong>{rows.filter((row) => row.advantage === "EVEN").length} 동률</strong>
+            </div>
+          </div>
+          <div className="battle-position-list">
+            {rows.map((row) => (
+              <article className="battle-position-row" key={row.position}>
+                <BattlePositionSide row={row.left} side={row.advantage === "A" ? "win" : row.advantage === "EVEN" ? "even" : "lose"} />
+                <span className="battle-position-code">{row.position}</span>
+                <BattlePositionSide row={row.right} side={row.advantage === "B" ? "win" : row.advantage === "EVEN" ? "even" : "lose"} />
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="battle-lower-grid">
+          <article className="battle-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Auto XI</p>
+              <h2>{leftProfile.country}</h2>
+            </div>
+            <BattleXiList onPlayerSelect={onPlayerSelect} starters={leftProfile.xiStarters} />
+          </article>
+          <article className="battle-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Matchups</p>
+              <h2>대표 매치업</h2>
+            </div>
+            <div className="battle-matchup-list">
+              {matchups.map((matchup, index) => (
+                <div className="battle-matchup-row" key={`${matchup.left?.id ?? "left"}-${matchup.right?.id ?? "right"}-${index}`}>
+                  {matchup.left ? <button onClick={() => onPlayerSelect(matchup.left.id)} type="button">{matchup.left.name}<span>{matchup.left.overallScore}</span></button> : <span />}
+                  <em>{index + 1}</em>
+                  {matchup.right ? <button onClick={() => onPlayerSelect(matchup.right.id)} type="button">{matchup.right.name}<span>{matchup.right.overallScore}</span></button> : <span />}
+                </div>
+              ))}
+            </div>
+          </article>
+          <article className="battle-xi-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Auto XI</p>
+              <h2>{rightProfile.country}</h2>
+            </div>
+            <BattleXiList onPlayerSelect={onPlayerSelect} starters={rightProfile.xiStarters} />
+          </article>
+        </section>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
+function BattleCountryPicker({
+  continent,
+  countries,
+  country,
+  label,
+  onContinentChange,
+  onCountryChange,
+}: {
+  continent: Continent | FilterValue;
+  countries: LegendData["countries"];
+  country: string;
+  label: string;
+  onContinentChange: (value: Continent | FilterValue) => void;
+  onCountryChange: (value: string) => void;
+}) {
+  return (
+    <div className="battle-picker">
+      <p>{label}</p>
+      <label className="field">
+        <span>대륙</span>
+        <select value={continent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
+          <option value="ALL">전체</option>
+          {continentOptions.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span>국가</span>
+        <select value={country} onChange={(event) => onCountryChange(event.target.value)}>
+          {countries.map((item) => (
+            <option key={item.name} value={item.name}>
+              {item.name} ({item.count})
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+}
+
+function BattleProfileCard({
+  onOpenBestXi,
+  onPlayerSelect,
+  profile,
+}: {
+  onOpenBestXi: (country: string, continent?: Continent) => void;
+  onPlayerSelect: (playerId: string) => void;
+  profile: BattleCountryProfile;
+}) {
+  return (
+    <article className="battle-profile-card">
+      <div className="section-heading row">
+        <div>
+          <p className="eyebrow">{profile.summary?.continent ?? "World"}</p>
+          <h2>{profile.country}</h2>
+        </div>
+        <span className="rating-pill small">{profile.xiAverage}</span>
+      </div>
+      <div className="battle-metric-grid">
+        <span><strong>{profile.players.length}</strong>선수 풀</span>
+        <span><strong>{profile.average}</strong>Top 10</span>
+        <span><strong>{profile.topScore}</strong>최고점</span>
+      </div>
+      <div className="battle-top-list">
+        {profile.topPlayers.slice(0, 5).map((player, index) => (
+          <button key={player.id} onClick={() => onPlayerSelect(player.id)} type="button">
+            <em>{index + 1}</em>
+            <span>{player.name}</span>
+            <strong>{player.overallScore}</strong>
+          </button>
+        ))}
+      </div>
+      <button className="primary-inline" onClick={() => onOpenBestXi(profile.country, profile.summary?.continent)} type="button">
+        이 국가로 XI 만들기
+      </button>
+    </article>
+  );
+}
+
+function BattlePositionSide({ row, side }: { row: DepthPositionRow; side: "win" | "even" | "lose" }) {
+  const leader = row.players[0];
+
+  return (
+    <div className={`battle-position-side ${side}`}>
+      <strong>{row.average || "-"}</strong>
+      <span>{leader?.name ?? "등록 선수 없음"}</span>
+      <small>{row.count}명 · 최고 {row.topScore || "-"}</small>
+    </div>
+  );
+}
+
+function BattleXiList({
+  onPlayerSelect,
+  starters,
+}: {
+  onPlayerSelect: (playerId: string) => void;
+  starters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+}) {
+  return (
+    <div className="battle-xi-list">
+      {starters.map(({ player, rating, slot }) => (
+        <button key={slot.id} onClick={() => onPlayerSelect(player.id)} type="button">
+          <span>{slot.label}</span>
+          <strong>{player.name}</strong>
+          <em>{rating}</em>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -2743,6 +3127,61 @@ function formatSquadExport(
 ) {
   const lines = starters.map(({ player, rating, slot }) => `${slot.label}: ${player.name} (${player.country}, ${rating})`);
   return [`${scope} ${formationName} XI`, `Average: ${averageRating}`, "", ...lines].join("\n");
+}
+
+function createEmptyDepthRow(position: PositionCode): DepthPositionRow {
+  return {
+    average: 0,
+    count: 0,
+    players: [],
+    position,
+    topScore: 0,
+  };
+}
+
+function buildBattleCountryProfile(
+  country: string,
+  players: LegendPlayer[],
+  countries: LegendData["countries"],
+  weights: WeightMap,
+): BattleCountryProfile {
+  const countryPlayers = players
+    .filter((player) => player.country === country)
+    .sort((a, b) => b.overallScore - a.overallScore || a.positionOrder - b.positionOrder || a.name.localeCompare(b.name));
+  const rows = positionOptions.map((position) => {
+    const positionPlayers = countryPlayers.filter((player) => player.primaryPosition === position);
+    const topPlayers = positionPlayers.slice(0, 3);
+    return {
+      average: average(topPlayers.map((player) => player.overallScore)),
+      count: positionPlayers.length,
+      players: positionPlayers,
+      position,
+      topScore: positionPlayers[0]?.overallScore ?? 0,
+    };
+  });
+  const countryFormation = formations["4-3-3"];
+  const countrySquad = buildSquad(countryPlayers, countryPlayers, countryFormation.slots, weights, {});
+  const xiStarters = countryFormation.slots
+    .map((slot) => {
+      const selected = countrySquad[slot.id];
+      return selected ? { slot, player: selected.player, rating: selected.rating } : null;
+    })
+    .filter(Boolean) as Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+  const nonEmptyRows = rows.filter((row) => row.count > 0);
+
+  return {
+    average: average(countryPlayers.slice(0, 10).map((player) => player.overallScore)),
+    country,
+    players: countryPlayers,
+    rows,
+    strengths: [...nonEmptyRows].sort((a, b) => b.average - a.average || b.count - a.count).slice(0, 3),
+    summary: countries.find((item) => item.name === country),
+    topPlayers: countryPlayers.slice(0, 10),
+    topScore: countryPlayers[0]?.overallScore ?? 0,
+    weaknesses: [...nonEmptyRows].sort((a, b) => a.average - b.average || a.count - b.count).slice(0, 3),
+    xiAverage: average(xiStarters.map((starter) => starter.rating)),
+    xiStarters,
+  };
 }
 
 function getFitLevel(fit: number) {
