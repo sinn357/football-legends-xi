@@ -207,6 +207,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [savedSquads, setSavedSquads] = useState<SavedSquad[]>([]);
+  const [exportedSquadText, setExportedSquadText] = useState("");
   const [slotPositions, setSlotPositions] = useState<Record<string, Record<string, SlotPosition>>>({});
   const [slotRoles, setSlotRoles] = useState<Record<string, Record<string, PitchRole>>>({});
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
@@ -573,6 +574,20 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     setSavedSquads((current) => current.filter((saved) => saved.id !== savedId));
   }
 
+  function renameSavedSquad(savedId: string, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    setSavedSquads((current) => current.map((saved) => (saved.id === savedId ? { ...saved, name: trimmed } : saved)));
+  }
+
+  function exportCurrentSquad() {
+    const scope = builderCountry !== "ALL" ? builderCountry : builderContinent !== "ALL" ? builderContinent : "World";
+    setExportedSquadText(formatSquadExport(scope, formation.name, starters, averageRating));
+  }
+
   function toggleCompare(playerId: string) {
     setCompareIds((current) => {
       if (current.includes(playerId)) {
@@ -661,6 +676,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           formationId={formationId}
           includeActiveHold={includeActiveHold}
           includeDeleteCandidates={includeDeleteCandidates}
+          exportedSquadText={exportedSquadText}
           manualSlots={manualSlots}
           onAssignPlayer={assignPlayerToSelectedSlot}
           onCandidateQueryChange={setCandidateQuery}
@@ -673,9 +689,12 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onIncludeActiveHoldChange={setIncludeActiveHold}
           onIncludeDeleteCandidatesChange={setIncludeDeleteCandidates}
           onDeleteSavedSquad={deleteSavedSquad}
+          onExport={exportCurrentSquad}
+          onExportDismiss={() => setExportedSquadText("")}
           onLoadSavedSquad={loadSavedSquad}
           onPlayerSelect={setSelectedPlayerId}
           onPositionChange={setBuilderPosition}
+          onRenameSavedSquad={renameSavedSquad}
           onResetPositions={resetCurrentFormationPositions}
           onSave={saveCurrentSquad}
           onSelectedSlotChange={setSelectedSlotId}
@@ -965,6 +984,7 @@ function BestXiView({
   draggingSlotId,
   dropTargetRole,
   dropTargetSlotId,
+  exportedSquadText,
   finalizeSlotDrag,
   formation,
   formationId,
@@ -978,12 +998,15 @@ function BestXiView({
   onContinentChange,
   onCountryChange,
   onDeleteSavedSquad,
+  onExport,
+  onExportDismiss,
   onFormationChange,
   onIncludeActiveHoldChange,
   onIncludeDeleteCandidatesChange,
   onLoadSavedSquad,
   onPlayerSelect,
   onPositionChange,
+  onRenameSavedSquad,
   onResetPositions,
   onSave,
   onSelectedSlotChange,
@@ -1015,6 +1038,7 @@ function BestXiView({
   draggingSlotId: string | null;
   dropTargetRole: PitchRole | null;
   dropTargetSlotId: string | null;
+  exportedSquadText: string;
   finalizeSlotDrag: (slotId: string, event: DragPoint) => void;
   formation: { name: string; slots: FormationSlot[] };
   formationId: string;
@@ -1028,12 +1052,15 @@ function BestXiView({
   onContinentChange: (value: Continent | FilterValue) => void;
   onCountryChange: (value: string | FilterValue) => void;
   onDeleteSavedSquad: (savedId: string) => void;
+  onExport: () => void;
+  onExportDismiss: () => void;
   onFormationChange: (formationId: string) => void;
   onIncludeActiveHoldChange: (value: boolean) => void;
   onIncludeDeleteCandidatesChange: (value: boolean) => void;
   onLoadSavedSquad: (saved: SavedSquad) => void;
   onPlayerSelect: (playerId: string) => void;
   onPositionChange: (value: PositionCode | FilterValue) => void;
+  onRenameSavedSquad: (savedId: string, name: string) => void;
   onResetPositions: () => void;
   onSave: () => void;
   onSelectedSlotChange: (slotId: string) => void;
@@ -1227,6 +1254,9 @@ function BestXiView({
             <button className="small-button" onClick={onSave} type="button">
               XI 저장
             </button>
+            <button className="small-button" onClick={onExport} type="button">
+              텍스트 내보내기
+            </button>
             <button className="small-button" onClick={onResetPositions} type="button">
               위치 초기화
             </button>
@@ -1262,6 +1292,7 @@ function BestXiView({
           {formation.slots.map((slot) => {
             const selected = squad[slot.id];
             const position = slotPositions[slot.id] ?? { left: slot.left, top: slot.top };
+            const fit = selected ? positionFit(selected.player.primaryPosition, slot.accepts) : null;
             return (
               <div
                 aria-label={`${slot.label} ${selected?.player.name ?? "비어 있음"} 위치 이동`}
@@ -1331,11 +1362,13 @@ function BestXiView({
                 <span className="slot-label">{slot.label}</span>
                 <strong>{selected?.player.name ?? "비어 있음"}</strong>
                 <small>{selected ? `${selected.player.country} · ${selected.rating}` : slot.accepts.join("/")}</small>
+                {fit !== null ? <span className={`fit-badge ${getFitLevel(fit)}`}>적합 {Math.round(fit * 100)}%</span> : null}
               </div>
             );
           })}
         </div>
-        <SavedSquadsPanel savedSquads={savedSquads} onDelete={onDeleteSavedSquad} onLoad={onLoadSavedSquad} />
+        {exportedSquadText ? <SquadExportPanel exportText={exportedSquadText} onDismiss={onExportDismiss} /> : null}
+        <SavedSquadsPanel savedSquads={savedSquads} onDelete={onDeleteSavedSquad} onLoad={onLoadSavedSquad} onRename={onRenameSavedSquad} />
       </section>
 
       {inspector}
@@ -1343,15 +1376,48 @@ function BestXiView({
   );
 }
 
+function SquadExportPanel({ exportText, onDismiss }: { exportText: string; onDismiss: () => void }) {
+  return (
+    <section className="saved-panel squad-export-panel">
+      <div className="section-heading row">
+        <div>
+          <p className="eyebrow">Export</p>
+          <h2>현재 XI 텍스트</h2>
+        </div>
+        <button className="small-button" onClick={onDismiss} type="button">
+          닫기
+        </button>
+      </div>
+      <textarea readOnly value={exportText} />
+    </section>
+  );
+}
+
 function SavedSquadsPanel({
   onDelete,
   onLoad,
+  onRename,
   savedSquads,
 }: {
   onDelete: (savedId: string) => void;
   onLoad: (saved: SavedSquad) => void;
+  onRename: (savedId: string, name: string) => void;
   savedSquads: SavedSquad[];
 }) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState("");
+
+  function beginEdit(saved: SavedSquad) {
+    setEditingId(saved.id);
+    setDraftName(saved.name);
+  }
+
+  function commitEdit(savedId: string) {
+    onRename(savedId, draftName);
+    setEditingId(null);
+    setDraftName("");
+  }
+
   return (
     <section className="saved-panel saved-xi-panel">
       <div className="section-heading row">
@@ -1367,15 +1433,24 @@ function SavedSquadsPanel({
         <div className="saved-list">
           {savedSquads.map((saved) => (
             <article className="saved-item" key={saved.id}>
-              <button className="saved-load-button" onClick={() => onLoad(saved)} type="button">
-                <span>
-                  <strong>{saved.name}</strong>
-                  <small>
-                    {saved.scope} · {saved.formationName} · {formatSavedDate(saved.createdAt)}
-                  </small>
-                </span>
-                <em>{Math.round(saved.slots.reduce((sum, slot) => sum + slot.rating, 0) / Math.max(saved.slots.length, 1))}</em>
-              </button>
+              <div className="saved-main">
+                {editingId === saved.id ? (
+                  <label className="saved-name-editor">
+                    <span>이름</span>
+                    <input onChange={(event) => setDraftName(event.target.value)} type="text" value={draftName} />
+                  </label>
+                ) : (
+                  <button className="saved-load-button" onClick={() => onLoad(saved)} type="button">
+                    <span>
+                      <strong>{saved.name}</strong>
+                      <small>
+                        {saved.scope} · {saved.formationName} · {formatSavedDate(saved.createdAt)}
+                      </small>
+                    </span>
+                    <em>{Math.round(saved.slots.reduce((sum, slot) => sum + slot.rating, 0) / Math.max(saved.slots.length, 1))}</em>
+                  </button>
+                )}
+              </div>
               <div className="saved-preview" aria-label={`${saved.name} 선수 목록`}>
                 {saved.slots.slice(0, 6).map((slot) => (
                   <span key={`${saved.id}-${slot.slotId}`}>
@@ -1383,9 +1458,27 @@ function SavedSquadsPanel({
                   </span>
                 ))}
               </div>
-              <button className="remove-button" onClick={() => onDelete(saved.id)} type="button">
-                삭제
-              </button>
+              <div className="saved-actions">
+                {editingId === saved.id ? (
+                  <>
+                    <button onClick={() => commitEdit(saved.id)} type="button">
+                      저장
+                    </button>
+                    <button onClick={() => setEditingId(null)} type="button">
+                      취소
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => beginEdit(saved)} type="button">
+                      이름
+                    </button>
+                    <button onClick={() => onDelete(saved.id)} type="button">
+                      삭제
+                    </button>
+                  </>
+                )}
+              </div>
             </article>
           ))}
         </div>
@@ -1959,6 +2052,28 @@ function formatSavedDate(value: string) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function formatSquadExport(
+  scope: string,
+  formationName: string,
+  starters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>,
+  averageRating: number,
+) {
+  const lines = starters.map(({ player, rating, slot }) => `${slot.label}: ${player.name} (${player.country}, ${rating})`);
+  return [`${scope} ${formationName} XI`, `Average: ${averageRating}`, "", ...lines].join("\n");
+}
+
+function getFitLevel(fit: number) {
+  if (fit >= 0.94) {
+    return "high";
+  }
+
+  if (fit >= 0.78) {
+    return "mid";
+  }
+
+  return "low";
 }
 
 function findPitchRole(position: SlotPosition): PitchRole {

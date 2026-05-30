@@ -455,7 +455,9 @@ input[type="range"] {
 .pitch-actions {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+  justify-content: flex-end;
 }
 
 .small-button {
@@ -505,6 +507,22 @@ input[type="range"] {
 .saved-xi-panel {
   box-shadow: none;
   margin-top: 16px;
+}
+
+.squad-export-panel {
+  box-shadow: none;
+  margin-top: 16px;
+}
+
+.squad-export-panel textarea {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 210px;
+  padding: 12px;
+  resize: vertical;
+  width: 100%;
 }
 
 .pitch::before {
@@ -646,6 +664,28 @@ input[type="range"] {
 
 .slot-label {
   font-weight: 900;
+}
+
+.fit-badge {
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 6px;
+}
+
+.fit-badge.high {
+  background: rgba(11, 61, 46, 0.12);
+  color: var(--green-dark);
+}
+
+.fit-badge.mid {
+  background: rgba(200, 162, 74, 0.18);
+  color: #7a5315;
+}
+
+.fit-badge.low {
+  background: rgba(183, 67, 67, 0.14);
+  color: var(--red);
 }
 
 .slot-editor {
@@ -1636,6 +1676,10 @@ td strong {
   text-align: left;
 }
 
+.saved-main {
+  min-width: 0;
+}
+
 .saved-load-button span,
 .saved-item span {
   display: grid;
@@ -1700,6 +1744,50 @@ td strong {
 .saved-item .remove-button {
   float: none;
   min-height: 34px;
+}
+
+.saved-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.saved-actions button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 34px;
+  padding: 0 9px;
+}
+
+.saved-actions button:hover,
+.saved-actions button:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.saved-name-editor {
+  display: grid;
+  gap: 6px;
+}
+
+.saved-name-editor span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.saved-name-editor input {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  min-height: 38px;
+  padding: 0 10px;
+  width: 100%;
 }
 
 .comparison-grid {
@@ -1796,6 +1884,14 @@ td strong {
 
   .saved-item {
     grid-template-columns: 1fr;
+  }
+
+  .saved-actions {
+    justify-content: stretch;
+  }
+
+  .saved-actions button {
+    flex: 1;
   }
 
   .saved-preview {
