@@ -205,7 +205,7 @@ select,
   box-shadow: 0 16px 40px rgba(4, 25, 19, 0.18);
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
   margin-bottom: 18px;
   padding: 8px;
 }
@@ -318,6 +318,7 @@ select,
 .battle-grid,
 .draft-grid,
 .challenge-grid,
+.quiz-grid,
 .builder-grid,
 .rankings-grid,
 .compare-grid {
@@ -347,6 +348,10 @@ select,
 }
 
 .challenge-grid {
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+}
+
+.quiz-grid {
   grid-template-columns: 300px minmax(0, 1fr) 360px;
 }
 
@@ -387,6 +392,7 @@ select,
 .battle-main,
 .draft-sidebar,
 .challenge-sidebar,
+.quiz-sidebar,
 .atlas-sidebar,
 .atlas-main,
 .top-list-panel,
@@ -405,6 +411,7 @@ select,
 .battle-main,
 .draft-sidebar,
 .challenge-sidebar,
+.quiz-sidebar,
 .atlas-main,
 .top-list-panel,
 .candidate-panel,
@@ -423,6 +430,7 @@ select,
 .battle-sidebar,
 .draft-sidebar,
 .challenge-sidebar,
+.quiz-sidebar,
 .builder-finder-panel,
 .ranking-finder-panel,
 .player-drawer {
@@ -1373,7 +1381,11 @@ td strong {
 .challenge-hero-panel,
 .challenge-xi-panel,
 .challenge-export-panel,
-.challenge-bench-panel {
+.challenge-bench-panel,
+.quiz-score-card,
+.quiz-control-card,
+.quiz-play-panel,
+.quiz-suggestion-panel {
   background: var(--side-1-strong);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1400,10 +1412,148 @@ td strong {
 .draft-main,
 .draft-sidebar,
 .challenge-main,
-.challenge-sidebar {
+.challenge-sidebar,
+.quiz-main,
+.quiz-sidebar {
   align-content: start;
   display: grid;
   gap: 18px;
+}
+
+.quiz-score-card h2 {
+  color: var(--main);
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+
+.quiz-stat-grid,
+.quiz-clue-grid,
+.quiz-suggestion-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.quiz-stat-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.quiz-stat-grid span {
+  background: rgba(11, 61, 46, 0.07);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 8px;
+  color: var(--muted);
+  display: grid;
+  font-size: 11px;
+  font-weight: 900;
+  gap: 4px;
+  padding: 9px;
+  text-align: center;
+}
+
+.quiz-stat-grid strong {
+  color: var(--main);
+  font-size: 22px;
+}
+
+.quiz-control-card {
+  display: grid;
+  gap: 10px;
+}
+
+.quiz-status {
+  background: rgba(11, 61, 46, 0.08);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.quiz-status.correct {
+  background: rgba(30, 123, 88, 0.14);
+  color: var(--green-dark);
+}
+
+.quiz-status.wrong,
+.quiz-status.revealed {
+  background: rgba(183, 67, 67, 0.12);
+  color: var(--red);
+}
+
+.quiz-clue-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.quiz-clue-card {
+  background: rgba(244, 239, 227, 0.62);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.quiz-clue-card span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.quiz-clue-card strong {
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.quiz-answer-row {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 110px;
+}
+
+.quiz-answer-card {
+  align-items: center;
+  background: rgba(11, 61, 46, 0.06);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.quiz-answer-card h2 {
+  color: var(--main);
+  margin-bottom: 8px;
+}
+
+.quiz-suggestion-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quiz-suggestion-grid button {
+  background: rgba(244, 239, 227, 0.62);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  padding: 10px;
+  text-align: left;
+}
+
+.quiz-suggestion-grid button:hover,
+.quiz-suggestion-grid button:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.quiz-suggestion-grid span {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .challenge-description {
@@ -2987,6 +3137,7 @@ td strong {
   .battle-grid,
   .draft-grid,
   .challenge-grid,
+  .quiz-grid,
   .builder-grid,
   .rankings-grid,
   .compare-grid,
@@ -3036,6 +3187,7 @@ td strong {
   .battle-sidebar,
   .draft-sidebar,
   .challenge-sidebar,
+  .quiz-sidebar,
   .builder-finder-panel,
   .ranking-finder-panel,
   .player-drawer {
@@ -3089,6 +3241,9 @@ td strong {
   .draft-team-actions,
   .challenge-summary-grid,
   .challenge-bench-grid,
+  .quiz-answer-row,
+  .quiz-clue-grid,
+  .quiz-suggestion-grid,
   .country-xi-list,
   .comparison-grid,
   .compare-cards {

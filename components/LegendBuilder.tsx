@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "draft" | "challenge" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "draft" | "challenge" | "quiz" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -1168,6 +1168,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["era", "Era"],
           ["draft", "Draft"],
           ["challenge", "Challenge"],
+          ["quiz", "Quiz"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -1405,6 +1406,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           players={data.players}
           weights={weights}
         />
+      ) : null}
+
+      {activeTab === "quiz" ? (
+        <LegendQuizView inspector={inspector} onPlayerSelect={setSelectedPlayerId} players={data.players} />
       ) : null}
 
       {activeTab === "best-xi" ? (
@@ -3133,6 +3138,203 @@ function LegendChallengeView({
   );
 }
 
+function LegendQuizView({
+  inspector,
+  onPlayerSelect,
+  players,
+}: {
+  inspector: ReactNode;
+  onPlayerSelect: (playerId: string) => void;
+  players: LegendPlayer[];
+}) {
+  const [targetId, setTargetId] = useState(() => chooseQuizPlayer(players)?.id ?? "");
+  const [revealedCount, setRevealedCount] = useState(2);
+  const [guess, setGuess] = useState("");
+  const [attempts, setAttempts] = useState(0);
+  const [status, setStatus] = useState<"playing" | "correct" | "wrong" | "revealed">("playing");
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const target = players.find((player) => player.id === targetId) ?? players[0];
+  const normalizedGuess = normalizeQuizAnswer(guess);
+  const suggestions = useMemo(() => {
+    if (!normalizedGuess) {
+      return players
+        .filter((player) => player.topTierRank !== null)
+        .sort((a, b) => (a.topTierRank ?? 999) - (b.topTierRank ?? 999))
+        .slice(0, 8);
+    }
+
+    return players
+      .filter((player) => normalizeQuizAnswer(player.name).includes(normalizedGuess))
+      .sort((a, b) => getPlayerSearchRank(a, guess.trim().toLowerCase()) - getPlayerSearchRank(b, guess.trim().toLowerCase()) || b.overallScore - a.overallScore)
+      .slice(0, 8);
+  }, [guess, normalizedGuess, players]);
+
+  if (!target) {
+    return (
+      <section className="quiz-grid">
+        <section className="quiz-main">
+          <p className="empty-state">퀴즈에 사용할 선수가 없습니다.</p>
+        </section>
+        {inspector}
+      </section>
+    );
+  }
+
+  const strongestKey = getPrimaryScoreKey(target);
+  const targetEra = getPlayerEra(target);
+  const clues = [
+    { label: "포지션", value: target.primaryPosition },
+    { label: "대륙", value: target.continent },
+    { label: "티어", value: `${getLegendTier(target.overallScore).label} (${getLegendTier(target.overallScore).range})` },
+    { label: "최고 강점", value: `${scoreLabels[strongestKey]} ${target.scores[strongestKey]}` },
+    { label: "대표 시대", value: `${targetEra.label} · ${targetEra.range}` },
+    { label: "국가", value: target.country },
+    { label: "프로필", value: maskQuizAnswer(target.profile.summary, target.name) },
+  ];
+  const visibleClues = clues.slice(0, revealedCount);
+  const isFinished = status === "correct" || status === "revealed";
+
+  function startNextQuiz() {
+    const nextPlayer = chooseQuizPlayer(players, target.id);
+    setTargetId(nextPlayer?.id ?? "");
+    setRevealedCount(2);
+    setGuess("");
+    setAttempts(0);
+    setStatus("playing");
+  }
+
+  function submitGuess(value = guess) {
+    const normalizedValue = normalizeQuizAnswer(value);
+    if (!normalizedValue || isFinished) {
+      return;
+    }
+
+    if (normalizeQuizAnswer(target.name) === normalizedValue) {
+      const nextStreak = streak + 1;
+      setStreak(nextStreak);
+      setBestStreak((current) => Math.max(current, nextStreak));
+      setStatus("correct");
+      setGuess(target.name);
+      return;
+    }
+
+    setAttempts((current) => current + 1);
+    setStatus("wrong");
+  }
+
+  function revealAnswer() {
+    setStatus("revealed");
+    setStreak(0);
+    setGuess(target.name);
+  }
+
+  return (
+    <section className="quiz-grid">
+      <aside className="quiz-sidebar">
+        <section className="quiz-score-card">
+          <p className="eyebrow">Legend Quiz</p>
+          <h2>{isFinished ? target.name : "Who is it?"}</h2>
+          <div className="quiz-stat-grid">
+            <span>
+              연속
+              <strong>{streak}</strong>
+            </span>
+            <span>
+              최고
+              <strong>{bestStreak}</strong>
+            </span>
+            <span>
+              시도
+              <strong>{attempts}</strong>
+            </span>
+          </div>
+        </section>
+
+        <section className="quiz-control-card">
+          <button className="primary-button" onClick={startNextQuiz} type="button">
+            다음 문제
+          </button>
+          <button className="ghost-button compact-button" disabled={revealedCount >= clues.length || isFinished} onClick={() => setRevealedCount((current) => Math.min(current + 1, clues.length))} type="button">
+            힌트 더 보기
+          </button>
+          <button className="ghost-button compact-button" disabled={isFinished} onClick={revealAnswer} type="button">
+            정답 공개
+          </button>
+        </section>
+      </aside>
+
+      <section className="quiz-main">
+        <section className="quiz-play-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Guess Player</p>
+              <h2>힌트로 선수 맞히기</h2>
+            </div>
+            <span className={status === "correct" ? "quiz-status correct" : status === "wrong" ? "quiz-status wrong" : status === "revealed" ? "quiz-status revealed" : "quiz-status"}>
+              {status === "correct" ? "정답" : status === "wrong" ? "오답" : status === "revealed" ? "공개됨" : "진행 중"}
+            </span>
+          </div>
+          <div className="quiz-clue-grid">
+            {visibleClues.map((clue) => (
+              <article className="quiz-clue-card" key={clue.label}>
+                <span>{clue.label}</span>
+                <strong>{clue.value}</strong>
+              </article>
+            ))}
+          </div>
+          <form
+            className="quiz-answer-row"
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitGuess();
+            }}
+          >
+            <input className="search-input" disabled={isFinished} onChange={(event) => setGuess(event.target.value)} placeholder="선수 이름 입력" type="search" value={guess} />
+            <button className="primary-inline" disabled={isFinished || !guess.trim()} type="submit">
+              제출
+            </button>
+          </form>
+          {isFinished ? (
+            <div className="quiz-answer-card">
+              <div>
+                <p className="eyebrow">{target.country} · {target.primaryPosition}</p>
+                <h2>{target.name}</h2>
+                <span className={`tier-badge ${getLegendTier(target.overallScore).id}`}>{getLegendTier(target.overallScore).label}</span>
+              </div>
+              <button className="primary-inline" onClick={() => onPlayerSelect(target.id)} type="button">
+                선수 정보 보기
+              </button>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="quiz-suggestion-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Quick Picks</p>
+              <h2>후보 선택</h2>
+            </div>
+            <span className="saved-count">{suggestions.length}</span>
+          </div>
+          <div className="quiz-suggestion-grid">
+            {suggestions.map((player) => (
+              <button disabled={isFinished} key={player.id} onClick={() => submitGuess(player.name)} type="button">
+                <strong>{player.name}</strong>
+                <span>
+                  {player.country} · {player.primaryPosition} · {getLegendTier(player.overallScore).label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
 function BestXiView({
   activeDragSlotRef,
   averageRating,
@@ -4151,6 +4353,28 @@ function getSnakeDraftTeamIndex(pickIndex: number, teamCount: number) {
   const roundIndex = Math.floor(pickIndex / teamCount);
   const slotIndex = pickIndex % teamCount;
   return roundIndex % 2 === 0 ? slotIndex : teamCount - 1 - slotIndex;
+}
+
+function chooseQuizPlayer(players: LegendPlayer[], currentPlayerId?: string) {
+  const pool = players.filter((player) => player.id !== currentPlayerId && player.overallScore >= 85);
+  const candidates = pool.length ? pool : players.filter((player) => player.id !== currentPlayerId);
+  if (!candidates.length) {
+    return players[0] ?? null;
+  }
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function normalizeQuizAnswer(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]/g, "");
+}
+
+function maskQuizAnswer(value: string, answer: string) {
+  return value.replaceAll(answer, "이 선수");
 }
 
 function getPrimaryScoreKey(player: LegendPlayer) {
