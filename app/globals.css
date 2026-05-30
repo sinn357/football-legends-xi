@@ -2840,6 +2840,110 @@ td strong {
   gap: 10px;
 }
 
+.sim-history-panel {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.sim-history-panel .section-heading button {
+  background: rgba(255, 250, 240, 0.68);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+  min-height: 30px;
+  padding: 0 10px;
+  text-transform: uppercase;
+}
+
+.sim-history-panel .section-heading button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.sim-history-summary {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sim-history-summary span {
+  background: rgba(255, 250, 240, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px;
+}
+
+.sim-history-summary strong {
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sim-history-summary small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sim-history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.sim-history-list article {
+  align-items: center;
+  background: rgba(255, 250, 240, 0.035);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 42px 58px;
+  padding: 9px 10px;
+}
+
+.sim-history-list div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sim-history-list strong,
+.sim-history-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sim-history-list strong {
+  font-size: 13px;
+}
+
+.sim-history-list small,
+.sim-history-list em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.sim-history-list span {
+  color: var(--main);
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
 .sim-scoreboard {
   align-items: stretch;
   background:
@@ -3903,6 +4007,7 @@ td strong {
   .shortlist-player-grid,
   .sim-tactics-grid,
   .sim-scoreboard,
+  .sim-history-list article,
   .sim-metric-grid,
   .sim-series-grid,
   .sim-series-leaders,

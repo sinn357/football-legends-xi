@@ -30,6 +30,24 @@ type SimSeriesPlayerLeader = {
   teamId: string;
 };
 
+type SimHistoryEntry = {
+  createdAt: string;
+  id: string;
+  matchCount: number;
+  mode: SimMatchMode;
+  randomness: RandomnessLevel;
+  seed: string;
+  teamAGoals: number;
+  teamAName: string;
+  teamAWins: number;
+  teamAXg: number;
+  teamBGoals: number;
+  teamBName: string;
+  teamBWins: number;
+  teamBXg: number;
+  winnerName: string;
+};
+
 type LegendTier = {
   id: LegendTierId;
   label: string;
@@ -340,6 +358,7 @@ const storageKey = "football-legends-xi.saved-squads.v2";
 const slotPositionsStorageKey = "football-legends-xi.slot-positions.v1";
 const slotRolesStorageKey = "football-legends-xi.slot-roles.v1";
 const shortlistStorageKey = "football-legends-xi.shortlist.v1";
+const simHistoryStorageKey = "football-legends-xi.sim-history.v1";
 
 export function LegendBuilder({ data }: { data: LegendData }) {
   const pitchRef = useRef<HTMLDivElement | null>(null);
@@ -394,6 +413,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [simRandomness, setSimRandomness] = useState<RandomnessLevel>("normal");
   const [simResult, setSimResult] = useState<SimulatedMatchResult | null>(null);
   const [simSeriesResults, setSimSeriesResults] = useState<SimSeriesMatch[]>([]);
+  const [simHistory, setSimHistory] = useState<SimHistoryEntry[]>([]);
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -464,6 +484,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     } catch {
       setShortlistIds([]);
     }
+
+    try {
+      const raw = window.localStorage.getItem(simHistoryStorageKey);
+      if (raw) {
+        setSimHistory(JSON.parse(raw) as SimHistoryEntry[]);
+      }
+    } catch {
+      setSimHistory([]);
+    }
   }, []);
 
   useEffect(() => {
@@ -481,6 +510,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   useEffect(() => {
     window.localStorage.setItem(shortlistStorageKey, JSON.stringify(shortlistIds));
   }, [shortlistIds]);
+
+  useEffect(() => {
+    window.localStorage.setItem(simHistoryStorageKey, JSON.stringify(simHistory));
+  }, [simHistory]);
 
   useEffect(() => {
     if (atlasContinent && !data.countries.some((country) => country.name === atlasCountry && country.continent === atlasContinent)) {
@@ -1216,15 +1249,21 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
     const seed = nextSeed ?? (simSeed.trim() || `legends-match-${Date.now()}`);
     const matches = runSimulationSeries(simTeamA, simTeamB, simTacticsA, simTacticsB, simRandomness, seed, simMatchMode);
+    const historyEntry = createSimHistoryEntry(matches, simTeamA, simTeamB, simMatchMode, simRandomness, seed);
     setSimSeed(seed);
     setSimSeriesResults(matches);
     setSimResult(matches[matches.length - 1]?.result ?? null);
+    setSimHistory((current) => [historyEntry, ...current].slice(0, 30));
   }
 
   function updateSimMatchMode(value: SimMatchMode) {
     setSimMatchMode(value);
     setSimSeriesResults([]);
     setSimResult(null);
+  }
+
+  function clearSimHistory() {
+    setSimHistory([]);
   }
 
   function toggleShortlist(playerId: string) {
@@ -1564,6 +1603,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           countries={data.countries}
           inspector={inspector}
           matchMode={simMatchMode}
+          onClearHistory={clearSimHistory}
           onMatchModeChange={updateSimMatchMode}
           onPlayerSelect={setSelectedPlayerId}
           onRandomSeed={() => runSimulation(`legends-match-${Date.now()}`)}
@@ -1583,6 +1623,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           seed={simSeed}
           savedSquads={savedSquads}
           seriesResults={simSeriesResults}
+          simHistory={simHistory}
           teamA={simTeamA}
           teamACountry={simTeamACountry}
           teamASavedSquadId={simTeamASavedId}
@@ -4248,6 +4289,7 @@ function MatchSimulatorView({
   countries,
   inspector,
   matchMode,
+  onClearHistory,
   onMatchModeChange,
   onPlayerSelect,
   onRandomSeed,
@@ -4267,6 +4309,7 @@ function MatchSimulatorView({
   seed,
   savedSquads,
   seriesResults,
+  simHistory,
   teamA,
   teamACountry,
   teamASavedSquadId,
@@ -4281,6 +4324,7 @@ function MatchSimulatorView({
   countries: LegendData["countries"];
   inspector: ReactNode;
   matchMode: SimMatchMode;
+  onClearHistory: () => void;
   onMatchModeChange: (value: SimMatchMode) => void;
   onPlayerSelect: (playerId: string) => void;
   onRandomSeed: () => void;
@@ -4300,6 +4344,7 @@ function MatchSimulatorView({
   seed: string;
   savedSquads: SavedSquad[];
   seriesResults: SimSeriesMatch[];
+  simHistory: SimHistoryEntry[];
   teamA: SimulationTeamInput;
   teamACountry: string;
   teamASavedSquadId: string;
@@ -4316,6 +4361,7 @@ function MatchSimulatorView({
   const topEvents = result?.events.filter((event) => event.outcome === "goal" || event.xg >= 0.1).slice(0, 12) ?? [];
   const topRatings = result?.playerRatings.slice(0, 10) ?? [];
   const seriesSummary = seriesResults.length ? getSeriesSummary(seriesResults, teamA, teamB, matchMode) : null;
+  const historySummary = getSimHistorySummary(simHistory);
 
   return (
     <section className="sim-grid">
@@ -4380,6 +4426,49 @@ function MatchSimulatorView({
             새 경기 다시 돌리기
           </button>
         </div>
+        <section className="sim-history-panel">
+          <div className="section-heading row compact-heading">
+            <div>
+              <p className="eyebrow">History</p>
+              <h3>전적 보드</h3>
+            </div>
+            <button disabled={simHistory.length === 0} onClick={onClearHistory} type="button">
+              Clear
+            </button>
+          </div>
+          <div className="sim-history-summary">
+            <span>
+              <strong>{historySummary.total}</strong>
+              <small>runs</small>
+            </span>
+            <span>
+              <strong>{historySummary.averageGoals}</strong>
+              <small>avg goals</small>
+            </span>
+            <span>
+              <strong>{historySummary.topWinner}</strong>
+              <small>top winner</small>
+            </span>
+          </div>
+          {simHistory.length ? (
+            <div className="sim-history-list">
+              {simHistory.slice(0, 6).map((entry) => (
+                <article key={entry.id}>
+                  <div>
+                    <strong>{entry.winnerName}</strong>
+                    <small>
+                      {entry.teamAName} {entry.teamAGoals}-{entry.teamBGoals} {entry.teamBName}
+                    </small>
+                  </div>
+                  <span>{formatSimMode(entry.mode)}</span>
+                  <em>{formatSavedDate(entry.createdAt)}</em>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="sim-inline-empty">아직 저장된 시뮬레이션 기록이 없습니다.</p>
+          )}
+        </section>
       </aside>
 
       <section className="sim-main">
@@ -4750,6 +4839,112 @@ function runSimulationSeries(
   }
 
   return matches;
+}
+
+function createSimHistoryEntry(
+  seriesResults: SimSeriesMatch[],
+  teamA: SimulationTeamInput,
+  teamB: SimulationTeamInput,
+  mode: SimMatchMode,
+  randomness: RandomnessLevel,
+  seed: string,
+): SimHistoryEntry {
+  const totals = seriesResults.reduce(
+    (summary, match) => {
+      const statsA = match.result.stats[teamA.id];
+      const statsB = match.result.stats[teamB.id];
+      summary.teamAGoals += statsA.goals;
+      summary.teamBGoals += statsB.goals;
+      summary.teamAXg += statsA.xg;
+      summary.teamBXg += statsB.xg;
+
+      if (match.result.winnerTeamId === teamA.id) {
+        summary.teamAWins += 1;
+      } else if (match.result.winnerTeamId === teamB.id) {
+        summary.teamBWins += 1;
+      }
+
+      return summary;
+    },
+    {
+      teamAGoals: 0,
+      teamAWins: 0,
+      teamAXg: 0,
+      teamBGoals: 0,
+      teamBWins: 0,
+      teamBXg: 0,
+    },
+  );
+  const winner =
+    mode === "home-away"
+      ? totals.teamAGoals === totals.teamBGoals
+        ? null
+        : totals.teamAGoals > totals.teamBGoals
+          ? teamA
+          : teamB
+      : totals.teamAWins === totals.teamBWins
+        ? null
+        : totals.teamAWins > totals.teamBWins
+          ? teamA
+          : teamB;
+
+  return {
+    ...totals,
+    createdAt: new Date().toISOString(),
+    id: `${seed}-${mode}-${Date.now()}`,
+    matchCount: seriesResults.length,
+    mode,
+    randomness,
+    seed,
+    teamAName: teamA.name,
+    teamAXg: roundTo(totals.teamAXg, 2),
+    teamBName: teamB.name,
+    teamBXg: roundTo(totals.teamBXg, 2),
+    winnerName: winner?.name ?? "Draw",
+  };
+}
+
+function getSimHistorySummary(history: SimHistoryEntry[]) {
+  if (!history.length) {
+    return {
+      averageGoals: "-",
+      topWinner: "-",
+      total: 0,
+    };
+  }
+
+  const winnerCounts = history.reduce<Record<string, number>>((summary, entry) => {
+    if (entry.winnerName !== "Draw") {
+      summary[entry.winnerName] = (summary[entry.winnerName] ?? 0) + 1;
+    }
+
+    return summary;
+  }, {});
+  const topWinner = Object.entries(winnerCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Draw";
+  const averageGoals = roundTo(history.reduce((sum, entry) => sum + entry.teamAGoals + entry.teamBGoals, 0) / history.length, 1).toFixed(1);
+
+  return {
+    averageGoals,
+    topWinner,
+    total: history.length,
+  };
+}
+
+function formatSimMode(mode: SimMatchMode) {
+  if (mode === "best-of-3") {
+    return "Bo3";
+  }
+
+  if (mode === "home-away") {
+    return "H/A";
+  }
+
+  return "Single";
+}
+
+function roundTo(value: number, digits: number) {
+  const multiplier = 10 ** digits;
+  return Math.round(value * multiplier) / multiplier;
 }
 
 function getSeriesSummary(seriesResults: SimSeriesMatch[], teamA: SimulationTeamInput, teamB: SimulationTeamInput, mode: SimMatchMode) {
