@@ -2891,7 +2891,8 @@ td strong {
 }
 
 .sim-metric-grid,
-.sim-report-grid {
+.sim-report-grid,
+.sim-series-grid {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2899,6 +2900,40 @@ td strong {
 
 .sim-report-grid {
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.sim-series-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sim-series-list article {
+  align-items: center;
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 90px 54px minmax(0, 1fr);
+  padding: 10px 12px;
+}
+
+.sim-series-list span {
+  color: var(--main);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sim-series-list strong {
+  font-size: 18px;
+  text-align: center;
+}
+
+.sim-series-list small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .sim-report-card {
@@ -3726,6 +3761,7 @@ td strong {
   .timeline-spotlight-grid,
   .sim-scoreboard,
   .sim-metric-grid,
+  .sim-series-grid,
   .sim-report-grid,
   .timeline-player-strip {
     grid-template-columns: 1fr;
@@ -3817,6 +3853,8 @@ td strong {
   .sim-tactics-grid,
   .sim-scoreboard,
   .sim-metric-grid,
+  .sim-series-grid,
+  .sim-series-list article,
   .sim-report-grid,
   .sim-rating-list button,
   .quiz-answer-row,

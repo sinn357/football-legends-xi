@@ -12,6 +12,13 @@ type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
 type LegendTierId = "pantheon" | "all-time" | "national" | "borderline" | "watchlist" | "archive";
 type SimTeamSource = "country" | "current" | "saved" | "world";
+type SimMatchMode = "best-of-3" | "home-away" | "single";
+
+type SimSeriesMatch = {
+  homeTeamId: string;
+  label: string;
+  result: SimulatedMatchResult;
+};
 
 type LegendTier = {
   id: LegendTierId;
@@ -372,9 +379,11 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [simTeamBSavedId, setSimTeamBSavedId] = useState("");
   const [simTacticsA, setSimTacticsA] = useState<SimulationTactics>({ ...defaultTactics, style: "possession" });
   const [simTacticsB, setSimTacticsB] = useState<SimulationTactics>({ ...defaultTactics, style: "counter" });
+  const [simMatchMode, setSimMatchMode] = useState<SimMatchMode>("single");
   const [simSeed, setSimSeed] = useState("legends-match-1");
   const [simRandomness, setSimRandomness] = useState<RandomnessLevel>("normal");
   const [simResult, setSimResult] = useState<SimulatedMatchResult | null>(null);
+  const [simSeriesResults, setSimSeriesResults] = useState<SimSeriesMatch[]>([]);
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -1196,14 +1205,16 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     }
 
     const seed = nextSeed ?? (simSeed.trim() || `legends-match-${Date.now()}`);
+    const matches = runSimulationSeries(simTeamA, simTeamB, simTacticsA, simTacticsB, simRandomness, seed, simMatchMode);
     setSimSeed(seed);
-    setSimResult(
-      simulateMatch(simTeamA, simTeamB, simTacticsA, simTacticsB, {
-        homeTeamId: simTeamA.id,
-        randomness: simRandomness,
-        seed,
-      }),
-    );
+    setSimSeriesResults(matches);
+    setSimResult(matches[matches.length - 1]?.result ?? null);
+  }
+
+  function updateSimMatchMode(value: SimMatchMode) {
+    setSimMatchMode(value);
+    setSimSeriesResults([]);
+    setSimResult(null);
   }
 
   function toggleShortlist(playerId: string) {
@@ -1542,6 +1553,8 @@ export function LegendBuilder({ data }: { data: LegendData }) {
         <MatchSimulatorView
           countries={data.countries}
           inspector={inspector}
+          matchMode={simMatchMode}
+          onMatchModeChange={updateSimMatchMode}
           onPlayerSelect={setSelectedPlayerId}
           onRandomSeed={() => runSimulation(`legends-match-${Date.now()}`)}
           onRandomnessChange={setSimRandomness}
@@ -1559,6 +1572,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           result={simResult}
           seed={simSeed}
           savedSquads={savedSquads}
+          seriesResults={simSeriesResults}
           teamA={simTeamA}
           teamACountry={simTeamACountry}
           teamASavedSquadId={simTeamASavedId}
@@ -4223,6 +4237,8 @@ function SavedSquadsPanel({
 function MatchSimulatorView({
   countries,
   inspector,
+  matchMode,
+  onMatchModeChange,
   onPlayerSelect,
   onRandomSeed,
   onRandomnessChange,
@@ -4240,6 +4256,7 @@ function MatchSimulatorView({
   result,
   seed,
   savedSquads,
+  seriesResults,
   teamA,
   teamACountry,
   teamASavedSquadId,
@@ -4253,6 +4270,8 @@ function MatchSimulatorView({
 }: {
   countries: LegendData["countries"];
   inspector: ReactNode;
+  matchMode: SimMatchMode;
+  onMatchModeChange: (value: SimMatchMode) => void;
   onPlayerSelect: (playerId: string) => void;
   onRandomSeed: () => void;
   onRandomnessChange: (value: RandomnessLevel) => void;
@@ -4270,6 +4289,7 @@ function MatchSimulatorView({
   result: SimulatedMatchResult | null;
   seed: string;
   savedSquads: SavedSquad[];
+  seriesResults: SimSeriesMatch[];
   teamA: SimulationTeamInput;
   teamACountry: string;
   teamASavedSquadId: string;
@@ -4285,6 +4305,7 @@ function MatchSimulatorView({
   const statsB = result?.stats[teamB.id] ?? null;
   const topEvents = result?.events.filter((event) => event.outcome === "goal" || event.xg >= 0.1).slice(0, 12) ?? [];
   const topRatings = result?.playerRatings.slice(0, 10) ?? [];
+  const seriesSummary = seriesResults.length ? getSeriesSummary(seriesResults, teamA, teamB, matchMode) : null;
 
   return (
     <section className="sim-grid">
@@ -4330,6 +4351,14 @@ function MatchSimulatorView({
           </select>
         </label>
         <label className="field">
+          <span>경기 방식</span>
+          <select value={matchMode} onChange={(event) => onMatchModeChange(event.target.value as SimMatchMode)}>
+            <option value="single">Single Match</option>
+            <option value="best-of-3">Best of 3</option>
+            <option value="home-away">Home & Away</option>
+          </select>
+        </label>
+        <label className="field">
           <span>Seed</span>
           <input className="search-input" onChange={(event) => onSeedChange(event.target.value)} type="text" value={seed} />
         </label>
@@ -4360,6 +4389,40 @@ function MatchSimulatorView({
 
         {result ? (
           <>
+            {seriesSummary ? (
+              <section className="sim-panel">
+                <div className="section-heading row">
+                  <div>
+                    <p className="eyebrow">Series</p>
+                    <h2>{seriesSummary.title}</h2>
+                  </div>
+                  <span className="saved-count">{seriesResults.length} matches</span>
+                </div>
+                <div className="sim-series-grid">
+                  <Metric label="Winner" value={seriesSummary.winnerName} detail={seriesSummary.method} />
+                  <Metric label="Record" value={`${seriesSummary.teamAWins}-${seriesSummary.teamBWins}`} detail={`${teamA.name} - ${teamB.name}`} />
+                  <Metric label="Goals" value={`${seriesSummary.teamAGoals}-${seriesSummary.teamBGoals}`} detail="시리즈 합산 득점" />
+                  <Metric label="xG" value={`${seriesSummary.teamAXg.toFixed(2)}-${seriesSummary.teamBXg.toFixed(2)}`} detail="시리즈 합산 xG" />
+                </div>
+                <div className="sim-series-list">
+                  {seriesResults.map((match) => {
+                    const matchStatsA = match.result.stats[teamA.id];
+                    const matchStatsB = match.result.stats[teamB.id];
+                    return (
+                      <article key={match.label}>
+                        <span>{match.label}</span>
+                        <strong>
+                          {matchStatsA.goals}-{matchStatsB.goals}
+                        </strong>
+                        <small>
+                          xG {matchStatsA.xg.toFixed(2)}-{matchStatsB.xg.toFixed(2)} · 홈 {match.homeTeamId === teamA.id ? teamA.name : teamB.name}
+                        </small>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
             <div className="sim-metric-grid">
               <Metric label="Shots" value={`${statsA?.shots ?? 0}-${statsB?.shots ?? 0}`} detail="전체 슈팅" />
               <Metric label="SOT" value={`${statsA?.shotsOnTarget ?? 0}-${statsB?.shotsOnTarget ?? 0}`} detail="유효 슈팅" />
@@ -4581,6 +4644,132 @@ function ReportList({ items, title }: { items: string[]; title: string }) {
       )}
     </article>
   );
+}
+
+function runSimulationSeries(
+  teamA: SimulationTeamInput,
+  teamB: SimulationTeamInput,
+  tacticsA: SimulationTactics,
+  tacticsB: SimulationTactics,
+  randomness: RandomnessLevel,
+  seed: string,
+  mode: SimMatchMode,
+): SimSeriesMatch[] {
+  if (mode === "single") {
+    return [
+      {
+        homeTeamId: teamA.id,
+        label: "Match 1",
+        result: simulateMatch(teamA, teamB, tacticsA, tacticsB, {
+          homeTeamId: teamA.id,
+          randomness,
+          seed,
+        }),
+      },
+    ];
+  }
+
+  if (mode === "home-away") {
+    return [
+      {
+        homeTeamId: teamA.id,
+        label: "1st Leg",
+        result: simulateMatch(teamA, teamB, tacticsA, tacticsB, {
+          homeTeamId: teamA.id,
+          randomness,
+          seed: `${seed}-leg-1`,
+        }),
+      },
+      {
+        homeTeamId: teamB.id,
+        label: "2nd Leg",
+        result: simulateMatch(teamA, teamB, tacticsA, tacticsB, {
+          homeTeamId: teamB.id,
+          randomness,
+          seed: `${seed}-leg-2`,
+        }),
+      },
+    ];
+  }
+
+  const matches: SimSeriesMatch[] = [];
+  let teamAWins = 0;
+  let teamBWins = 0;
+
+  for (let index = 0; index < 3; index += 1) {
+    const homeTeamId = index === 1 ? teamB.id : teamA.id;
+    const result = simulateMatch(teamA, teamB, tacticsA, tacticsB, {
+      homeTeamId,
+      randomness,
+      seed: `${seed}-game-${index + 1}`,
+    });
+
+    matches.push({
+      homeTeamId,
+      label: `Game ${index + 1}`,
+      result,
+    });
+
+    if (result.winnerTeamId === teamA.id) {
+      teamAWins += 1;
+    } else if (result.winnerTeamId === teamB.id) {
+      teamBWins += 1;
+    }
+
+    if (teamAWins === 2 || teamBWins === 2) {
+      break;
+    }
+  }
+
+  return matches;
+}
+
+function getSeriesSummary(seriesResults: SimSeriesMatch[], teamA: SimulationTeamInput, teamB: SimulationTeamInput, mode: SimMatchMode) {
+  const totals = seriesResults.reduce(
+    (summary, match) => {
+      const statsA = match.result.stats[teamA.id];
+      const statsB = match.result.stats[teamB.id];
+      summary.teamAGoals += statsA.goals;
+      summary.teamBGoals += statsB.goals;
+      summary.teamAXg += statsA.xg;
+      summary.teamBXg += statsB.xg;
+
+      if (match.result.winnerTeamId === teamA.id) {
+        summary.teamAWins += 1;
+      } else if (match.result.winnerTeamId === teamB.id) {
+        summary.teamBWins += 1;
+      }
+
+      return summary;
+    },
+    {
+      teamAGoals: 0,
+      teamAWins: 0,
+      teamAXg: 0,
+      teamBGoals: 0,
+      teamBWins: 0,
+      teamBXg: 0,
+    },
+  );
+  const winnerTeam =
+    mode === "home-away"
+      ? totals.teamAGoals === totals.teamBGoals
+        ? null
+        : totals.teamAGoals > totals.teamBGoals
+          ? teamA
+          : teamB
+      : totals.teamAWins === totals.teamBWins
+        ? null
+        : totals.teamAWins > totals.teamBWins
+          ? teamA
+          : teamB;
+
+  return {
+    ...totals,
+    method: mode === "home-away" ? "합산 득점 기준" : mode === "best-of-3" ? "승수 기준" : "단판 결과",
+    title: mode === "home-away" ? "Home & Away 결과" : mode === "best-of-3" ? "Best of 3 결과" : "Single Match 결과",
+    winnerName: winnerTeam?.name ?? "Draw",
+  };
 }
 
 function ShortlistView({
