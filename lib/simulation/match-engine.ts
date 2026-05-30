@@ -316,6 +316,7 @@ function pickEventPlayer(
   const weightedCandidates = candidates.map((entry) => {
     const attributes = entry.attributes;
     const roleWeight = getRoleEventWeight(entry.role, eventType, purpose);
+    const simulationRoleWeight = getSimulationRoleEventWeight(entry.simulationRoles, eventType, purpose);
     const skillWeight =
       purpose === "scorer"
         ? attributes.scoring * 0.4 + attributes.finishing * 0.35 + attributes.bigMatch * 0.25
@@ -323,7 +324,7 @@ function pickEventPlayer(
 
     return {
       item: entry,
-      weight: Math.max(1, skillWeight * roleWeight * entry.fit),
+      weight: Math.max(1, skillWeight * roleWeight * simulationRoleWeight * entry.fit),
     };
   });
 
@@ -345,6 +346,30 @@ function getRoleEventWeight(role: string, eventType: MatchEventType, purpose: "a
   if (role === "DM") return 0.95;
   if (role === "GK") return 0.08;
   return 0.72;
+}
+
+function getSimulationRoleEventWeight(roles: string[], eventType: MatchEventType, purpose: "assister" | "scorer") {
+  let weight = 1;
+
+  if (purpose === "scorer") {
+    if (roles.includes("finisher")) weight += 0.18;
+    if (roles.includes("line-breaker") && eventType === "counter") weight += 0.22;
+    if (roles.includes("target") && (eventType === "setPiece" || eventType === "wideAttack")) weight += 0.2;
+    if (roles.includes("set-piece") && eventType === "setPiece") weight += 0.24;
+    if (roles.includes("creator") && eventType === "centralCombination") weight += 0.08;
+  } else {
+    if (roles.includes("creator")) weight += 0.22;
+    if (roles.includes("controller") && (eventType === "centralCombination" || eventType === "openPlay")) weight += 0.16;
+    if (roles.includes("wide-overload") && eventType === "wideAttack") weight += 0.18;
+    if (roles.includes("ball-winner") && eventType === "pressWin") weight += 0.16;
+    if (roles.includes("leader") && eventType === "lateMoment") weight += 0.12;
+  }
+
+  if (roles.includes("sweeper")) {
+    weight -= 0.12;
+  }
+
+  return Math.max(0.55, weight);
 }
 
 function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, events: MatchEvent[]) {
@@ -578,9 +603,10 @@ function buildKeyPlayerImpacts(
       ? Object.entries(playerContext.entry.attributes).sort((a, b) => b[1] - a[1])[0]
       : null;
     const attributeText = strongestAttribute ? `${attributeLabels[strongestAttribute[0] as keyof typeof attributeLabels]} ${Math.round(strongestAttribute[1])}점` : "핵심 능력";
+    const roleText = playerContext?.entry.simulationRoles.length ? `역할 ${playerContext.entry.simulationRoles.map((role) => simulationRoleLabels[role]).join("/")}` : "역할 수행";
     const tacticalText = profile ? getPlayerTacticImpactText(profile.tactics.style, role) : "경기 영향";
 
-    return `${playerContext?.teamName ?? rating.teamId}: ${rating.playerName} ${rating.rating.toFixed(1)}점, ${rating.goals}G ${rating.assists}A. ${attributeText}과 ${tacticalText}이 결과에 반영됐습니다.`;
+    return `${playerContext?.teamName ?? rating.teamId}: ${rating.playerName} ${rating.rating.toFixed(1)}점, ${rating.goals}G ${rating.assists}A. ${roleText}, ${attributeText}, ${tacticalText}이 결과에 반영됐습니다.`;
   });
 }
 
@@ -750,6 +776,19 @@ const attributeLabels = {
   pressing: "압박",
   scoring: "득점력",
   versatility: "유연성",
+};
+
+const simulationRoleLabels = {
+  "ball-winner": "볼위너",
+  controller: "컨트롤러",
+  creator: "크리에이터",
+  finisher: "피니셔",
+  leader: "리더",
+  "line-breaker": "라인브레이커",
+  "set-piece": "세트피스",
+  sweeper: "스위퍼",
+  target: "타깃",
+  "wide-overload": "와이드오버로드",
 };
 
 function getPlayerTacticImpactText(style: SimulationTactics["style"], role: string) {

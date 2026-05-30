@@ -41,6 +41,18 @@ export type PlayerSimulationAttributes = {
   versatility: number;
 };
 
+export type PlayerSimulationRole =
+  | "ball-winner"
+  | "controller"
+  | "creator"
+  | "finisher"
+  | "leader"
+  | "line-breaker"
+  | "set-piece"
+  | "sweeper"
+  | "target"
+  | "wide-overload";
+
 export type TeamMetrics = {
   attackPower: number;
   chanceQuality: number;
@@ -70,6 +82,7 @@ export type TeamSimulationProfile = {
     attributes: PlayerSimulationAttributes;
     fit: number;
     player: LegendPlayer;
+    simulationRoles: PlayerSimulationRole[];
     role: PositionCode;
     slotId: string;
     slotLabel: string;

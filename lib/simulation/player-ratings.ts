@@ -1,5 +1,5 @@
 import type { LegendPlayer, PositionCode, ScoreKey } from "../legend-data";
-import type { PlayerSimulationAttributes } from "./types";
+import type { PlayerSimulationAttributes, PlayerSimulationRole } from "./types";
 
 type PositionGroup = "attack" | "defense" | "goalkeeper" | "midfield" | "wide";
 
@@ -71,6 +71,65 @@ export function getRoleFit(player: LegendPlayer, role: PositionCode) {
   }
 
   return 0.62;
+}
+
+export function getPlayerSimulationRoles(player: LegendPlayer, attributes: PlayerSimulationAttributes): PlayerSimulationRole[] {
+  const roles = new Set<PlayerSimulationRole>();
+  const position = player.primaryPosition;
+
+  if (["ST", "SS", "LW", "RW"].includes(position) && attributes.finishing >= 88) {
+    roles.add("finisher");
+  }
+
+  if ((position === "ST" || position === "CB") && attributes.aerial >= 88) {
+    roles.add("target");
+  }
+
+  if (["ST", "SS", "LW", "RW"].includes(position) && attributes.ballProgression >= 88 && attributes.scoring >= 86) {
+    roles.add("line-breaker");
+  }
+
+  if (["AM", "CM", "SS", "LW", "RW"].includes(position) && attributes.chanceCreation >= 88) {
+    roles.add("creator");
+  }
+
+  if (["CM", "DM", "AM"].includes(position) && attributes.control >= 88) {
+    roles.add("controller");
+  }
+
+  if (["DM", "CM", "CB", "LB", "RB"].includes(position) && attributes.defending >= 86 && attributes.pressing >= 84) {
+    roles.add("ball-winner");
+  }
+
+  if (["LW", "RW", "LB", "RB"].includes(position) && attributes.ballProgression >= 86) {
+    roles.add("wide-overload");
+  }
+
+  if ((position === "CB" || position === "ST") && attributes.aerial >= 90) {
+    roles.add("set-piece");
+  }
+
+  if (position === "GK" && attributes.goalkeeper >= 88 && attributes.control >= 82) {
+    roles.add("sweeper");
+  }
+
+  if (attributes.leadership >= 90 || player.scores.legacy >= 96 || player.scores.teamImportance >= 96) {
+    roles.add("leader");
+  }
+
+  if (roles.size === 0) {
+    if (attackPositions.has(position)) {
+      roles.add("finisher");
+    } else if (midfieldPositions.has(position)) {
+      roles.add("controller");
+    } else if (defensivePositions.has(position)) {
+      roles.add("ball-winner");
+    } else if (position === "GK") {
+      roles.add("sweeper");
+    }
+  }
+
+  return [...roles].slice(0, 4);
 }
 
 export function clampScore(value: number, min = 40, max = 100) {

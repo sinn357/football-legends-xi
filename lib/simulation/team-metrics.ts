@@ -1,6 +1,6 @@
 import type { PositionCode } from "../legend-data";
-import { clampScore, getPlayerSimulationAttributes, getRoleFit } from "./player-ratings";
-import type { PlayerSimulationAttributes, SimulationTeamInput, TeamBalanceReport, TeamMetrics, TeamSimulationProfile } from "./types";
+import { clampScore, getPlayerSimulationAttributes, getPlayerSimulationRoles, getRoleFit } from "./player-ratings";
+import type { PlayerSimulationAttributes, PlayerSimulationRole, SimulationTeamInput, TeamBalanceReport, TeamMetrics, TeamSimulationProfile } from "./types";
 
 const metricKeys: Array<keyof TeamMetrics> = [
   "attackPower",
@@ -19,16 +19,21 @@ const metricKeys: Array<keyof TeamMetrics> = [
 ];
 
 export function buildTeamSimulationProfile(team: SimulationTeamInput): TeamSimulationProfile {
-  const playerAttributes = team.slots.map((slot) => ({
-    attributes: getPlayerSimulationAttributes(slot.player),
-    fit: getRoleFit(slot.player, slot.role),
-    player: slot.player,
-    role: slot.role,
-    slotId: slot.id,
-    slotLabel: slot.label,
-  }));
+  const playerAttributes = team.slots.map((slot) => {
+    const attributes = getPlayerSimulationAttributes(slot.player);
+
+    return {
+      attributes,
+      fit: getRoleFit(slot.player, slot.role),
+      player: slot.player,
+      role: slot.role,
+      simulationRoles: getPlayerSimulationRoles(slot.player, attributes),
+      slotId: slot.id,
+      slotLabel: slot.label,
+    };
+  });
   const balance = getTeamBalanceReport(team.slots);
-  const metrics = applyBalanceModifiers(calculateRawMetrics(playerAttributes), balance);
+  const metrics = applyRoleModifiers(applyBalanceModifiers(calculateRawMetrics(playerAttributes), balance), playerAttributes);
 
   return {
     balance,
@@ -207,6 +212,35 @@ function applyBalanceModifiers(metrics: TeamMetrics, balance: TeamBalanceReport)
       next.wideSecurity += 3;
     }
   }
+
+  return normalizeMetrics(next);
+}
+
+function applyRoleModifiers(metrics: TeamMetrics, playerAttributes: TeamSimulationProfile["playerAttributes"]): TeamMetrics {
+  const next = { ...metrics };
+  const roleCount = (role: PlayerSimulationRole) => playerAttributes.filter((entry) => entry.simulationRoles.includes(role)).length;
+  const roleFitAverage = (role: PlayerSimulationRole) => {
+    const entries = playerAttributes.filter((entry) => entry.simulationRoles.includes(role));
+    return entries.length ? average(entries.map((entry) => entry.fit)) : 0;
+  };
+
+  next.finishing += roleCount("finisher") * 1.6;
+  next.attackPower += roleCount("finisher") * 0.9;
+  next.transitionThreat += roleCount("line-breaker") * 1.9;
+  next.progression += roleCount("line-breaker") * 0.9;
+  next.chanceQuality += roleCount("creator") * 1.6;
+  next.progression += roleCount("creator") * 0.7;
+  next.midfieldControl += roleCount("controller") * 1.4;
+  next.chemistry += roleFitAverage("controller") * 2;
+  next.pressingPower += roleCount("ball-winner") * 1.5;
+  next.defensiveSecurity += roleCount("ball-winner") * 0.9;
+  next.setPieceThreat += roleCount("target") * 1.3 + roleCount("set-piece") * 2.2;
+  next.progression += roleCount("wide-overload") * 1.1;
+  next.wideSecurity += roleCount("wide-overload") * 0.7;
+  next.goalkeeperImpact += roleCount("sweeper") * 1.4;
+  next.defensiveSecurity += roleCount("sweeper") * 0.8;
+  next.chemistry += roleCount("leader") * 1.2;
+  next.roleConflict -= Math.min(6, roleCount("leader") * 1.4 + roleFitAverage("controller") * 2);
 
   return normalizeMetrics(next);
 }
