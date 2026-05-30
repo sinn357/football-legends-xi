@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "shortlist" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -319,6 +319,7 @@ const formations: Record<string, { name: string; slots: FormationSlot[] }> = {
 const storageKey = "football-legends-xi.saved-squads.v2";
 const slotPositionsStorageKey = "football-legends-xi.slot-positions.v1";
 const slotRolesStorageKey = "football-legends-xi.slot-roles.v1";
+const shortlistStorageKey = "football-legends-xi.shortlist.v1";
 
 export function LegendBuilder({ data }: { data: LegendData }) {
   const pitchRef = useRef<HTMLDivElement | null>(null);
@@ -371,6 +372,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [selectedSlotId, setSelectedSlotId] = useState("st");
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [shortlistIds, setShortlistIds] = useState<string[]>([]);
   const [savedSquads, setSavedSquads] = useState<SavedSquad[]>([]);
   const [exportedSquadText, setExportedSquadText] = useState("");
   const [slotPositions, setSlotPositions] = useState<Record<string, Record<string, SlotPosition>>>({});
@@ -420,6 +422,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     } catch {
       setSlotRoles({});
     }
+
+    try {
+      const raw = window.localStorage.getItem(shortlistStorageKey);
+      if (raw) {
+        setShortlistIds(JSON.parse(raw) as string[]);
+      }
+    } catch {
+      setShortlistIds([]);
+    }
   }, []);
 
   useEffect(() => {
@@ -433,6 +444,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   useEffect(() => {
     window.localStorage.setItem(slotRolesStorageKey, JSON.stringify(slotRoles));
   }, [slotRoles]);
+
+  useEffect(() => {
+    window.localStorage.setItem(shortlistStorageKey, JSON.stringify(shortlistIds));
+  }, [shortlistIds]);
 
   useEffect(() => {
     if (atlasContinent && !data.countries.some((country) => country.name === atlasCountry && country.continent === atlasContinent)) {
@@ -1128,6 +1143,16 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     });
   }
 
+  function toggleShortlist(playerId: string) {
+    setShortlistIds((current) => {
+      if (current.includes(playerId)) {
+        return current.filter((id) => id !== playerId);
+      }
+
+      return [playerId, ...current].slice(0, 100);
+    });
+  }
+
   function toggleCompare(playerId: string) {
     setCompareIds((current) => {
       if (current.includes(playerId)) {
@@ -1138,7 +1163,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     });
   }
 
-  const inspector = <PlayerDetailDrawer player={selectedPlayer} onClose={() => setSelectedPlayerId(null)} onToggleCompare={toggleCompare} />;
+  const inspector = (
+    <PlayerDetailDrawer
+      isShortlisted={selectedPlayer ? shortlistIds.includes(selectedPlayer.id) : false}
+      onClose={() => setSelectedPlayerId(null)}
+      onToggleCompare={toggleCompare}
+      onToggleShortlist={toggleShortlist}
+      player={selectedPlayer}
+    />
+  );
 
   return (
     <main className="app-shell">
@@ -1170,6 +1203,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["draft", "Draft"],
           ["challenge", "Challenge"],
           ["quiz", "Quiz"],
+          ["shortlist", "Shortlist"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -1424,6 +1458,20 @@ export function LegendBuilder({ data }: { data: LegendData }) {
 
       {activeTab === "quiz" ? (
         <LegendQuizView inspector={inspector} onPlayerSelect={setSelectedPlayerId} players={data.players} />
+      ) : null}
+
+      {activeTab === "shortlist" ? (
+        <ShortlistView
+          compareIds={compareIds}
+          inspector={inspector}
+          onClear={() => setShortlistIds([])}
+          onPlayerSelect={setSelectedPlayerId}
+          onToggleCompare={toggleCompare}
+          onToggleShortlist={toggleShortlist}
+          players={data.players}
+          shortlistIds={shortlistIds}
+          weights={weights}
+        />
       ) : null}
 
       {activeTab === "best-xi" ? (
@@ -4074,6 +4122,167 @@ function SavedSquadsPanel({
   );
 }
 
+function ShortlistView({
+  compareIds,
+  inspector,
+  onClear,
+  onPlayerSelect,
+  onToggleCompare,
+  onToggleShortlist,
+  players,
+  shortlistIds,
+  weights,
+}: {
+  compareIds: string[];
+  inspector: ReactNode;
+  onClear: () => void;
+  onPlayerSelect: (playerId: string) => void;
+  onToggleCompare: (playerId: string) => void;
+  onToggleShortlist: (playerId: string) => void;
+  players: LegendPlayer[];
+  shortlistIds: string[];
+  weights: WeightMap;
+}) {
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const shortlistSet = useMemo(() => new Set(shortlistIds), [shortlistIds]);
+  const playerById = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
+  const shortlistedPlayers = shortlistIds.map((id) => playerById.get(id)).filter(Boolean) as LegendPlayer[];
+  const candidatePlayers = players
+    .filter((player) => !shortlistSet.has(player.id))
+    .filter((player) => {
+      if (!normalizedQuery) {
+        return player.topTierRank !== null;
+      }
+
+      return matchesPlayerSearch(player, normalizedQuery);
+    })
+    .sort(
+      (a, b) =>
+        getPlayerSearchRank(a, normalizedQuery) - getPlayerSearchRank(b, normalizedQuery) ||
+        (a.topTierRank ?? 999) - (b.topTierRank ?? 999) ||
+        b.overallScore - a.overallScore,
+    )
+    .slice(0, 36);
+  const averageScore = shortlistedPlayers.length
+    ? Math.round(shortlistedPlayers.reduce((sum, player) => sum + player.overallScore, 0) / shortlistedPlayers.length)
+    : null;
+  const highestPlayer = shortlistedPlayers.slice().sort((a, b) => b.overallScore - a.overallScore)[0];
+  const comparedCount = shortlistedPlayers.filter((player) => compareIds.includes(player.id)).length;
+
+  return (
+    <section className="shortlist-grid">
+      <aside className="shortlist-sidebar">
+        <div className="section-heading">
+          <p className="eyebrow">Shortlist</p>
+          <h2>선수 찾기</h2>
+        </div>
+        <input
+          className="search-input"
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="선수, 국가, 포지션 검색"
+          type="search"
+          value={query}
+        />
+        <div className="shortlist-help">
+          <span>{normalizedQuery ? "검색 결과" : "Top 50 기본 추천"}</span>
+          <strong>{candidatePlayers.length}</strong>
+        </div>
+        <div className="shortlist-suggestion-list">
+          {candidatePlayers.map((player) => (
+            <article className="shortlist-suggestion-item" key={player.id}>
+              <button className="shortlist-suggestion-main" onClick={() => onPlayerSelect(player.id)} type="button">
+                <strong>{player.name}</strong>
+                <span>
+                  {player.country} · {player.primaryPosition} · {getLegendTier(player.overallScore).label}
+                </span>
+              </button>
+              <button className="small-button" onClick={() => onToggleShortlist(player.id)} type="button">
+                추가
+              </button>
+            </article>
+          ))}
+          {candidatePlayers.length === 0 ? <p className="empty-state">추가할 선수가 없습니다.</p> : null}
+        </div>
+      </aside>
+
+      <section className="shortlist-main">
+        <div className="shortlist-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Collection</p>
+              <h2>관심 선수 목록</h2>
+            </div>
+            <button className="small-button" disabled={shortlistedPlayers.length === 0} onClick={onClear} type="button">
+              전체 해제
+            </button>
+          </div>
+          <div className="shortlist-summary-grid">
+            <Metric label="Players" value={`${shortlistedPlayers.length}`} detail="저장된 관심 선수" />
+            <Metric label="Average" value={averageScore === null ? "-" : `${averageScore}`} detail="공식 총점 평균" />
+            <Metric label="Compare" value={`${comparedCount}`} detail="비교 목록에 포함" />
+          </div>
+          {highestPlayer ? (
+            <div className="shortlist-leader">
+              <span>최고 점수</span>
+              <strong>
+                {highestPlayer.name} · {highestPlayer.overallScore}
+              </strong>
+              <button className="small-button" onClick={() => onPlayerSelect(highestPlayer.id)} type="button">
+                정보
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="shortlist-panel">
+          {shortlistedPlayers.length === 0 ? (
+            <p className="empty-state">왼쪽 검색 목록에서 관심 선수를 추가하면 여기에 모입니다.</p>
+          ) : (
+            <div className="shortlist-player-grid">
+              {shortlistedPlayers.map((player) => {
+                const tier = getLegendTier(player.overallScore);
+                const rating = ratePlayer(player, weights);
+
+                return (
+                  <article className="shortlist-card" key={player.id}>
+                    <div>
+                      <span className={`tier-badge ${tier.id}`}>{tier.label}</span>
+                      <strong>{player.name}</strong>
+                      <small>
+                        {player.country} · {player.continent} · {player.primaryPosition}
+                      </small>
+                    </div>
+                    <p>{player.profile.summary}</p>
+                    <div className="shortlist-card-meta">
+                      <span>공식 {player.overallScore}</span>
+                      <span>기준 {rating}</span>
+                      <span>{player.scoreMode === "computed" ? "산식" : "고정"}</span>
+                    </div>
+                    <div className="shortlist-card-actions">
+                      <button onClick={() => onPlayerSelect(player.id)} type="button">
+                        정보
+                      </button>
+                      <button className={compareIds.includes(player.id) ? "active" : ""} onClick={() => onToggleCompare(player.id)} type="button">
+                        {compareIds.includes(player.id) ? "비교 해제" : "비교"}
+                      </button>
+                      <button onClick={() => onToggleShortlist(player.id)} type="button">
+                        제거
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
 function RankingsView({
   continent,
   countries,
@@ -4358,12 +4567,16 @@ function CompareView({
 }
 
 function PlayerDetailDrawer({
+  isShortlisted,
   onClose,
   onToggleCompare,
+  onToggleShortlist,
   player,
 }: {
+  isShortlisted: boolean;
   onClose: () => void;
   onToggleCompare: (playerId: string) => void;
+  onToggleShortlist: (playerId: string) => void;
   player: LegendPlayer | null;
 }) {
   const profileKeys = Object.keys(scoreLabels) as ScoreKey[];
@@ -4415,6 +4628,9 @@ function PlayerDetailDrawer({
         </em>
       </div>
       <div className="drawer-actions">
+        <button className={isShortlisted ? "primary-inline active" : "primary-inline"} onClick={() => onToggleShortlist(player.id)} type="button">
+          {isShortlisted ? "관심 선수 해제" : "관심 선수 추가"}
+        </button>
         <button className="primary-inline" onClick={() => onToggleCompare(player.id)} type="button">
           비교에 추가
         </button>

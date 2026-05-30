@@ -319,6 +319,7 @@ select,
 .draft-grid,
 .challenge-grid,
 .quiz-grid,
+.shortlist-grid,
 .timeline-grid,
 .builder-grid,
 .rankings-grid,
@@ -354,6 +355,10 @@ select,
 
 .quiz-grid {
   grid-template-columns: 300px minmax(0, 1fr) 360px;
+}
+
+.shortlist-grid {
+  grid-template-columns: 320px minmax(0, 1fr) 360px;
 }
 
 .timeline-grid {
@@ -398,6 +403,8 @@ select,
 .draft-sidebar,
 .challenge-sidebar,
 .quiz-sidebar,
+.shortlist-sidebar,
+.shortlist-panel,
 .timeline-sidebar,
 .atlas-sidebar,
 .atlas-main,
@@ -418,6 +425,8 @@ select,
 .draft-sidebar,
 .challenge-sidebar,
 .quiz-sidebar,
+.shortlist-sidebar,
+.shortlist-panel,
 .timeline-sidebar,
 .atlas-main,
 .top-list-panel,
@@ -438,6 +447,7 @@ select,
 .draft-sidebar,
 .challenge-sidebar,
 .quiz-sidebar,
+.shortlist-sidebar,
 .timeline-sidebar,
 .builder-finder-panel,
 .ranking-finder-panel,
@@ -2600,6 +2610,162 @@ td strong {
   overflow: auto;
 }
 
+.shortlist-main {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.shortlist-help,
+.shortlist-leader,
+.shortlist-card-meta {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.shortlist-help {
+  background: rgba(11, 61, 46, 0.07);
+  border: 1px solid rgba(11, 61, 46, 0.08);
+  border-radius: 8px;
+  margin: 12px 0;
+  padding: 10px 12px;
+}
+
+.shortlist-help span,
+.shortlist-leader span,
+.shortlist-card small,
+.shortlist-card p,
+.shortlist-card-meta {
+  color: var(--muted);
+}
+
+.shortlist-help strong,
+.shortlist-leader strong {
+  color: var(--main);
+  font-size: 18px;
+}
+
+.shortlist-suggestion-list {
+  display: grid;
+  gap: 10px;
+  max-height: min(720px, calc(100vh - 410px));
+  overflow: auto;
+}
+
+.shortlist-suggestion-item {
+  align-items: center;
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 8px;
+}
+
+.shortlist-suggestion-main {
+  background: transparent;
+  border: 0;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 4px;
+  text-align: left;
+}
+
+.shortlist-suggestion-main strong {
+  font-size: 14px;
+}
+
+.shortlist-suggestion-main span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.shortlist-summary-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shortlist-leader {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 12px;
+  padding: 12px;
+}
+
+.shortlist-player-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shortlist-card {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.shortlist-card > div:first-child {
+  display: grid;
+  gap: 6px;
+}
+
+.shortlist-card strong {
+  font-size: 18px;
+}
+
+.shortlist-card p {
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.shortlist-card-meta {
+  flex-wrap: wrap;
+  font-size: 12px;
+  justify-content: flex-start;
+}
+
+.shortlist-card-meta span {
+  background: rgba(11, 61, 46, 0.07);
+  border-radius: 999px;
+  padding: 5px 8px;
+}
+
+.shortlist-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shortlist-card-actions button {
+  background: rgba(255, 250, 240, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 34px;
+  padding: 0 10px;
+}
+
+.shortlist-card-actions button.active,
+.small-button.active {
+  background: var(--main);
+  color: var(--side-1-strong);
+}
+
 .candidate-item {
   align-items: center;
   background: var(--side-1-strong);
@@ -3273,6 +3439,7 @@ td strong {
   .draft-grid,
   .challenge-grid,
   .quiz-grid,
+  .shortlist-grid,
   .timeline-grid,
   .builder-grid,
   .rankings-grid,
@@ -3319,6 +3486,7 @@ td strong {
   }
 
   .candidate-list,
+  .shortlist-suggestion-list,
   .ranking-list {
     max-height: none;
   }
@@ -3330,6 +3498,7 @@ td strong {
   .draft-sidebar,
   .challenge-sidebar,
   .quiz-sidebar,
+  .shortlist-sidebar,
   .timeline-sidebar,
   .builder-finder-panel,
   .ranking-finder-panel,
@@ -3384,6 +3553,8 @@ td strong {
   .draft-team-actions,
   .challenge-summary-grid,
   .challenge-bench-grid,
+  .shortlist-summary-grid,
+  .shortlist-player-grid,
   .quiz-answer-row,
   .quiz-clue-grid,
   .quiz-suggestion-grid,
