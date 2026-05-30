@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "draft" | "challenge" | "quiz" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -1166,6 +1166,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["depth", "Depth"],
           ["battle", "Battle"],
           ["era", "Era"],
+          ["timeline", "Timeline"],
           ["draft", "Draft"],
           ["challenge", "Challenge"],
           ["quiz", "Quiz"],
@@ -1334,6 +1335,19 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           rightProfile={eraRightProfile}
           rows={eraRows}
           winner={eraWinner}
+        />
+      ) : null}
+
+      {activeTab === "timeline" ? (
+        <LegendTimelineView
+          inspector={inspector}
+          onOpenEra={(eraId) => {
+            setEraA(eraId);
+            setEraB(eraId === "modern" ? "classic" : "modern");
+            setActiveTab("era");
+          }}
+          onPlayerSelect={setSelectedPlayerId}
+          players={data.players}
         />
       ) : null}
 
@@ -2514,6 +2528,219 @@ function EraPicker({
         </select>
       </label>
     </div>
+  );
+}
+
+function LegendTimelineView({
+  inspector,
+  onOpenEra,
+  onPlayerSelect,
+  players,
+}: {
+  inspector: ReactNode;
+  onOpenEra: (eraId: EraId) => void;
+  onPlayerSelect: (playerId: string) => void;
+  players: LegendPlayer[];
+}) {
+  const [continent, setContinent] = useState<Continent | FilterValue>("ALL");
+  const [era, setEra] = useState<EraId | FilterValue>("ALL");
+  const [position, setPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [tier, setTier] = useState<LegendTierId | FilterValue>("ALL");
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const timelineItems = useMemo(
+    () =>
+      players
+        .map((player) => {
+          const year = getPlayerRepresentativeYear(player);
+          const playerEra = getPlayerEra(player);
+          return {
+            decade: year ? Math.floor(year / 10) * 10 : 0,
+            era: playerEra,
+            player,
+            year,
+          };
+        })
+        .filter((item) => continent === "ALL" || item.player.continent === continent)
+        .filter((item) => era === "ALL" || item.era.id === era)
+        .filter((item) => position === "ALL" || item.player.primaryPosition === position)
+        .filter((item) => tier === "ALL" || getLegendTier(item.player.overallScore).id === tier)
+        .filter((item) => !normalizedQuery || matchesPlayerSearch(item.player, normalizedQuery))
+        .sort(
+          (a, b) =>
+            (a.year ?? 9999) - (b.year ?? 9999) ||
+            b.player.overallScore - a.player.overallScore ||
+            (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999),
+        ),
+    [continent, era, normalizedQuery, players, position, tier],
+  );
+  const decadeGroups = useMemo(() => {
+    const groups = new Map<number, typeof timelineItems>();
+    for (const item of timelineItems) {
+      const key = item.decade || 0;
+      groups.set(key, [...(groups.get(key) ?? []), item]);
+    }
+
+    return [...groups.entries()]
+      .sort(([a], [b]) => (a || 9999) - (b || 9999))
+      .map(([decade, items]) => ({ decade, items }));
+  }, [timelineItems]);
+  const topPlayers = [...timelineItems].sort((a, b) => b.player.overallScore - a.player.overallScore || (a.year ?? 9999) - (b.year ?? 9999)).slice(0, 12);
+  const placedItems = timelineItems.filter((item) => item.year);
+  const earliest = placedItems[0];
+  const latest = placedItems[placedItems.length - 1];
+  const eraCounts = eraOptions.reduce<Record<EraId, number>>((counts, item) => {
+    counts[item.id] = timelineItems.filter((timelineItem) => timelineItem.era.id === item.id).length;
+    return counts;
+  }, {
+    foundations: 0,
+    classic: 0,
+    "global-tv": 0,
+    modern: 0,
+    current: 0,
+    unplaced: 0,
+  });
+
+  return (
+    <section className="timeline-grid">
+      <aside className="timeline-sidebar">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Legacy Timeline</p>
+            <h2>시대별 레전드 흐름</h2>
+          </div>
+          <label className="field">
+            <span>검색</span>
+            <input className="search-input" onChange={(event) => setQuery(event.target.value)} placeholder="선수, 국가, 포지션 검색" type="search" value={query} />
+          </label>
+          <label className="field">
+            <span>대륙</span>
+            <select value={continent} onChange={(event) => setContinent(event.target.value as Continent | FilterValue)}>
+              <option value="ALL">전체</option>
+              {continentOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>시대</span>
+            <select value={era} onChange={(event) => setEra(event.target.value as EraId | FilterValue)}>
+              <option value="ALL">전체</option>
+              {eraOptions.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} ({item.range})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>포지션</span>
+            <select value={position} onChange={(event) => setPosition(event.target.value as PositionCode | FilterValue)}>
+              <option value="ALL">전체</option>
+              {positionOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>티어</span>
+            <select value={tier} onChange={(event) => setTier(event.target.value as LegendTierId | FilterValue)}>
+              <option value="ALL">전체</option>
+              {legendTiers.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} ({item.range})
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="ghost-button compact-button"
+            onClick={() => {
+              setContinent("ALL");
+              setEra("ALL");
+              setPosition("ALL");
+              setTier("ALL");
+              setQuery("");
+            }}
+            type="button"
+          >
+            필터 초기화
+          </button>
+        </section>
+
+        <section className="timeline-era-card">
+          <p className="eyebrow">Era Counts</p>
+          <div className="timeline-era-list">
+            {eraOptions.map((item) => (
+              <button key={item.id} onClick={() => onOpenEra(item.id)} type="button">
+                <span>{item.label}</span>
+                <strong>{eraCounts[item.id]}</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+      </aside>
+
+      <section className="timeline-main">
+        <section className="timeline-hero-panel">
+          <div className="section-heading row">
+            <div>
+              <p className="eyebrow">Archive Flow</p>
+              <h2>대표 연도 타임라인</h2>
+            </div>
+            <div className="ranking-summary">
+              <span>{timelineItems.length}명</span>
+              <span>{earliest?.year ?? "-"} 시작</span>
+              <strong>{latest?.year ?? "-"} 최신</strong>
+            </div>
+          </div>
+          <div className="timeline-spotlight-grid">
+            {topPlayers.slice(0, 4).map(({ player, year }) => (
+              <button key={player.id} onClick={() => onPlayerSelect(player.id)} type="button">
+                <span>{year ?? "?"}</span>
+                <strong>{player.name}</strong>
+                <small>
+                  {player.country} · {player.primaryPosition} · {player.overallScore}
+                </small>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="timeline-decade-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Decades</p>
+            <h2>10년대별 대표 선수</h2>
+          </div>
+          <div className="timeline-decade-list">
+            {decadeGroups.map((group) => (
+              <article className="timeline-decade-row" key={group.decade}>
+                <div className="timeline-decade-label">
+                  <strong>{formatDecadeLabel(group.decade)}</strong>
+                  <span>{group.items.length}명</span>
+                </div>
+                <div className="timeline-player-strip">
+                  {group.items.slice(0, 10).map(({ player, year }) => (
+                    <button key={player.id} onClick={() => onPlayerSelect(player.id)} type="button">
+                      <span>{year ?? "?"}</span>
+                      <strong>{player.name}</strong>
+                      <small>{player.country}</small>
+                    </button>
+                  ))}
+                </div>
+              </article>
+            ))}
+            {decadeGroups.length === 0 ? <p className="empty-state">조건에 맞는 선수가 없습니다.</p> : null}
+          </div>
+        </section>
+      </section>
+
+      {inspector}
+    </section>
   );
 }
 
@@ -4375,6 +4602,10 @@ function normalizeQuizAnswer(value: string) {
 
 function maskQuizAnswer(value: string, answer: string) {
   return value.replaceAll(answer, "이 선수");
+}
+
+function formatDecadeLabel(decade: number) {
+  return decade ? `${decade}s` : "Unplaced";
 }
 
 function getPrimaryScoreKey(player: LegendPlayer) {

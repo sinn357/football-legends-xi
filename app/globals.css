@@ -319,6 +319,7 @@ select,
 .draft-grid,
 .challenge-grid,
 .quiz-grid,
+.timeline-grid,
 .builder-grid,
 .rankings-grid,
 .compare-grid {
@@ -352,6 +353,10 @@ select,
 }
 
 .quiz-grid {
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+}
+
+.timeline-grid {
   grid-template-columns: 300px minmax(0, 1fr) 360px;
 }
 
@@ -393,6 +398,7 @@ select,
 .draft-sidebar,
 .challenge-sidebar,
 .quiz-sidebar,
+.timeline-sidebar,
 .atlas-sidebar,
 .atlas-main,
 .top-list-panel,
@@ -412,6 +418,7 @@ select,
 .draft-sidebar,
 .challenge-sidebar,
 .quiz-sidebar,
+.timeline-sidebar,
 .atlas-main,
 .top-list-panel,
 .candidate-panel,
@@ -431,6 +438,7 @@ select,
 .draft-sidebar,
 .challenge-sidebar,
 .quiz-sidebar,
+.timeline-sidebar,
 .builder-finder-panel,
 .ranking-finder-panel,
 .player-drawer {
@@ -1385,7 +1393,10 @@ td strong {
 .quiz-score-card,
 .quiz-control-card,
 .quiz-play-panel,
-.quiz-suggestion-panel {
+.quiz-suggestion-panel,
+.timeline-era-card,
+.timeline-hero-panel,
+.timeline-decade-panel {
   background: var(--side-1-strong);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1414,10 +1425,134 @@ td strong {
 .challenge-main,
 .challenge-sidebar,
 .quiz-main,
-.quiz-sidebar {
+.quiz-sidebar,
+.timeline-main,
+.timeline-sidebar {
   align-content: start;
   display: grid;
   gap: 18px;
+}
+
+.timeline-era-list {
+  display: grid;
+  gap: 8px;
+}
+
+.timeline-era-list button {
+  align-items: center;
+  background: rgba(244, 239, 227, 0.62);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: flex;
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 8px 10px;
+}
+
+.timeline-era-list button:hover,
+.timeline-era-list button:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.timeline-era-list span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.timeline-era-list strong {
+  color: var(--main);
+}
+
+.timeline-spotlight-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.timeline-spotlight-grid button,
+.timeline-player-strip button {
+  background: rgba(244, 239, 227, 0.62);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px;
+  text-align: left;
+}
+
+.timeline-spotlight-grid button:hover,
+.timeline-spotlight-grid button:focus-visible,
+.timeline-player-strip button:hover,
+.timeline-player-strip button:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.timeline-spotlight-grid span,
+.timeline-player-strip span {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.timeline-spotlight-grid strong,
+.timeline-player-strip strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-spotlight-grid small,
+.timeline-player-strip small {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-decade-list {
+  display: grid;
+  gap: 12px;
+}
+
+.timeline-decade-row {
+  align-items: stretch;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 110px minmax(0, 1fr);
+}
+
+.timeline-decade-label {
+  background: linear-gradient(180deg, var(--main-soft), var(--main));
+  border-radius: 8px;
+  color: var(--side-1-strong);
+  display: grid;
+  gap: 4px;
+  min-height: 82px;
+  padding: 12px;
+}
+
+.timeline-decade-label strong {
+  color: var(--gold);
+  font-size: 20px;
+}
+
+.timeline-decade-label span {
+  color: rgba(244, 239, 227, 0.76);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.timeline-player-strip {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .quiz-score-card h2 {
@@ -3138,6 +3273,7 @@ td strong {
   .draft-grid,
   .challenge-grid,
   .quiz-grid,
+  .timeline-grid,
   .builder-grid,
   .rankings-grid,
   .compare-grid,
@@ -3164,7 +3300,13 @@ td strong {
   .battle-scoreboard,
   .battle-lower-grid,
   .draft-team-grid,
-  .challenge-board-grid {
+  .challenge-board-grid,
+  .timeline-spotlight-grid,
+  .timeline-player-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline-decade-row {
     grid-template-columns: 1fr;
   }
 
@@ -3188,6 +3330,7 @@ td strong {
   .draft-sidebar,
   .challenge-sidebar,
   .quiz-sidebar,
+  .timeline-sidebar,
   .builder-finder-panel,
   .ranking-finder-panel,
   .player-drawer {
@@ -3244,6 +3387,8 @@ td strong {
   .quiz-answer-row,
   .quiz-clue-grid,
   .quiz-suggestion-grid,
+  .timeline-spotlight-grid,
+  .timeline-player-strip,
   .country-xi-list,
   .comparison-grid,
   .compare-cards {
