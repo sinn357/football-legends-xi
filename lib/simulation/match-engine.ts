@@ -33,8 +33,9 @@ export function simulateMatch(
 ): SimulatedMatchResult {
   const matchSeed = options.seed ?? `${teamA.id}:${teamB.id}:${Date.now()}`;
   const random = createSeededRandom(matchSeed);
-  const profileA = applyMatchContext(buildTeamSimulationProfile(teamA), tacticsA, options.homeTeamId === teamA.id);
-  const profileB = applyMatchContext(buildTeamSimulationProfile(teamB), tacticsB, options.homeTeamId === teamB.id);
+  const baseProfileA = applyMatchContext(buildTeamSimulationProfile(teamA), tacticsA, options.homeTeamId === teamA.id);
+  const baseProfileB = applyMatchContext(buildTeamSimulationProfile(teamB), tacticsB, options.homeTeamId === teamB.id);
+  const [profileA, profileB] = applyHeadToHeadContext(baseProfileA, baseProfileB);
   const events = simulateEvents(profileA, profileB, random, options.randomness ?? "normal");
   const stats = buildMatchStats(profileA, profileB, events);
   const playerRatings = buildPlayerRatings(profileA, profileB, events, stats);
@@ -68,6 +69,152 @@ function applyMatchContext(profile: TeamSimulationProfile, tactics: SimulationTa
     adjustedMetrics,
     tactics,
   };
+}
+
+function applyHeadToHeadContext(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile): [AppliedTeamProfile, AppliedTeamProfile] {
+  return [applyOpponentSpecificModifiers(profileA, profileB), applyOpponentSpecificModifiers(profileB, profileA)];
+}
+
+function applyOpponentSpecificModifiers(profile: AppliedTeamProfile, opponent: AppliedTeamProfile): AppliedTeamProfile {
+  const next = { ...profile.adjustedMetrics };
+  const shape = getTeamShape(profile);
+  const opponentShape = getTeamShape(opponent);
+
+  if (profile.tactics.style === "counter") {
+    if (opponent.tactics.lineHeight === "high" || opponent.tactics.risk === "aggressive") {
+      next.transitionThreat += 7;
+      next.chanceQuality += 3;
+      next.attackPower += 2;
+    }
+
+    if (opponentShape.centerBacks < 2 || opponentShape.defensiveMidfielders === 0) {
+      next.transitionThreat += 4;
+      next.finishing += 2;
+    }
+  }
+
+  if (profile.tactics.style === "possession") {
+    if (profile.adjustedMetrics.midfieldControl + profile.adjustedMetrics.chemistry - opponent.adjustedMetrics.pressingPower >= 6) {
+      next.midfieldControl += 5;
+      next.chanceQuality += 4;
+      next.roleConflict -= 3;
+    } else if (opponent.tactics.style === "high-press") {
+      next.midfieldControl -= 4;
+      next.roleConflict += 4;
+      next.defensiveSecurity -= 2;
+    }
+
+    if (shape.centralMidfielders >= 3) {
+      next.midfieldControl += 3;
+    }
+  }
+
+  if (profile.tactics.style === "high-press") {
+    if (opponent.tactics.style === "possession" || opponent.tactics.tempo === "slow") {
+      next.pressingPower += 5;
+      next.transitionThreat += 3;
+      next.chanceQuality += 2;
+    }
+
+    if (opponent.adjustedMetrics.chemistry >= 92 && opponent.adjustedMetrics.midfieldControl >= 92) {
+      next.pressingPower -= 4;
+      next.defensiveSecurity -= 2;
+    }
+  }
+
+  if (profile.tactics.style === "low-block") {
+    if (opponent.tactics.style === "direct" || opponent.tactics.style === "high-press") {
+      next.defensiveSecurity += 4;
+      next.wideSecurity += 2;
+      next.midfieldControl -= 2;
+    }
+
+    if (opponent.adjustedMetrics.setPieceThreat >= 90) {
+      next.defensiveSecurity -= 3;
+    }
+  }
+
+  if (profile.tactics.style === "direct") {
+    if (opponent.tactics.style === "low-block") {
+      next.setPieceThreat += 6;
+      next.progression += 3;
+      next.chanceQuality -= 2;
+    }
+
+    if (opponentShape.centerBacks < 2) {
+      next.attackPower += 4;
+      next.finishing += 2;
+    }
+  }
+
+  if (profile.tactics.lineHeight === "high" && opponent.tactics.style === "counter") {
+    next.defensiveSecurity -= 5;
+    next.wideSecurity -= 3;
+    next.roleConflict += 2;
+  }
+
+  if (shape.centerBacks >= 3) {
+    next.defensiveSecurity += 4;
+    next.setPieceThreat += 3;
+    next.wideSecurity -= opponentShape.wideAttackers >= 2 ? 3 : 1;
+  }
+
+  if (shape.fullbacks < 2 && opponentShape.wideThreat >= 3) {
+    next.wideSecurity -= 6;
+    next.defensiveSecurity -= 2;
+  }
+
+  if (shape.defensiveMidfielders >= 1 && opponent.tactics.style === "counter") {
+    next.defensiveSecurity += 3;
+    next.transitionThreat -= 1;
+  }
+
+  if (shape.centralMidfielders >= 3 && opponent.tactics.style !== "low-block") {
+    next.midfieldControl += 3;
+    next.chanceQuality += 1;
+  }
+
+  if (shape.attackers >= 5 && profile.tactics.risk === "aggressive") {
+    next.attackPower += 2;
+    next.roleConflict += 5;
+    next.defensiveSecurity -= 3;
+  }
+
+  if (shape.wideThreat >= 3 && opponentShape.fullbacks < 2) {
+    next.progression += 4;
+    next.chanceQuality += 2;
+  }
+
+  return {
+    ...profile,
+    adjustedMetrics: normalizeMatchupMetrics(next),
+  };
+}
+
+function getTeamShape(profile: AppliedTeamProfile) {
+  const count = (roles: string[]) => profile.team.slots.filter((slot) => roles.includes(slot.role)).length;
+  const centerBacks = count(["CB"]);
+  const fullbacks = count(["LB", "RB"]);
+  const defensiveMidfielders = count(["DM"]);
+  const centralMidfielders = count(["DM", "CM", "AM"]);
+  const wideAttackers = count(["LW", "RW"]);
+  const attackers = count(["ST", "SS", "LW", "RW", "AM"]);
+
+  return {
+    attackers,
+    centerBacks,
+    centralMidfielders,
+    defensiveMidfielders,
+    fullbacks,
+    wideAttackers,
+    wideThreat: fullbacks + wideAttackers,
+  };
+}
+
+function normalizeMatchupMetrics(metrics: TeamMetrics): TeamMetrics {
+  return Object.fromEntries(
+    Object.entries(metrics).map(([key, value]) => [key, key === "roleConflict" ? Math.max(0, Math.min(100, Math.round(value))) : Math.max(35, Math.min(105, Math.round(value)))]),
+  ) as TeamMetrics;
 }
 
 function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, random: SeededRandom, randomness: RandomnessLevel) {
@@ -446,7 +593,7 @@ function buildTacticalEdges(profileA: AppliedTeamProfile, profileB: AppliedTeamP
       const follower = edge.value > 0 ? profileB : profileA;
       return `${leader.team.name}은 ${edge.label}에서 ${Math.abs(Math.round(edge.value))}점 앞서 ${follower.team.name}보다 ${edge.effect} 측면이 더 좋았습니다.`;
     });
-  const matchupNotes = [describeTacticMatchup(profileA, profileB), describeTacticMatchup(profileB, profileA)].filter(Boolean) as string[];
+  const matchupNotes = [describeTacticMatchup(profileA, profileB), describeTacticMatchup(profileB, profileA), ...describeShapeMatchups(profileA, profileB)].filter(Boolean) as string[];
   const eventNotes = buildEventPatternNotes(profileA, profileB, events);
 
   return [...metricEdges, ...matchupNotes, ...eventNotes].slice(0, 8);
@@ -525,6 +672,39 @@ function describeTacticMatchup(profile: AppliedTeamProfile, opponent: AppliedTea
   }
 
   return null;
+}
+
+function describeShapeMatchups(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile) {
+  const notes: string[] = [];
+  const shapeA = getTeamShape(profileA);
+  const shapeB = getTeamShape(profileB);
+
+  for (const [profile, opponent, shape, opponentShape] of [
+    [profileA, profileB, shapeA, shapeB],
+    [profileB, profileA, shapeB, shapeA],
+  ] as const) {
+    if (profile.tactics.style === "counter" && opponent.tactics.lineHeight === "high") {
+      notes.push(`${profile.team.name}은 Counter와 상대 high line 상성으로 전환 위협 보정을 받았습니다.`);
+    }
+
+    if (shape.fullbacks < 2 && opponentShape.wideThreat >= 3) {
+      notes.push(`${profile.team.name}은 풀백 커버가 부족해 ${opponent.team.name}의 측면 전개에 취약한 구조입니다.`);
+    }
+
+    if (shape.centerBacks >= 3 && opponentShape.wideAttackers < 2) {
+      notes.push(`${profile.team.name}의 3CB 구조는 중앙 수비와 세트피스 안정성에서 보정을 받았습니다.`);
+    }
+
+    if (shape.centralMidfielders >= 3 && profile.tactics.style === "possession") {
+      notes.push(`${profile.team.name}은 중원 3명 이상과 Possession 조합으로 점유 안정성이 올라갑니다.`);
+    }
+
+    if (shape.attackers >= 5 && profile.tactics.risk === "aggressive") {
+      notes.push(`${profile.team.name}은 공격 숫자와 aggressive risk가 겹쳐 공격 보상과 수비 리스크가 동시에 커졌습니다.`);
+    }
+  }
+
+  return notes.slice(0, 4);
 }
 
 function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, events: MatchEvent[]) {
