@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
 
-type TabId = "atlas" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -203,6 +203,11 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [builderPosition, setBuilderPosition] = useState<PositionCode | FilterValue>("ALL");
   const [builderTier, setBuilderTier] = useState<LegendTierId | FilterValue>("ALL");
   const [candidateQuery, setCandidateQuery] = useState("");
+  const [hallContinent, setHallContinent] = useState<Continent | FilterValue>("ALL");
+  const [hallCountry, setHallCountry] = useState<string | FilterValue>("ALL");
+  const [hallPosition, setHallPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [hallTier, setHallTier] = useState<LegendTierId | FilterValue>("ALL");
+  const [hallQuery, setHallQuery] = useState("");
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -289,6 +294,12 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     [builderContinent, data.countries],
   );
 
+  const hallCountries = useMemo(
+    () =>
+      data.countries.filter((country) => hallContinent === "ALL" || country.continent === hallContinent),
+    [data.countries, hallContinent],
+  );
+
   const rankingCountries = useMemo(
     () =>
       data.countries.filter((country) => rankingContinent === "ALL" || country.continent === rankingContinent),
@@ -362,6 +373,48 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     average: average(rankingPool.map((item) => item.rating)),
     count: rankingPool.length,
     topScore: rankingPool[0]?.rating ?? 0,
+  };
+
+  const hallPlayers = useMemo(() => {
+    const normalizedQuery = hallQuery.trim().toLowerCase();
+    return data.players
+      .filter((player) => hallContinent === "ALL" || player.continent === hallContinent)
+      .filter((player) => hallCountry === "ALL" || player.country === hallCountry)
+      .filter((player) => hallPosition === "ALL" || player.primaryPosition === hallPosition)
+      .filter((player) => hallTier === "ALL" || getLegendTier(player.overallScore).id === hallTier)
+      .filter((player) => !normalizedQuery || matchesPlayerSearch(player, normalizedQuery))
+      .sort(
+        (a, b) =>
+          getPlayerSearchRank(a, normalizedQuery) - getPlayerSearchRank(b, normalizedQuery) ||
+          b.overallScore - a.overallScore ||
+          (a.topTierRank ?? 999) - (b.topTierRank ?? 999) ||
+          a.name.localeCompare(b.name),
+      );
+  }, [data.players, hallContinent, hallCountry, hallPosition, hallQuery, hallTier]);
+
+  const hallTierCounts = useMemo(
+    () =>
+      data.players.reduce<Record<LegendTierId, number>>(
+        (counts, player) => {
+          counts[getLegendTier(player.overallScore).id] += 1;
+          return counts;
+        },
+        {
+          pantheon: 0,
+          "all-time": 0,
+          national: 0,
+          borderline: 0,
+          watchlist: 0,
+          archive: 0,
+        },
+      ),
+    [data.players],
+  );
+
+  const hallSummary = {
+    average: average(hallPlayers.map((player) => player.overallScore)),
+    count: hallPlayers.length,
+    topScore: hallPlayers[0]?.overallScore ?? 0,
   };
 
   const atlasPlayers = useMemo(
@@ -625,6 +678,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       <nav className="app-tabs" aria-label="주요 기능">
         {[
           ["atlas", "Atlas"],
+          ["hall", "Hall"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -662,6 +716,37 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           selectedCountrySummary={selectedCountrySummary}
           inspector={inspector}
           weights={weights}
+        />
+      ) : null}
+
+      {activeTab === "hall" ? (
+        <HallOfFameView
+          countries={hallCountries}
+          continent={hallContinent}
+          country={hallCountry}
+          inspector={inspector}
+          onContinentChange={(value) => {
+            setHallContinent(value);
+            setHallCountry("ALL");
+          }}
+          onCountryChange={setHallCountry}
+          onPlayerSelect={setSelectedPlayerId}
+          onPositionChange={setHallPosition}
+          onQueryChange={setHallQuery}
+          onResetFilters={() => {
+            setHallContinent("ALL");
+            setHallCountry("ALL");
+            setHallPosition("ALL");
+            setHallTier("ALL");
+            setHallQuery("");
+          }}
+          onTierChange={setHallTier}
+          players={hallPlayers}
+          position={hallPosition}
+          query={hallQuery}
+          summary={hallSummary}
+          tier={hallTier}
+          tierCounts={hallTierCounts}
         />
       ) : null}
 
@@ -971,6 +1056,220 @@ function AtlasView({
       </section>
       {inspector}
     </section>
+  );
+}
+
+function HallOfFameView({
+  continent,
+  countries,
+  country,
+  inspector,
+  onContinentChange,
+  onCountryChange,
+  onPlayerSelect,
+  onPositionChange,
+  onQueryChange,
+  onResetFilters,
+  onTierChange,
+  players,
+  position,
+  query,
+  summary,
+  tier,
+  tierCounts,
+}: {
+  continent: Continent | FilterValue;
+  countries: LegendData["countries"];
+  country: string | FilterValue;
+  inspector: ReactNode;
+  onContinentChange: (value: Continent | FilterValue) => void;
+  onCountryChange: (value: string | FilterValue) => void;
+  onPlayerSelect: (playerId: string) => void;
+  onPositionChange: (value: PositionCode | FilterValue) => void;
+  onQueryChange: (query: string) => void;
+  onResetFilters: () => void;
+  onTierChange: (value: LegendTierId | FilterValue) => void;
+  players: LegendPlayer[];
+  position: PositionCode | FilterValue;
+  query: string;
+  summary: {
+    average: number;
+    count: number;
+    topScore: number;
+  };
+  tier: LegendTierId | FilterValue;
+  tierCounts: Record<LegendTierId, number>;
+}) {
+  const groupedPlayers = legendTiers.map((item) => ({
+    tier: item,
+    players: players.filter((player) => getLegendTier(player.overallScore).id === item.id).slice(0, 18),
+  }));
+  const spotlightPlayers = players.slice(0, 6);
+
+  return (
+    <section className="hall-grid">
+      <aside className="hall-sidebar">
+        <section className="weights-panel">
+          <div className="section-heading">
+            <p className="eyebrow">Hall Filters</p>
+            <h2>전당 탐색</h2>
+          </div>
+          <label className="field">
+            <span>검색</span>
+            <input
+              className="search-input"
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="선수, 국가, 포지션 검색"
+              type="search"
+              value={query}
+            />
+          </label>
+          <label className="field">
+            <span>레전드 티어</span>
+            <select value={tier} onChange={(event) => onTierChange(event.target.value as LegendTierId | FilterValue)}>
+              <option value="ALL">전체</option>
+              {legendTiers.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} ({item.range})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>대륙</span>
+            <select value={continent} onChange={(event) => onContinentChange(event.target.value as Continent | FilterValue)}>
+              <option value="ALL">전체</option>
+              {continentOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>국가</span>
+            <select value={country} onChange={(event) => onCountryChange(event.target.value)}>
+              <option value="ALL">전체</option>
+              {countries.map((item) => (
+                <option key={item.name} value={item.name}>
+                  {item.name} ({item.count})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>포지션</span>
+            <select value={position} onChange={(event) => onPositionChange(event.target.value as PositionCode | FilterValue)}>
+              <option value="ALL">전체</option>
+              {positionOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="ghost-button compact-button" onClick={onResetFilters} type="button">
+            필터 초기화
+          </button>
+        </section>
+
+        <section className="hall-tier-list">
+          <div className="section-heading">
+            <p className="eyebrow">Tier Map</p>
+            <h2>전체 분포</h2>
+          </div>
+          {legendTiers.map((item) => (
+            <button
+              className={tier === item.id ? "hall-tier-button active" : "hall-tier-button"}
+              key={item.id}
+              onClick={() => onTierChange(tier === item.id ? "ALL" : item.id)}
+              type="button"
+            >
+              <span>
+                <strong>{item.label}</strong>
+                <small>{item.range}</small>
+              </span>
+              <em>{tierCounts[item.id]}</em>
+            </button>
+          ))}
+        </section>
+      </aside>
+
+      <section className="hall-main">
+        <div className="section-heading row">
+          <div>
+            <p className="eyebrow">Hall of Fame</p>
+            <h2>레전드 전당</h2>
+          </div>
+          <div className="ranking-summary">
+            <span>{summary.count}명</span>
+            <span>평균 {summary.average}</span>
+            <strong>최고 {summary.topScore}</strong>
+          </div>
+        </div>
+
+        <section className="hall-spotlight">
+          {spotlightPlayers.map((player, index) => (
+            <button className={index === 0 ? "hall-hero-card featured" : "hall-hero-card"} key={player.id} onClick={() => onPlayerSelect(player.id)} type="button">
+              <span className={`tier-badge ${getLegendTier(player.overallScore).id}`}>{getLegendTier(player.overallScore).label}</span>
+              <strong>{player.name}</strong>
+              <small>
+                {player.country} · {player.primaryPosition}
+              </small>
+              <em>{player.overallScore}</em>
+            </button>
+          ))}
+          {spotlightPlayers.length === 0 ? <p className="empty-state">조건에 맞는 선수가 없습니다.</p> : null}
+        </section>
+
+        <div className="hall-tier-sections">
+          {groupedPlayers.map(({ players: tierPlayers, tier: item }) => {
+            if (!tierPlayers.length) {
+              return null;
+            }
+
+            return (
+              <section className="hall-tier-section" key={item.id}>
+                <div className="section-heading row">
+                  <div>
+                    <p className="eyebrow">{item.range}</p>
+                    <h2>{item.label}</h2>
+                  </div>
+                  <span className={`tier-badge ${item.id}`}>{tierPlayers.length} shown</span>
+                </div>
+                <div className="hall-card-grid">
+                  {tierPlayers.map((player) => (
+                    <HallPlayerCard key={player.id} onClick={() => onPlayerSelect(player.id)} player={player} />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
+function HallPlayerCard({ onClick, player }: { onClick: () => void; player: LegendPlayer }) {
+  const primaryScoreKey = getPrimaryScoreKey(player);
+
+  return (
+    <button className="hall-player-card" onClick={onClick} type="button">
+      <span className={`tier-badge ${getLegendTier(player.overallScore).id}`}>{getLegendTier(player.overallScore).label}</span>
+      <strong>{player.name}</strong>
+      <small>
+        {player.country} · {player.continent} · {player.primaryPosition}
+      </small>
+      <div className="hall-card-footer">
+        <span>
+          {scoreLabels[primaryScoreKey]} {player.scores[primaryScoreKey]}
+        </span>
+        <em>{player.overallScore}</em>
+      </div>
+    </button>
   );
 }
 
@@ -1986,6 +2285,10 @@ function ScoreBars({ player }: { player: LegendPlayer }) {
       ))}
     </div>
   );
+}
+
+function getPrimaryScoreKey(player: LegendPlayer) {
+  return (Object.keys(scoreLabels) as ScoreKey[]).sort((a, b) => player.scores[b] - player.scores[a])[0];
 }
 
 function getLegendTier(score: number): LegendTier {

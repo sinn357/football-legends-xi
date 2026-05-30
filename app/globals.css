@@ -205,7 +205,7 @@ select,
   box-shadow: 0 16px 40px rgba(4, 25, 19, 0.18);
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   margin-bottom: 18px;
   padding: 8px;
 }
@@ -313,6 +313,7 @@ select,
 }
 
 .atlas-grid,
+.hall-grid,
 .builder-grid,
 .rankings-grid,
 .compare-grid {
@@ -322,6 +323,10 @@ select,
 }
 
 .atlas-grid {
+  grid-template-columns: 300px minmax(0, 1fr) 360px;
+}
+
+.hall-grid {
   grid-template-columns: 300px minmax(0, 1fr) 360px;
 }
 
@@ -354,6 +359,8 @@ select,
 .bench-panel,
 .roster-panel,
 .saved-panel,
+.hall-sidebar,
+.hall-main,
 .atlas-sidebar,
 .atlas-main,
 .top-list-panel,
@@ -364,6 +371,8 @@ select,
 }
 
 .atlas-sidebar,
+.hall-sidebar,
+.hall-main,
 .atlas-main,
 .top-list-panel,
 .candidate-panel,
@@ -377,6 +386,7 @@ select,
 }
 
 .atlas-sidebar,
+.hall-sidebar,
 .builder-finder-panel,
 .ranking-finder-panel,
 .player-drawer {
@@ -854,6 +864,207 @@ td strong {
 .tier-badge.archive {
   background: rgba(183, 67, 67, 0.13);
   color: var(--red);
+}
+
+.hall-sidebar {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+}
+
+.hall-tier-list {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.hall-tier-button {
+  align-items: center;
+  background: rgba(244, 239, 227, 0.64);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.hall-tier-button + .hall-tier-button {
+  margin-top: 8px;
+}
+
+.hall-tier-button:hover,
+.hall-tier-button:focus-visible,
+.hall-tier-button.active {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.hall-tier-button.active {
+  background: rgba(200, 162, 74, 0.18);
+  box-shadow: inset 4px 0 0 var(--gold);
+}
+
+.hall-tier-button span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.hall-tier-button strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.hall-tier-button small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hall-tier-button em {
+  align-items: center;
+  background: rgba(11, 61, 46, 0.08);
+  border-radius: 999px;
+  color: var(--main);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-style: normal;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  min-width: 34px;
+  padding: 0 9px;
+}
+
+.hall-spotlight {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 22px;
+}
+
+.hall-hero-card,
+.hall-player-card {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  text-align: left;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.hall-hero-card {
+  gap: 8px;
+  min-height: 150px;
+  padding: 16px;
+  position: relative;
+}
+
+.hall-hero-card.featured {
+  background:
+    linear-gradient(135deg, rgba(200, 162, 74, 0.28), transparent 46%),
+    linear-gradient(180deg, var(--main-soft), var(--main));
+  border-color: rgba(200, 162, 74, 0.7);
+  color: var(--side-1-strong);
+}
+
+.hall-hero-card:hover,
+.hall-hero-card:focus-visible,
+.hall-player-card:hover,
+.hall-player-card:focus-visible {
+  border-color: rgba(200, 162, 74, 0.92);
+  box-shadow: 0 12px 26px rgba(4, 25, 19, 0.12);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.hall-hero-card strong {
+  align-self: end;
+  font-size: 22px;
+  line-height: 1.08;
+}
+
+.hall-hero-card small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hall-hero-card.featured small {
+  color: rgba(244, 239, 227, 0.72);
+}
+
+.hall-hero-card em {
+  bottom: 14px;
+  color: var(--gold);
+  font-size: 38px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  position: absolute;
+  right: 16px;
+}
+
+.hall-tier-sections {
+  display: grid;
+  gap: 18px;
+}
+
+.hall-tier-section {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.hall-card-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+
+.hall-player-card {
+  gap: 7px;
+  min-height: 132px;
+  padding: 13px;
+}
+
+.hall-player-card strong {
+  font-size: 15px;
+}
+
+.hall-player-card small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.hall-card-footer {
+  align-items: flex-end;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.hall-card-footer span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.hall-card-footer em {
+  color: var(--main);
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .score-bars {
@@ -1868,6 +2079,7 @@ td strong {
   .main-grid,
   .data-grid,
   .atlas-grid,
+  .hall-grid,
   .builder-grid,
   .rankings-grid,
   .compare-grid,
@@ -1897,6 +2109,7 @@ td strong {
   }
 
   .atlas-sidebar,
+  .hall-sidebar,
   .builder-finder-panel,
   .ranking-finder-panel,
   .player-drawer {
@@ -1941,6 +2154,7 @@ td strong {
   .slot-editor,
   .summary-grid,
   .summary-grid.compact,
+  .hall-spotlight,
   .country-xi-list,
   .comparison-grid,
   .compare-cards {
