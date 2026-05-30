@@ -125,7 +125,10 @@ export type PlayerMatchRating = {
 };
 
 export type TacticalReport = {
+  balanceInsights: string[];
+  keyPlayerImpacts: string[];
   notes: string[];
+  tacticalEdges: string[];
   weakPoints: string[];
   whyTheyWon: string[];
 };

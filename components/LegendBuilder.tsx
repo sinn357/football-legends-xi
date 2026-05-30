@@ -4374,7 +4374,10 @@ function MatchSimulatorView({
               </div>
               <div className="sim-report-grid">
                 <ReportList title="Why" items={result.report.whyTheyWon} />
+                <ReportList title="Edges" items={result.report.tacticalEdges} />
+                <ReportList title="Key" items={result.report.keyPlayerImpacts} />
                 <ReportList title="Notes" items={result.report.notes} />
+                <ReportList title="Balance" items={result.report.balanceInsights} />
                 <ReportList title="Weak" items={result.report.weakPoints} />
               </div>
             </section>

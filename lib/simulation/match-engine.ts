@@ -44,7 +44,7 @@ export function simulateMatch(
     events,
     matchSeed,
     playerRatings,
-    report: buildTacticalReport(profileA, profileB, stats, winnerTeamId),
+    report: buildTacticalReport(profileA, profileB, stats, winnerTeamId, events, playerRatings),
     stats,
     teams: {
       [teamA.id]: profileA,
@@ -314,6 +314,8 @@ function buildTacticalReport(
   profileB: AppliedTeamProfile,
   stats: Record<string, MatchTeamStats>,
   winnerTeamId: string | null,
+  events: MatchEvent[],
+  playerRatings: PlayerMatchRating[],
 ) {
   const winningProfile = winnerTeamId === profileA.team.id ? profileA : winnerTeamId === profileB.team.id ? profileB : null;
   const losingProfile = winnerTeamId === profileA.team.id ? profileB : winnerTeamId === profileB.team.id ? profileA : null;
@@ -334,7 +336,10 @@ function buildTacticalReport(
       : ["양 팀의 핵심 지표가 비슷해 단판에서는 승부가 갈리지 않았습니다."];
 
   return {
+    balanceInsights: buildBalanceInsights(profileA, profileB),
+    keyPlayerImpacts: buildKeyPlayerImpacts(profileA, profileB, playerRatings, events),
     notes,
+    tacticalEdges: buildTacticalEdges(profileA, profileB, events),
     weakPoints,
     whyTheyWon,
   };
@@ -358,14 +363,97 @@ function summarizeProfile(profile: AppliedTeamProfile, opponent: AppliedTeamProf
   return notes;
 }
 
+function buildBalanceInsights(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile) {
+  return [profileA, profileB].flatMap((profile) => {
+    const bestStrengths = profile.balance.strengths.slice(0, 2).map((item) => `${profile.team.name}: ${item}`);
+    const profileIssues = profile.balance.penalties.slice(0, 2).map((item) => `${profile.team.name}: ${item}`);
+    const roleConflict =
+      profile.adjustedMetrics.roleConflict >= 45
+        ? [`${profile.team.name}: 역할 충돌 ${profile.adjustedMetrics.roleConflict}로 공격 재능 대비 팀 효율이 흔들립니다.`]
+        : [];
+    const chemistry =
+      profile.adjustedMetrics.chemistry >= 88
+        ? [`${profile.team.name}: 케미스트리 ${profile.adjustedMetrics.chemistry}로 전술 수행 안정성이 높습니다.`]
+        : [];
+
+    return [...bestStrengths, ...profileIssues, ...roleConflict, ...chemistry];
+  }).slice(0, 8);
+}
+
+function buildKeyPlayerImpacts(
+  profileA: AppliedTeamProfile,
+  profileB: AppliedTeamProfile,
+  playerRatings: PlayerMatchRating[],
+  events: MatchEvent[],
+) {
+  const profiles = new Map([
+    [profileA.team.id, profileA],
+    [profileB.team.id, profileB],
+  ]);
+  const playerEntries = new Map(
+    [profileA, profileB].flatMap((profile) =>
+      profile.playerAttributes.map((entry) => [
+        entry.player.id,
+        {
+          entry,
+          teamName: profile.team.name,
+        },
+      ] as const),
+    ),
+  );
+  const eventInvolvements = events.reduce<Record<string, { goals: number; highXg: number; xg: number }>>((summary, event) => {
+    for (const playerId of [event.scorerId, event.assisterId]) {
+      if (!playerId) {
+        continue;
+      }
+
+      summary[playerId] ??= { goals: 0, highXg: 0, xg: 0 };
+      summary[playerId].xg += event.xg;
+
+      if (event.outcome === "goal" && playerId === event.scorerId) {
+        summary[playerId].goals += 1;
+      }
+
+      if (event.xg >= 0.14) {
+        summary[playerId].highXg += 1;
+      }
+    }
+
+    return summary;
+  }, {});
+
+  return playerRatings.slice(0, 5).map((rating) => {
+    const playerContext = playerEntries.get(rating.playerId);
+    const profile = profiles.get(rating.teamId);
+    const involvement = eventInvolvements[rating.playerId] ?? { goals: 0, highXg: 0, xg: 0 };
+    const role = playerContext?.entry.role ?? "LEGEND";
+    const strongestAttribute = playerContext
+      ? Object.entries(playerContext.entry.attributes).sort((a, b) => b[1] - a[1])[0]
+      : null;
+    const attributeText = strongestAttribute ? `${attributeLabels[strongestAttribute[0] as keyof typeof attributeLabels]} ${Math.round(strongestAttribute[1])}점` : "핵심 능력";
+    const tacticalText = profile ? getPlayerTacticImpactText(profile.tactics.style, role) : "경기 영향";
+
+    return `${playerContext?.teamName ?? rating.teamId}: ${rating.playerName} ${rating.rating.toFixed(1)}점, ${rating.goals}G ${rating.assists}A. ${attributeText}과 ${tacticalText}이 결과에 반영됐습니다.`;
+  });
+}
+
+function buildTacticalEdges(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, events: MatchEvent[]) {
+  const metricEdges = getMetricEdges(profileA, profileB)
+    .filter((edge) => Math.abs(edge.value) >= 4)
+    .slice(0, 4)
+    .map((edge) => {
+      const leader = edge.value > 0 ? profileA : profileB;
+      const follower = edge.value > 0 ? profileB : profileA;
+      return `${leader.team.name}은 ${edge.label}에서 ${Math.abs(Math.round(edge.value))}점 앞서 ${follower.team.name}보다 ${edge.effect} 측면이 더 좋았습니다.`;
+    });
+  const matchupNotes = [describeTacticMatchup(profileA, profileB), describeTacticMatchup(profileB, profileA)].filter(Boolean) as string[];
+  const eventNotes = buildEventPatternNotes(profileA, profileB, events);
+
+  return [...metricEdges, ...matchupNotes, ...eventNotes].slice(0, 8);
+}
+
 function getMetricEdgeText(winningProfile: AppliedTeamProfile, losingProfile: AppliedTeamProfile) {
-  const edges = [
-    { label: "공격력", value: winningProfile.adjustedMetrics.attackPower - losingProfile.adjustedMetrics.attackPower },
-    { label: "중원 장악", value: winningProfile.adjustedMetrics.midfieldControl - losingProfile.adjustedMetrics.midfieldControl },
-    { label: "수비 안정성", value: winningProfile.adjustedMetrics.defensiveSecurity - losingProfile.adjustedMetrics.defensiveSecurity },
-    { label: "전환 위협", value: winningProfile.adjustedMetrics.transitionThreat - losingProfile.adjustedMetrics.transitionThreat },
-    { label: "골키퍼 영향력", value: winningProfile.adjustedMetrics.goalkeeperImpact - losingProfile.adjustedMetrics.goalkeeperImpact },
-  ].sort((a, b) => b.value - a.value);
+  const edges = getMetricEdges(winningProfile, losingProfile).sort((a, b) => b.value - a.value);
   const bestEdge = edges[0];
 
   if (bestEdge.value < 2) {
@@ -373,6 +461,139 @@ function getMetricEdgeText(winningProfile: AppliedTeamProfile, losingProfile: Ap
   }
 
   return `${winningProfile.team.name}의 가장 큰 우위는 ${bestEdge.label}입니다.`;
+}
+
+function getMetricEdges(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile) {
+  return [
+    {
+      effect: "박스 근처 위협",
+      label: "공격력",
+      value: profileA.adjustedMetrics.attackPower - profileB.adjustedMetrics.attackPower,
+    },
+    {
+      effect: "경기 템포 통제",
+      label: "중원 장악",
+      value: profileA.adjustedMetrics.midfieldControl - profileB.adjustedMetrics.midfieldControl,
+    },
+    {
+      effect: "실점 억제",
+      label: "수비 안정성",
+      value: profileA.adjustedMetrics.defensiveSecurity - profileB.adjustedMetrics.defensiveSecurity,
+    },
+    {
+      effect: "역습 찬스",
+      label: "전환 위협",
+      value: profileA.adjustedMetrics.transitionThreat - profileB.adjustedMetrics.transitionThreat,
+    },
+    {
+      effect: "선방 기대값",
+      label: "골키퍼 영향력",
+      value: profileA.adjustedMetrics.goalkeeperImpact - profileB.adjustedMetrics.goalkeeperImpact,
+    },
+    {
+      effect: "전방 탈취",
+      label: "압박",
+      value: profileA.adjustedMetrics.pressingPower - profileB.adjustedMetrics.pressingPower,
+    },
+    {
+      effect: "측면 방어",
+      label: "측면 안정성",
+      value: profileA.adjustedMetrics.wideSecurity - profileB.adjustedMetrics.wideSecurity,
+    },
+  ];
+}
+
+function describeTacticMatchup(profile: AppliedTeamProfile, opponent: AppliedTeamProfile) {
+  if (profile.tactics.style === "high-press" && profile.adjustedMetrics.pressingPower - opponent.adjustedMetrics.midfieldControl >= 6) {
+    return `${profile.team.name}의 High Press는 ${opponent.team.name}의 빌드업 안정성보다 강해 실책성 찬스를 만들 조건이 좋습니다.`;
+  }
+
+  if (profile.tactics.style === "counter" && opponent.tactics.lineHeight === "high") {
+    return `${profile.team.name}의 Counter는 ${opponent.team.name}의 높은 라인 뒤 공간을 직접 겨냥합니다.`;
+  }
+
+  if (profile.tactics.style === "possession" && profile.adjustedMetrics.midfieldControl - opponent.adjustedMetrics.pressingPower >= 6) {
+    return `${profile.team.name}의 Possession은 상대 압박을 버티며 점유 흐름을 길게 가져갑니다.`;
+  }
+
+  if (profile.tactics.style === "low-block" && profile.adjustedMetrics.defensiveSecurity >= 88) {
+    return `${profile.team.name}의 Low Block은 중앙 수비 안정성을 살려 상대 슈팅 품질을 낮춥니다.`;
+  }
+
+  if (profile.tactics.risk === "aggressive" && profile.adjustedMetrics.roleConflict >= 45) {
+    return `${profile.team.name}은 공격적 위험 감수와 역할 충돌이 겹쳐 경기 후반 공간 노출 가능성이 큽니다.`;
+  }
+
+  return null;
+}
+
+function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, events: MatchEvent[]) {
+  return [profileA, profileB].flatMap((profile) => {
+    const profileEvents = events.filter((event) => event.teamId === profile.team.id);
+    const goals = profileEvents.filter((event) => event.outcome === "goal").length;
+    const counters = profileEvents.filter((event) => event.eventType === "counter").length;
+    const pressWins = profileEvents.filter((event) => event.eventType === "pressWin").length;
+    const setPieces = profileEvents.filter((event) => event.eventType === "setPiece").length;
+    const highXg = profileEvents.filter((event) => event.xg >= 0.14).length;
+    const notes: string[] = [];
+
+    if (counters >= 4) {
+      notes.push(`${profile.team.name}은 역습 이벤트 ${counters}회로 전환 공격이 반복적으로 열렸습니다.`);
+    }
+
+    if (pressWins >= 3) {
+      notes.push(`${profile.team.name}은 압박 탈취 ${pressWins}회로 상대 전개를 짧게 끊었습니다.`);
+    }
+
+    if (setPieces >= 3) {
+      notes.push(`${profile.team.name}은 세트피스 ${setPieces}회로 공중전/세컨볼 루트를 확보했습니다.`);
+    }
+
+    if (goals > 0 && highXg >= goals) {
+      notes.push(`${profile.team.name}의 득점은 낮은 확률 난사가 아니라 높은 xG 장면에서 나왔습니다.`);
+    }
+
+    return notes;
+  });
+}
+
+const attributeLabels = {
+  aerial: "제공권",
+  ballProgression: "전진",
+  bigMatch: "큰 경기",
+  chanceCreation: "찬스 창출",
+  control: "점유 안정",
+  defending: "수비 기여",
+  finishing: "결정력",
+  goalkeeper: "GK 영향",
+  leadership: "리더십",
+  pressing: "압박",
+  scoring: "득점력",
+  versatility: "유연성",
+};
+
+function getPlayerTacticImpactText(style: SimulationTactics["style"], role: string) {
+  if (style === "possession" && ["CM", "AM", "DM"].includes(role)) {
+    return "점유 전술의 연결 역할";
+  }
+
+  if (style === "counter" && ["ST", "SS", "LW", "RW"].includes(role)) {
+    return "역습 전술의 전방 실행력";
+  }
+
+  if (style === "high-press" && ["LW", "RW", "AM", "CM", "DM"].includes(role)) {
+    return "압박 전술의 탈취/재압박";
+  }
+
+  if (style === "low-block" && ["GK", "CB", "DM", "LB", "RB"].includes(role)) {
+    return "낮은 블록의 수비 안정";
+  }
+
+  if (style === "direct" && ["ST", "CB", "CM", "DM"].includes(role)) {
+    return "직선 전개의 타깃/전진 역할";
+  }
+
+  return "팀 전술 내 역할 수행";
 }
 
 function describeEvent(
