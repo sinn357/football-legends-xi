@@ -3,12 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject, ReactNode, RefObject } from "react";
 import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, ScoreMode } from "@/lib/legend-data";
+import { defaultTactics, simulateMatch } from "@/lib/simulation";
+import type { RandomnessLevel, SimulatedMatchResult, SimulationTactics, SimulationTeamInput } from "@/lib/simulation";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "shortlist" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "shortlist" | "sim" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
 type LegendTierId = "pantheon" | "all-time" | "national" | "borderline" | "watchlist" | "archive";
+type SimTeamSource = "country" | "current" | "world";
 
 type LegendTier = {
   id: LegendTierId;
@@ -361,6 +364,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [draftQuery, setDraftQuery] = useState("");
   const [draftPicks, setDraftPicks] = useState<DraftPick[]>([]);
   const [challengeId, setChallengeId] = useState<ChallengeId>("non-europe");
+  const [simTeamASource, setSimTeamASource] = useState<SimTeamSource>("current");
+  const [simTeamBSource, setSimTeamBSource] = useState<SimTeamSource>("country");
+  const [simTeamACountry, setSimTeamACountry] = useState(defaultCountry);
+  const [simTeamBCountry, setSimTeamBCountry] = useState(defaultBattleCountry);
+  const [simTacticsA, setSimTacticsA] = useState<SimulationTactics>({ ...defaultTactics, style: "possession" });
+  const [simTacticsB, setSimTacticsB] = useState<SimulationTactics>({ ...defaultTactics, style: "counter" });
+  const [simSeed, setSimSeed] = useState("legends-match-1");
+  const [simRandomness, setSimRandomness] = useState<RandomnessLevel>("normal");
+  const [simResult, setSimResult] = useState<SimulatedMatchResult | null>(null);
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -564,6 +576,33 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const averageRating = starters.length
     ? Math.round(starters.reduce((sum, starter) => sum + starter.rating, 0) / starters.length)
     : 0;
+
+  const simTeamA = useMemo(
+    () =>
+      createSimulationTeam(
+        "team-a",
+        simTeamASource,
+        simTeamACountry,
+        starters,
+        data.players,
+        weights,
+        formation.name,
+      ),
+    [data.players, formation.name, simTeamACountry, simTeamASource, starters, weights],
+  );
+  const simTeamB = useMemo(
+    () =>
+      createSimulationTeam(
+        "team-b",
+        simTeamBSource,
+        simTeamBCountry,
+        starters,
+        data.players,
+        weights,
+        formation.name,
+      ),
+    [data.players, formation.name, simTeamBCountry, simTeamBSource, starters, weights],
+  );
 
   const rankingPool = useMemo(() => {
     const normalizedQuery = rankingQuery.trim().toLowerCase();
@@ -1143,6 +1182,18 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     });
   }
 
+  function runSimulation(nextSeed?: string) {
+    const seed = nextSeed ?? (simSeed.trim() || `legends-match-${Date.now()}`);
+    setSimSeed(seed);
+    setSimResult(
+      simulateMatch(simTeamA, simTeamB, simTacticsA, simTacticsB, {
+        homeTeamId: simTeamA.id,
+        randomness: simRandomness,
+        seed,
+      }),
+    );
+  }
+
   function toggleShortlist(playerId: string) {
     setShortlistIds((current) => {
       if (current.includes(playerId)) {
@@ -1204,6 +1255,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["challenge", "Challenge"],
           ["quiz", "Quiz"],
           ["shortlist", "Shortlist"],
+          ["sim", "Sim"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -1471,6 +1523,35 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           players={data.players}
           shortlistIds={shortlistIds}
           weights={weights}
+        />
+      ) : null}
+
+      {activeTab === "sim" ? (
+        <MatchSimulatorView
+          countries={data.countries}
+          inspector={inspector}
+          onPlayerSelect={setSelectedPlayerId}
+          onRandomSeed={() => runSimulation(`legends-match-${Date.now()}`)}
+          onRandomnessChange={setSimRandomness}
+          onRun={() => runSimulation()}
+          onSeedChange={setSimSeed}
+          onTeamACountryChange={setSimTeamACountry}
+          onTeamASourceChange={setSimTeamASource}
+          onTeamBCountryChange={setSimTeamBCountry}
+          onTeamBSourceChange={setSimTeamBSource}
+          onTacticsAChange={setSimTacticsA}
+          onTacticsBChange={setSimTacticsB}
+          randomness={simRandomness}
+          result={simResult}
+          seed={simSeed}
+          teamA={simTeamA}
+          teamACountry={simTeamACountry}
+          teamASource={simTeamASource}
+          teamB={simTeamB}
+          teamBCountry={simTeamBCountry}
+          teamBSource={simTeamBSource}
+          tacticsA={simTacticsA}
+          tacticsB={simTacticsB}
         />
       ) : null}
 
@@ -4122,6 +4203,319 @@ function SavedSquadsPanel({
   );
 }
 
+function MatchSimulatorView({
+  countries,
+  inspector,
+  onPlayerSelect,
+  onRandomSeed,
+  onRandomnessChange,
+  onRun,
+  onSeedChange,
+  onTeamACountryChange,
+  onTeamASourceChange,
+  onTeamBCountryChange,
+  onTeamBSourceChange,
+  onTacticsAChange,
+  onTacticsBChange,
+  randomness,
+  result,
+  seed,
+  teamA,
+  teamACountry,
+  teamASource,
+  teamB,
+  teamBCountry,
+  teamBSource,
+  tacticsA,
+  tacticsB,
+}: {
+  countries: LegendData["countries"];
+  inspector: ReactNode;
+  onPlayerSelect: (playerId: string) => void;
+  onRandomSeed: () => void;
+  onRandomnessChange: (value: RandomnessLevel) => void;
+  onRun: () => void;
+  onSeedChange: (value: string) => void;
+  onTeamACountryChange: (value: string) => void;
+  onTeamASourceChange: (value: SimTeamSource) => void;
+  onTeamBCountryChange: (value: string) => void;
+  onTeamBSourceChange: (value: SimTeamSource) => void;
+  onTacticsAChange: (value: SimulationTactics) => void;
+  onTacticsBChange: (value: SimulationTactics) => void;
+  randomness: RandomnessLevel;
+  result: SimulatedMatchResult | null;
+  seed: string;
+  teamA: SimulationTeamInput;
+  teamACountry: string;
+  teamASource: SimTeamSource;
+  teamB: SimulationTeamInput;
+  teamBCountry: string;
+  teamBSource: SimTeamSource;
+  tacticsA: SimulationTactics;
+  tacticsB: SimulationTactics;
+}) {
+  const statsA = result?.stats[teamA.id] ?? null;
+  const statsB = result?.stats[teamB.id] ?? null;
+  const topEvents = result?.events.filter((event) => event.outcome === "goal" || event.xg >= 0.1).slice(0, 12) ?? [];
+  const topRatings = result?.playerRatings.slice(0, 10) ?? [];
+
+  return (
+    <section className="sim-grid">
+      <aside className="sim-sidebar">
+        <div className="section-heading">
+          <p className="eyebrow">Match Sim</p>
+          <h2>경기 설정</h2>
+        </div>
+        <TeamSimControl
+          countries={countries}
+          label="Team A"
+          onCountryChange={onTeamACountryChange}
+          onSourceChange={onTeamASourceChange}
+          onTacticsChange={onTacticsAChange}
+          selectedCountry={teamACountry}
+          source={teamASource}
+          tactics={tacticsA}
+          team={teamA}
+        />
+        <TeamSimControl
+          countries={countries}
+          label="Team B"
+          onCountryChange={onTeamBCountryChange}
+          onSourceChange={onTeamBSourceChange}
+          onTacticsChange={onTacticsBChange}
+          selectedCountry={teamBCountry}
+          source={teamBSource}
+          tactics={tacticsB}
+          team={teamB}
+        />
+        <label className="field">
+          <span>랜덤성</span>
+          <select value={randomness} onChange={(event) => onRandomnessChange(event.target.value as RandomnessLevel)}>
+            <option value="controlled">Controlled</option>
+            <option value="normal">Normal</option>
+            <option value="wild">Wild</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Seed</span>
+          <input className="search-input" onChange={(event) => onSeedChange(event.target.value)} type="text" value={seed} />
+        </label>
+        <div className="sim-actions">
+          <button className="primary-button" onClick={onRun} type="button">
+            시뮬레이션 실행
+          </button>
+          <button className="ghost-button" onClick={onRandomSeed} type="button">
+            새 경기 다시 돌리기
+          </button>
+        </div>
+      </aside>
+
+      <section className="sim-main">
+        <div className="sim-scoreboard">
+          <div>
+            <span>{teamA.name}</span>
+            <strong>{statsA?.goals ?? "-"}</strong>
+            <small>{statsA ? `xG ${statsA.xg.toFixed(2)} · 점유 ${statsA.possession}%` : `${teamA.slots.length} players`}</small>
+          </div>
+          <em>vs</em>
+          <div>
+            <span>{teamB.name}</span>
+            <strong>{statsB?.goals ?? "-"}</strong>
+            <small>{statsB ? `xG ${statsB.xg.toFixed(2)} · 점유 ${statsB.possession}%` : `${teamB.slots.length} players`}</small>
+          </div>
+        </div>
+
+        {result ? (
+          <>
+            <div className="sim-metric-grid">
+              <Metric label="Shots" value={`${statsA?.shots ?? 0}-${statsB?.shots ?? 0}`} detail="전체 슈팅" />
+              <Metric label="SOT" value={`${statsA?.shotsOnTarget ?? 0}-${statsB?.shotsOnTarget ?? 0}`} detail="유효 슈팅" />
+              <Metric label="Press" value={`${statsA?.pressingWins ?? 0}-${statsB?.pressingWins ?? 0}`} detail="압박 탈취" />
+              <Metric label="Seed" value={result.matchSeed.slice(-8)} detail="동일 seed 재현 가능" />
+            </div>
+
+            <section className="sim-panel">
+              <div className="section-heading">
+                <p className="eyebrow">Tactical Report</p>
+                <h2>경기 해석</h2>
+              </div>
+              <div className="sim-report-grid">
+                <ReportList title="Why" items={result.report.whyTheyWon} />
+                <ReportList title="Notes" items={result.report.notes} />
+                <ReportList title="Weak" items={result.report.weakPoints} />
+              </div>
+            </section>
+
+            <section className="sim-panel">
+              <div className="section-heading row">
+                <div>
+                  <p className="eyebrow">Timeline</p>
+                  <h2>주요 장면</h2>
+                </div>
+                <span className="saved-count">{result.events.length} events</span>
+              </div>
+              <div className="sim-event-list">
+                {topEvents.map((event, index) => (
+                  <article className={event.outcome === "goal" ? "sim-event goal" : "sim-event"} key={`${event.minute}-${event.teamId}-${index}`}>
+                    <span>{event.minute}'</span>
+                    <div>
+                      <strong>
+                        {event.outcome.toUpperCase()} · xG {event.xg.toFixed(2)}
+                      </strong>
+                      <p>{event.description}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="sim-panel">
+              <div className="section-heading">
+                <p className="eyebrow">Ratings</p>
+                <h2>선수 평점</h2>
+              </div>
+              <div className="sim-rating-list">
+                {topRatings.map((rating) => (
+                  <button key={rating.playerId} onClick={() => onPlayerSelect(rating.playerId)} type="button">
+                    <span>{rating.teamId === teamA.id ? "A" : "B"}</span>
+                    <strong>{rating.playerName}</strong>
+                    <small>
+                      {rating.goals}G · {rating.assists}A
+                    </small>
+                    <em>{rating.rating.toFixed(1)}</em>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        ) : (
+          <section className="sim-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Ready</p>
+              <h2>첫 경기를 실행하세요</h2>
+            </div>
+            <p className="empty-state">전술과 seed를 고른 뒤 시뮬레이션을 실행하면 스코어, xG, 이벤트, 평점, 전술 리포트가 생성됩니다.</p>
+          </section>
+        )}
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
+function TeamSimControl({
+  countries,
+  label,
+  onCountryChange,
+  onSourceChange,
+  onTacticsChange,
+  selectedCountry,
+  source,
+  tactics,
+  team,
+}: {
+  countries: LegendData["countries"];
+  label: string;
+  onCountryChange: (value: string) => void;
+  onSourceChange: (value: SimTeamSource) => void;
+  onTacticsChange: (value: SimulationTactics) => void;
+  selectedCountry: string;
+  source: SimTeamSource;
+  tactics: SimulationTactics;
+  team: SimulationTeamInput;
+}) {
+  return (
+    <section className="sim-team-control">
+      <div className="section-heading compact-heading">
+        <p className="eyebrow">{label}</p>
+        <h3>{team.name}</h3>
+      </div>
+      <label className="field">
+        <span>팀 소스</span>
+        <select value={source} onChange={(event) => onSourceChange(event.target.value as SimTeamSource)}>
+          <option value="current">현재 Best XI</option>
+          <option value="world">World Auto XI</option>
+          <option value="country">국가 Auto XI</option>
+        </select>
+      </label>
+      {source === "country" ? (
+        <label className="field">
+          <span>국가</span>
+          <select value={selectedCountry} onChange={(event) => onCountryChange(event.target.value)}>
+            {countries.map((country) => (
+              <option key={country.name} value={country.name}>
+                {country.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      <div className="sim-team-preview">
+        {team.slots.slice(0, 5).map((slot) => (
+          <span key={slot.id}>
+            {slot.role} {slot.player.name}
+          </span>
+        ))}
+      </div>
+      <div className="sim-tactics-grid">
+        <label className="field">
+          <span>Style</span>
+          <select value={tactics.style} onChange={(event) => onTacticsChange({ ...tactics, style: event.target.value as SimulationTactics["style"] })}>
+            <option value="balanced">Balanced</option>
+            <option value="possession">Possession</option>
+            <option value="direct">Direct</option>
+            <option value="counter">Counter</option>
+            <option value="high-press">High Press</option>
+            <option value="low-block">Low Block</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Tempo</span>
+          <select value={tactics.tempo} onChange={(event) => onTacticsChange({ ...tactics, tempo: event.target.value as SimulationTactics["tempo"] })}>
+            <option value="slow">Slow</option>
+            <option value="normal">Normal</option>
+            <option value="fast">Fast</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Line</span>
+          <select value={tactics.lineHeight} onChange={(event) => onTacticsChange({ ...tactics, lineHeight: event.target.value as SimulationTactics["lineHeight"] })}>
+            <option value="low">Low</option>
+            <option value="mid">Mid</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <label className="field">
+          <span>Risk</span>
+          <select value={tactics.risk} onChange={(event) => onTacticsChange({ ...tactics, risk: event.target.value as SimulationTactics["risk"] })}>
+            <option value="conservative">Conservative</option>
+            <option value="normal">Normal</option>
+            <option value="aggressive">Aggressive</option>
+          </select>
+        </label>
+      </div>
+    </section>
+  );
+}
+
+function ReportList({ items, title }: { items: string[]; title: string }) {
+  return (
+    <article className="sim-report-card">
+      <strong>{title}</strong>
+      {items.length ? (
+        <ul>
+          {items.slice(0, 4).map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>특이 사항 없음</p>
+      )}
+    </article>
+  );
+}
+
 function ShortlistView({
   compareIds,
   inspector,
@@ -4942,6 +5336,51 @@ function formatSquadExport(
 ) {
   const lines = starters.map(({ player, rating, slot }) => `${slot.label}: ${player.name} (${player.country}, ${rating})`);
   return [`${scope} ${formationName} XI`, `Average: ${averageRating}`, "", ...lines].join("\n");
+}
+
+function createSimulationTeam(
+  id: string,
+  source: SimTeamSource,
+  country: string,
+  currentStarters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>,
+  players: LegendPlayer[],
+  weights: WeightMap,
+  currentFormationName: string,
+): SimulationTeamInput {
+  if (source === "current") {
+    return {
+      id,
+      name: `Current ${currentFormationName}`,
+      slots: currentStarters.map(({ player, slot }) => ({
+        id: slot.id,
+        label: slot.label,
+        player,
+        role: isPitchRole(slot.label) ? slot.label : slot.accepts[0],
+      })),
+    };
+  }
+
+  const formation = formations["4-3-3"];
+  const pool = source === "country" ? players.filter((player) => player.country === country) : players;
+  const squad = buildSquad(pool, pool, formation.slots, weights, {});
+
+  return {
+    id,
+    name: source === "country" ? `${country} Auto XI` : "World Auto XI",
+    slots: formation.slots
+      .map((slot) => {
+        const selected = squad[slot.id];
+        return selected
+          ? {
+              id: slot.id,
+              label: slot.label,
+              player: selected.player,
+              role: slot.accepts[0],
+            }
+          : null;
+      })
+      .filter(Boolean) as SimulationTeamInput["slots"],
+  };
 }
 
 function formatDraftExport(
