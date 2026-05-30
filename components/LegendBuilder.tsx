@@ -923,6 +923,76 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     setExportedSquadText(formatSquadExport(scope, formation.name, starters, averageRating));
   }
 
+  function getDraftTeamStarters(teamIndex: number) {
+    const draftFormation = formations["4-3-3"];
+    const players = draftPicks
+      .filter((pick) => pick.teamIndex === teamIndex)
+      .map((pick) => playerById.get(pick.playerId))
+      .filter(Boolean) as LegendPlayer[];
+    const draftSquad = buildSquad(players, players, draftFormation.slots, weights, {});
+
+    return draftFormation.slots
+      .map((slot) => {
+        const selected = draftSquad[slot.id];
+        return selected ? { slot, player: selected.player, rating: selected.rating } : null;
+      })
+      .filter(Boolean) as Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+  }
+
+  function openDraftTeamBestXi(teamIndex: number) {
+    const draftFormation = formations["4-3-3"];
+    const draftStarters = getDraftTeamStarters(teamIndex);
+    const nextManualSlots = draftStarters.reduce<Record<string, string>>((slots, starter) => {
+      slots[starter.slot.id] = starter.player.id;
+      return slots;
+    }, {});
+
+    setFormationId("4-3-3");
+    setBuilderContinent("ALL");
+    setBuilderCountry("ALL");
+    setBuilderPosition("ALL");
+    setBuilderTier("ALL");
+    setCandidateQuery("");
+    setTopOnly(false);
+    setManualSlots(nextManualSlots);
+    setSelectedSlotId(draftStarters[0]?.slot.id ?? draftFormation.slots[0]?.id ?? "st");
+    setSelectedPlayerId(draftStarters[0]?.player.id ?? null);
+    setActiveTab("best-xi");
+  }
+
+  function saveDraftTeamBestXi(teamIndex: number) {
+    const draftFormation = formations["4-3-3"];
+    const draftStarters = getDraftTeamStarters(teamIndex);
+    if (!draftStarters.length) {
+      return;
+    }
+
+    const now = new Date();
+    const slots: SavedSlot[] = draftStarters.map(({ player, rating, slot }) => ({
+      slotId: slot.id,
+      slotLabel: slot.label,
+      playerId: player.id,
+      playerName: player.name,
+      rating,
+      position: { left: slot.left, top: slot.top },
+    }));
+
+    setSavedSquads((current) => {
+      const saved: SavedSquad = {
+        id: `Draft-Team-${teamIndex + 1}-${now.getTime()}`,
+        name: `Draft Team ${teamIndex + 1} ${draftFormation.name}`,
+        scope: `Draft Team ${teamIndex + 1}`,
+        formationId: "4-3-3",
+        formationName: draftFormation.name,
+        createdAt: now.toISOString(),
+        weights,
+        slots,
+      };
+
+      return [saved, ...current].slice(0, 20);
+    });
+  }
+
   function toggleCompare(playerId: string) {
     setCompareIds((current) => {
       if (current.includes(playerId)) {
@@ -1148,6 +1218,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
             setDraftCountry("ALL");
           }}
           onCountryChange={setDraftCountry}
+          onOpenTeamBestXi={openDraftTeamBestXi}
           onPickPlayer={draftPlayer}
           onPlayerSelect={setSelectedPlayerId}
           onPositionChange={setDraftPosition}
@@ -1164,6 +1235,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
             setDraftRounds(value);
             setDraftPicks((current) => current.slice(0, draftTeamCount * value));
           }}
+          onSaveTeamBestXi={saveDraftTeamBestXi}
           onTeamCountChange={(value) => {
             setDraftTeamCount(value);
             setDraftPicks([]);
@@ -2368,6 +2440,7 @@ function LegendDraftView({
   onAutoPick,
   onContinentChange,
   onCountryChange,
+  onOpenTeamBestXi,
   onPickPlayer,
   onPlayerSelect,
   onPositionChange,
@@ -2375,6 +2448,7 @@ function LegendDraftView({
   onResetDraft,
   onResetFilters,
   onRoundsChange,
+  onSaveTeamBestXi,
   onTeamCountChange,
   onTierChange,
   onUndoPick,
@@ -2395,6 +2469,7 @@ function LegendDraftView({
   onAutoPick: () => void;
   onContinentChange: (value: Continent | FilterValue) => void;
   onCountryChange: (value: string | FilterValue) => void;
+  onOpenTeamBestXi: (teamIndex: number) => void;
   onPickPlayer: (playerId: string) => void;
   onPlayerSelect: (playerId: string) => void;
   onPositionChange: (value: PositionCode | FilterValue) => void;
@@ -2402,6 +2477,7 @@ function LegendDraftView({
   onResetDraft: () => void;
   onResetFilters: () => void;
   onRoundsChange: (value: number) => void;
+  onSaveTeamBestXi: (teamIndex: number) => void;
   onTeamCountChange: (value: number) => void;
   onTierChange: (value: LegendTierId | FilterValue) => void;
   onUndoPick: () => void;
@@ -2414,6 +2490,7 @@ function LegendDraftView({
   tier: LegendTierId | FilterValue;
   weights: WeightMap;
 }) {
+  const [exportedDraftText, setExportedDraftText] = useState("");
   const maxPicks = teamCount * rounds;
   const isComplete = picks.length >= maxPicks;
   const currentRound = Math.min(Math.floor(picks.length / teamCount) + 1, rounds);
@@ -2450,6 +2527,10 @@ function LegendDraftView({
     .filter((team) => team.players.length > 0)
     .sort((a, b) => b.xiAverage - a.xiAverage || b.average - a.average)[0];
 
+  function exportDraftBoard() {
+    setExportedDraftText(formatDraftExport(teamSummaries, picks, playerById, weights, rounds));
+  }
+
   return (
     <section className="draft-grid">
       <aside className="draft-sidebar">
@@ -2481,6 +2562,9 @@ function LegendDraftView({
           <div className="draft-action-grid">
             <button className="primary-inline" disabled={!candidates.length || isComplete} onClick={onAutoPick} type="button">
               자동 픽
+            </button>
+            <button className="small-button" disabled={!picks.length} onClick={exportDraftBoard} type="button">
+              내보내기
             </button>
             <button className="small-button" disabled={!picks.length} onClick={onUndoPick} type="button">
               되돌리기
@@ -2614,11 +2698,34 @@ function LegendDraftView({
                     })}
                   {team.players.length === 0 ? <p className="empty-state">아직 선택한 선수가 없습니다.</p> : null}
                 </div>
+                <div className="draft-team-actions">
+                  <button disabled={!team.players.length} onClick={() => onOpenTeamBestXi(team.teamIndex)} type="button">
+                    Best XI로 열기
+                  </button>
+                  <button disabled={!team.players.length} onClick={() => onSaveTeamBestXi(team.teamIndex)} type="button">
+                    XI 저장
+                  </button>
+                </div>
                 {team.starters.length ? <BattleXiList onPlayerSelect={onPlayerSelect} starters={team.starters} /> : null}
               </article>
             ))}
           </div>
         </section>
+
+        {exportedDraftText ? (
+          <section className="draft-export-panel">
+            <div className="section-heading row">
+              <div>
+                <p className="eyebrow">Export</p>
+                <h2>드래프트 보드 텍스트</h2>
+              </div>
+              <button className="small-button" onClick={() => setExportedDraftText("")} type="button">
+                닫기
+              </button>
+            </div>
+            <textarea readOnly value={exportedDraftText} />
+          </section>
+        ) : null}
 
         <section className="draft-candidate-panel">
           <div className="section-heading row">
@@ -3797,6 +3904,39 @@ function formatSquadExport(
 ) {
   const lines = starters.map(({ player, rating, slot }) => `${slot.label}: ${player.name} (${player.country}, ${rating})`);
   return [`${scope} ${formationName} XI`, `Average: ${averageRating}`, "", ...lines].join("\n");
+}
+
+function formatDraftExport(
+  teams: Array<{
+    average: number;
+    players: LegendPlayer[];
+    teamIndex: number;
+    xiAverage: number;
+  }>,
+  picks: DraftPick[],
+  playerById: Map<string, LegendPlayer>,
+  weights: WeightMap,
+  rounds: number,
+) {
+  const header = [`Legend Draft`, `${teams.length} teams · ${rounds} rounds · ${picks.length} picks`, ""];
+  const teamBlocks = teams.flatMap((team) => {
+    const teamPicks = picks
+      .filter((pick) => pick.teamIndex === team.teamIndex)
+      .map((pick) => {
+        const player = playerById.get(pick.playerId);
+        return player ? `#${pick.pickNumber} ${player.name} (${player.country}, ${player.primaryPosition}, ${ratePlayer(player, weights)})` : null;
+      })
+      .filter(Boolean) as string[];
+
+    return [
+      `Team ${team.teamIndex + 1}`,
+      `Average: ${team.average || "-"} · XI: ${team.xiAverage || "-"}`,
+      ...teamPicks,
+      "",
+    ];
+  });
+
+  return [...header, ...teamBlocks].join("\n").trim();
 }
 
 function createEmptyDepthRow(position: PositionCode): DepthPositionRow {

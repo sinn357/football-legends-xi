@@ -1358,6 +1358,7 @@ td strong {
 .draft-status-card,
 .draft-board-panel,
 .draft-candidate-panel,
+.draft-export-panel,
 .draft-team-card {
   background: var(--side-1-strong);
   border: 1px solid var(--line);
@@ -1392,7 +1393,7 @@ td strong {
 .draft-action-grid {
   display: grid;
   gap: 8px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .draft-action-grid .primary-inline {
@@ -1542,6 +1543,40 @@ td strong {
 .draft-team-card .battle-xi-list {
   border-top: 1px solid var(--line);
   padding-top: 10px;
+}
+
+.draft-team-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.draft-team-actions button {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+.draft-team-actions button:hover,
+.draft-team-actions button:focus-visible {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.draft-export-panel textarea {
+  background: rgba(11, 61, 46, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 220px;
+  padding: 12px;
+  resize: vertical;
+  width: 100%;
 }
 
 .draft-candidate-list {
@@ -2919,6 +2954,7 @@ td strong {
   .battle-position-row,
   .draft-action-grid,
   .draft-candidate-item,
+  .draft-team-actions,
   .country-xi-list,
   .comparison-grid,
   .compare-cards {
