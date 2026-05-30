@@ -2944,6 +2944,119 @@ td strong {
   text-align: center;
 }
 
+.tournament-grid {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.55fr) minmax(320px, 0.9fr);
+}
+
+.tournament-seed-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tournament-main {
+  align-content: start;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.tournament-champion {
+  background:
+    linear-gradient(90deg, rgba(200, 162, 74, 0.2), transparent 45%, rgba(200, 162, 74, 0.2)),
+    linear-gradient(180deg, var(--main-soft), var(--main));
+  border: 1px solid rgba(244, 239, 227, 0.22);
+  border-radius: 8px;
+  box-shadow: var(--panel-shadow);
+  color: var(--side-1-strong);
+  display: grid;
+  gap: 8px;
+  min-height: 148px;
+  padding: 20px;
+}
+
+.tournament-champion span {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tournament-champion strong {
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+.tournament-champion small {
+  color: rgba(255, 250, 240, 0.72);
+  font-size: 12px;
+}
+
+.tournament-bracket {
+  align-items: stretch;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, 1fr);
+}
+
+.tournament-match-card {
+  background: var(--side-1-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.tournament-match-card.featured {
+  border-color: rgba(200, 162, 74, 0.52);
+  box-shadow: 0 16px 34px rgba(11, 61, 46, 0.12);
+}
+
+.tournament-match-card > span {
+  color: var(--main);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tournament-match-card div {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  padding: 9px 10px;
+}
+
+.tournament-match-card strong {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tournament-match-card strong.winner {
+  color: var(--main);
+}
+
+.tournament-match-card em {
+  color: var(--gold);
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 900;
+  text-align: right;
+}
+
+.tournament-match-card small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .sim-scoreboard {
   align-items: stretch;
   background:
@@ -3884,6 +3997,7 @@ td strong {
   .quiz-grid,
   .shortlist-grid,
   .sim-grid,
+  .tournament-grid,
   .timeline-grid,
   .builder-grid,
   .rankings-grid,
@@ -3914,6 +4028,7 @@ td strong {
   .challenge-board-grid,
   .timeline-spotlight-grid,
   .sim-scoreboard,
+  .tournament-bracket,
   .sim-metric-grid,
   .sim-series-leaders,
   .sim-series-grid,
@@ -4008,6 +4123,8 @@ td strong {
   .sim-tactics-grid,
   .sim-scoreboard,
   .sim-history-list article,
+  .tournament-bracket,
+  .tournament-match-card div,
   .sim-metric-grid,
   .sim-series-grid,
   .sim-series-leaders,

@@ -6,7 +6,7 @@ import type { Continent, LegendData, LegendPlayer, PositionCode, ScoreKey, Score
 import { defaultTactics, simulateMatch } from "@/lib/simulation";
 import type { RandomnessLevel, SimulatedMatchResult, SimulationTactics, SimulationTeamInput } from "@/lib/simulation";
 
-type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "shortlist" | "sim" | "best-xi" | "rankings" | "compare";
+type TabId = "atlas" | "hall" | "depth" | "battle" | "era" | "timeline" | "draft" | "challenge" | "quiz" | "shortlist" | "sim" | "tournament" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
@@ -46,6 +46,24 @@ type SimHistoryEntry = {
   teamBWins: number;
   teamBXg: number;
   winnerName: string;
+};
+
+type TournamentMatch = {
+  id: string;
+  label: string;
+  result: SimulatedMatchResult;
+  stage: "Final" | "Semifinal";
+  teamA: SimulationTeamInput;
+  teamB: SimulationTeamInput;
+  winner: SimulationTeamInput;
+};
+
+type TournamentRun = {
+  champion: SimulationTeamInput;
+  countries: string[];
+  createdAt: string;
+  matches: TournamentMatch[];
+  seed: string;
 };
 
 type LegendTier = {
@@ -366,6 +384,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const dragStartPositionsRef = useRef<Record<string, SlotPosition>>({});
   const defaultCountry = data.countries.find((country) => country.name === "Brazil")?.name ?? data.countries[0]?.name ?? "";
   const defaultBattleCountry = data.countries.find((country) => country.name === "Argentina")?.name ?? data.countries[1]?.name ?? defaultCountry;
+  const defaultTournamentCountries = getDefaultTournamentCountries(data.countries);
   const [activeTab, setActiveTab] = useState<TabId>("atlas");
   const [atlasContinent, setAtlasContinent] = useState<Continent | null>("America");
   const [atlasCountry, setAtlasCountry] = useState(defaultCountry);
@@ -414,6 +433,8 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [simResult, setSimResult] = useState<SimulatedMatchResult | null>(null);
   const [simSeriesResults, setSimSeriesResults] = useState<SimSeriesMatch[]>([]);
   const [simHistory, setSimHistory] = useState<SimHistoryEntry[]>([]);
+  const [tournamentCountries, setTournamentCountries] = useState<string[]>(defaultTournamentCountries);
+  const [tournamentRun, setTournamentRun] = useState<TournamentRun | null>(null);
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
@@ -1266,6 +1287,36 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     setSimHistory([]);
   }
 
+  function updateTournamentCountry(index: number, country: string) {
+    setTournamentCountries((current) => current.map((item, itemIndex) => (itemIndex === index ? country : item)));
+    setTournamentRun(null);
+  }
+
+  function runTournament() {
+    const countries = ensureUniqueTournamentCountries(tournamentCountries, data.countries);
+    const teams = countries.map((country, index) =>
+      createSimulationTeam(`tournament-${index + 1}`, "country", country, "", starters, data.players, savedSquads, playerById, weights, formation.name),
+    );
+
+    if (teams.some((team) => team.slots.length < 7)) {
+      return;
+    }
+
+    const seed = `tournament-${Date.now()}`;
+    const semifinalA = runTournamentMatch("semi-1", "Semifinal 1", teams[0], teams[3], `${seed}-semi-1`, simRandomness);
+    const semifinalB = runTournamentMatch("semi-2", "Semifinal 2", teams[1], teams[2], `${seed}-semi-2`, simRandomness);
+    const final = runTournamentMatch("final", "Final", semifinalA.winner, semifinalB.winner, `${seed}-final`, simRandomness);
+
+    setTournamentCountries(countries);
+    setTournamentRun({
+      champion: final.winner,
+      countries,
+      createdAt: new Date().toISOString(),
+      matches: [semifinalA, semifinalB, final],
+      seed,
+    });
+  }
+
   function toggleShortlist(playerId: string) {
     setShortlistIds((current) => {
       if (current.includes(playerId)) {
@@ -1328,6 +1379,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           ["quiz", "Quiz"],
           ["shortlist", "Shortlist"],
           ["sim", "Sim"],
+          ["tournament", "Tournament"],
           ["best-xi", "Best XI"],
           ["rankings", "Rankings"],
           ["compare", "Compare"],
@@ -1634,6 +1686,17 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           teamBSource={simTeamBSource}
           tacticsA={simTacticsA}
           tacticsB={simTacticsB}
+        />
+      ) : null}
+
+      {activeTab === "tournament" ? (
+        <TournamentView
+          countries={data.countries}
+          inspector={inspector}
+          onCountryChange={updateTournamentCountry}
+          onRun={runTournament}
+          run={tournamentRun}
+          selectedCountries={tournamentCountries}
         />
       ) : null}
 
@@ -4746,6 +4809,104 @@ function TeamSimControl({
   );
 }
 
+function TournamentView({
+  countries,
+  inspector,
+  onCountryChange,
+  onRun,
+  run,
+  selectedCountries,
+}: {
+  countries: LegendData["countries"];
+  inspector: ReactNode;
+  onCountryChange: (index: number, country: string) => void;
+  onRun: () => void;
+  run: TournamentRun | null;
+  selectedCountries: string[];
+}) {
+  const duplicateCount = selectedCountries.length - new Set(selectedCountries).size;
+
+  return (
+    <section className="tournament-grid">
+      <aside className="sim-sidebar">
+        <div className="section-heading">
+          <p className="eyebrow">Tournament</p>
+          <h2>4팀 미니 토너먼트</h2>
+        </div>
+        <div className="tournament-seed-list">
+          {selectedCountries.map((country, index) => (
+            <label className="field" key={`tournament-seed-${index}`}>
+              <span>Seed {index + 1}</span>
+              <select value={country} onChange={(event) => onCountryChange(index, event.target.value)}>
+                {countries.map((item) => (
+                  <option key={`${index}-${item.name}`} value={item.name}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+        </div>
+        <button className="primary-button" disabled={duplicateCount > 0} onClick={onRun} type="button">
+          토너먼트 실행
+        </button>
+        {duplicateCount > 0 ? <p className="sim-inline-empty">같은 국가는 한 번만 참가할 수 있습니다.</p> : null}
+      </aside>
+
+      <section className="tournament-main">
+        {run ? (
+          <>
+            <div className="tournament-champion">
+              <span>Champion</span>
+              <strong>{run.champion.name}</strong>
+              <small>
+                {run.countries.join(" · ")} · {formatSavedDate(run.createdAt)}
+              </small>
+            </div>
+            <div className="tournament-bracket">
+              <TournamentMatchCard match={run.matches[0]} />
+              <TournamentMatchCard match={run.matches[2]} featured />
+              <TournamentMatchCard match={run.matches[1]} />
+            </div>
+          </>
+        ) : (
+          <section className="sim-panel">
+            <div className="section-heading">
+              <p className="eyebrow">Ready</p>
+              <h2>국가 4개를 고르고 실행하세요</h2>
+            </div>
+            <p className="empty-state">각 국가는 4-3-3 Auto XI로 구성되고, 준결승 2경기와 결승 1경기를 단판으로 시뮬레이션합니다.</p>
+          </section>
+        )}
+      </section>
+
+      {inspector}
+    </section>
+  );
+}
+
+function TournamentMatchCard({ featured = false, match }: { featured?: boolean; match: TournamentMatch }) {
+  const statsA = match.result.stats[match.teamA.id];
+  const statsB = match.result.stats[match.teamB.id];
+
+  return (
+    <article className={featured ? "tournament-match-card featured" : "tournament-match-card"}>
+      <span>{match.label}</span>
+      <div>
+        <strong className={match.winner.id === match.teamA.id ? "winner" : ""}>{match.teamA.name}</strong>
+        <em>{statsA.goals}</em>
+      </div>
+      <div>
+        <strong className={match.winner.id === match.teamB.id ? "winner" : ""}>{match.teamB.name}</strong>
+        <em>{statsB.goals}</em>
+      </div>
+      <small>
+        xG {statsA.xg.toFixed(2)}-{statsB.xg.toFixed(2)} · Winner {match.winner.name}
+      </small>
+    </article>
+  );
+}
+
 function ReportList({ items, title }: { items: string[]; title: string }) {
   return (
     <article className="sim-report-card">
@@ -4839,6 +5000,45 @@ function runSimulationSeries(
   }
 
   return matches;
+}
+
+function runTournamentMatch(id: string, label: string, teamA: SimulationTeamInput, teamB: SimulationTeamInput, seed: string, randomness: RandomnessLevel): TournamentMatch {
+  const [match] = runSimulationSeries(teamA, teamB, defaultTactics, defaultTactics, randomness, seed, "single");
+  const result = match.result;
+  const winner = getTournamentWinner(result, teamA, teamB);
+
+  return {
+    id,
+    label,
+    result,
+    stage: label === "Final" ? "Final" : "Semifinal",
+    teamA,
+    teamB,
+    winner,
+  };
+}
+
+function getTournamentWinner(result: SimulatedMatchResult, teamA: SimulationTeamInput, teamB: SimulationTeamInput) {
+  if (result.winnerTeamId === teamA.id) {
+    return teamA;
+  }
+
+  if (result.winnerTeamId === teamB.id) {
+    return teamB;
+  }
+
+  const statsA = result.stats[teamA.id];
+  const statsB = result.stats[teamB.id];
+
+  if (statsA.xg !== statsB.xg) {
+    return statsA.xg > statsB.xg ? teamA : teamB;
+  }
+
+  return getTeamOverallAverage(teamA) >= getTeamOverallAverage(teamB) ? teamA : teamB;
+}
+
+function getTeamOverallAverage(team: SimulationTeamInput) {
+  return team.slots.reduce((sum, slot) => sum + slot.player.overallScore, 0) / Math.max(team.slots.length, 1);
 }
 
 function createSimHistoryEntry(
@@ -5848,6 +6048,39 @@ function maskQuizAnswer(value: string, answer: string) {
 
 function formatDecadeLabel(decade: number) {
   return decade ? `${decade}s` : "Unplaced";
+}
+
+function getDefaultTournamentCountries(countries: LegendData["countries"]) {
+  const preferred = ["Brazil", "Argentina", "France", "Germany"];
+  const selected = preferred.map((name) => countries.find((country) => country.name === name)?.name).filter(Boolean) as string[];
+
+  for (const country of countries) {
+    if (selected.length >= 4) {
+      break;
+    }
+
+    if (!selected.includes(country.name)) {
+      selected.push(country.name);
+    }
+  }
+
+  return selected.slice(0, 4);
+}
+
+function ensureUniqueTournamentCountries(selectedCountries: string[], countries: LegendData["countries"]) {
+  const next = selectedCountries.filter(Boolean);
+
+  for (const country of countries) {
+    if (next.length >= 4) {
+      break;
+    }
+
+    if (!next.includes(country.name)) {
+      next.push(country.name);
+    }
+  }
+
+  return next.slice(0, 4);
 }
 
 function getPrimaryScoreKey(player: LegendPlayer) {
