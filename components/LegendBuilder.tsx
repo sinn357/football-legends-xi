@@ -781,6 +781,26 @@ function AtlasView({
   weights: WeightMap;
 }) {
   const groupedByPosition = groupPlayersByPosition(atlasPlayers);
+  const countryFormation = formations["4-3-3"];
+  const countrySquad = buildSquad(atlasPlayers, atlasPlayers, countryFormation.slots, weights, {});
+  const countryXiStarters = countryFormation.slots
+    .map((slot) => {
+      const selected = countrySquad[slot.id];
+      return selected ? { slot, player: selected.player, rating: selected.rating } : null;
+    })
+    .filter(Boolean) as Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>;
+  const countryXiAverage = average(countryXiStarters.map((starter) => starter.rating));
+  const positionRows = ([...positionOptions, "LEGEND"] as PositionCode[])
+    .map((position) => {
+      const count = selectedCountrySummary?.positions[position] ?? 0;
+      const total = selectedCountrySummary?.count ?? 0;
+      return {
+        count,
+        percent: total ? Math.round((count / total) * 100) : 0,
+        position,
+      };
+    })
+    .filter((item) => item.count > 0);
 
   return (
     <section className="atlas-grid">
@@ -845,6 +865,46 @@ function AtlasView({
           <Metric label="선수 풀" value={`${selectedCountrySummary?.count ?? 0}명`} detail="원본 리스트 기준" />
           <Metric label="포지션 수" value={`${Object.keys(selectedCountrySummary?.positions ?? {}).length}`} detail="분류된 포지션" />
           <Metric label="Top 10 평균" value={`${average(selectedCountryTop.map((item) => item.rating))}`} detail="공식 총점" />
+          <Metric label="자동 XI 평균" value={`${countryXiAverage}`} detail="4-3-3 기준" />
+        </section>
+
+        <section className="country-insights-grid">
+          <article className="atlas-insight-card">
+            <div className="section-heading">
+              <p className="eyebrow">Position Map</p>
+              <h2>포지션 분포</h2>
+            </div>
+            <div className="position-distribution-list">
+              {positionRows.map((item) => (
+                <div className="position-distribution-row" key={item.position}>
+                  <span>{item.position}</span>
+                  <i aria-hidden="true">
+                    <b style={{ width: `${item.percent}%` }} />
+                  </i>
+                  <strong>{item.count}</strong>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="atlas-insight-card">
+            <div className="section-heading row">
+              <div>
+                <p className="eyebrow">Auto XI</p>
+                <h2>{countryFormation.name} 국가 XI</h2>
+              </div>
+              <span className="rating-pill small">{countryXiAverage}</span>
+            </div>
+            <div className="country-xi-list">
+              {countryXiStarters.map(({ player, rating, slot }) => (
+                <button key={slot.id} onClick={() => onPlayerSelect(player.id)} type="button">
+                  <span>{slot.label}</span>
+                  <strong>{player.name}</strong>
+                  <em>{rating}</em>
+                </button>
+              ))}
+            </div>
+          </article>
         </section>
 
         <div className="nation-dashboard">
