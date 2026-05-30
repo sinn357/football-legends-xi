@@ -9,6 +9,7 @@
 - 앱은 서버에서 마크다운을 읽어 국가, 포지션, 선수명, 보류/삭제 후보 메모를 파싱합니다.
 - 선수별 세부 점수는 MVP용 임시 시드이며, 현재는 문서 내 포지션 순서와 상태 메모를 기준으로 생성합니다.
 - 점수 체계와 선수 정보 입력 기준: `docs/design/SCORE_AND_PROFILE_SYSTEM.md`
+- 웹 기반 매치 시뮬레이션 설계: `docs/design/SIMULATION_SYSTEM_V1.md`
 
 ## 실행
 
@@ -33,3 +34,4 @@ npm run dev
 - 가중치 기반 Top 100 Ranking Lab
 - 최대 4명 선수 비교
 - 브라우저 로컬 저장소 기반 XI 저장 및 비교
+- 웹 기반 매치 시뮬레이션 설계 확정: Godot 없이 Next.js 앱 안에서 순수 엔진과 UI를 단계적으로 구현
