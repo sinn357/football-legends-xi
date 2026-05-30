@@ -845,6 +845,43 @@ td strong {
   color: var(--red);
 }
 
+.tier-badge {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  padding: 5px 8px;
+  width: fit-content;
+}
+
+.tier-badge.pantheon {
+  background: rgba(200, 162, 74, 0.24);
+  color: #5f4310;
+}
+
+.tier-badge.all-time {
+  background: rgba(11, 61, 46, 0.13);
+  color: var(--main);
+}
+
+.tier-badge.national {
+  background: rgba(44, 91, 115, 0.14);
+  color: var(--blue);
+}
+
+.tier-badge.borderline,
+.tier-badge.watchlist {
+  background: rgba(194, 138, 44, 0.16);
+  color: #7a5315;
+}
+
+.tier-badge.archive {
+  background: rgba(183, 67, 67, 0.13);
+  color: var(--red);
+}
+
 .score-bars {
   display: grid;
   gap: 3px;
@@ -1170,6 +1207,11 @@ td strong {
   font-style: normal;
 }
 
+.player-mini-card .tier-badge {
+  font-size: 10px;
+  padding: 4px 7px;
+}
+
 .compact-tabs {
   margin-bottom: 14px;
 }
@@ -1211,6 +1253,7 @@ td strong {
 .candidate-item span {
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.35;
 }
 
 .candidate-item div {
@@ -1385,6 +1428,10 @@ td strong {
   font-size: 12px;
   font-weight: 800;
   padding: 6px 9px;
+}
+
+.drawer-meta-chips .tier-badge {
+  border: 0;
 }
 
 .official-score-panel {

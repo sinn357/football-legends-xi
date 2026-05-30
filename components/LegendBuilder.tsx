@@ -8,6 +8,13 @@ type TabId = "atlas" | "best-xi" | "rankings" | "compare";
 type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
+type LegendTierId = "pantheon" | "all-time" | "national" | "borderline" | "watchlist" | "archive";
+
+type LegendTier = {
+  id: LegendTierId;
+  label: string;
+  range: string;
+};
 
 type FormationSlot = {
   id: string;
@@ -68,6 +75,15 @@ const scoreModeLabels: Record<ScoreMode, string> = {
   computed: "계산",
   adjusted: "보정",
 };
+
+const legendTiers: LegendTier[] = [
+  { id: "pantheon", label: "Pantheon Legend", range: "95-100" },
+  { id: "all-time", label: "All-Time Legend", range: "90-94" },
+  { id: "national", label: "National / Continental Legend", range: "85-89" },
+  { id: "borderline", label: "Cult / Borderline Legend", range: "80-84" },
+  { id: "watchlist", label: "Watchlist", range: "75-79" },
+  { id: "archive", label: "Archive / Remove Candidate", range: "0-74" },
+];
 
 const positionOptions: PositionCode[] = ["ST", "SS", "RW", "LW", "AM", "CM", "DM", "CB", "RB", "LB", "GK"];
 const continentOptions: Continent[] = ["America", "Europe", "Asia", "Africa"];
@@ -195,11 +211,13 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [builderContinent, setBuilderContinent] = useState<Continent | FilterValue>("ALL");
   const [builderCountry, setBuilderCountry] = useState<string | FilterValue>("ALL");
   const [builderPosition, setBuilderPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [builderTier, setBuilderTier] = useState<LegendTierId | FilterValue>("ALL");
   const [candidateQuery, setCandidateQuery] = useState("");
   const [compareQuery, setCompareQuery] = useState("");
   const [rankingContinent, setRankingContinent] = useState<Continent | FilterValue>("ALL");
   const [rankingCountry, setRankingCountry] = useState<string | FilterValue>("ALL");
   const [rankingPosition, setRankingPosition] = useState<PositionCode | FilterValue>("ALL");
+  const [rankingTier, setRankingTier] = useState<LegendTierId | FilterValue>("ALL");
   const [rankingQuery, setRankingQuery] = useState("");
   const [topOnly, setTopOnly] = useState(true);
   const [manualSlots, setManualSlots] = useState<Record<string, string>>({});
@@ -301,6 +319,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       .filter((player) => builderContinent === "ALL" || player.continent === builderContinent)
       .filter((player) => builderCountry === "ALL" || player.country === builderCountry)
       .filter((player) => builderPosition === "ALL" || player.primaryPosition === builderPosition)
+      .filter((player) => builderTier === "ALL" || getLegendTier(player.overallScore).id === builderTier)
       .filter((player) => !topOnly || player.topTierRank !== null)
       .filter((player) => !normalizedQuery || matchesPlayerSearch(player, normalizedQuery))
       .map((player) => ({ player, rating: ratePlayerForSlot(player, selectedSlot, weights) }))
@@ -315,6 +334,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     builderContinent,
     builderCountry,
     builderPosition,
+    builderTier,
     candidateQuery,
     selectedSlot,
     statusFilteredPlayers,
@@ -344,6 +364,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
       .filter((player) => rankingContinent === "ALL" || player.continent === rankingContinent)
       .filter((player) => rankingCountry === "ALL" || player.country === rankingCountry)
       .filter((player) => rankingPosition === "ALL" || player.primaryPosition === rankingPosition)
+      .filter((player) => rankingTier === "ALL" || getLegendTier(player.overallScore).id === rankingTier)
       .filter((player) => !normalizedQuery || matchesPlayerSearch(player, normalizedQuery))
       .map((player) => ({ player, rating: ratePlayer(player, weights) }))
       .sort(
@@ -352,7 +373,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           b.rating - a.rating ||
           (a.player.topTierRank ?? 999) - (b.player.topTierRank ?? 999),
       );
-  }, [rankingContinent, rankingCountry, rankingPosition, rankingQuery, statusFilteredPlayers, weights]);
+  }, [rankingContinent, rankingCountry, rankingPosition, rankingQuery, rankingTier, statusFilteredPlayers, weights]);
 
   const rankingPlayers = rankingPool.slice(0, 150);
   const rankingSummary = {
@@ -669,6 +690,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           builderCountries={builderCountries}
           builderCountry={builderCountry}
           builderPosition={builderPosition}
+          builderTier={builderTier}
           candidatePlayers={candidatePlayers}
           candidateQuery={candidateQuery}
           compareIds={compareIds}
@@ -694,6 +716,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onLoadSavedSquad={loadSavedSquad}
           onPlayerSelect={setSelectedPlayerId}
           onPositionChange={setBuilderPosition}
+          onTierChange={setBuilderTier}
           onRenameSavedSquad={renameSavedSquad}
           onResetPositions={resetCurrentFormationPositions}
           onSave={saveCurrentSquad}
@@ -728,6 +751,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           countries={rankingCountries}
           continent={rankingContinent}
           country={rankingCountry}
+          tier={rankingTier}
           onPlayerSelect={setSelectedPlayerId}
           onContinentChange={(value) => {
             setRankingContinent(value);
@@ -735,11 +759,13 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           }}
           onCountryChange={setRankingCountry}
           onPositionChange={setRankingPosition}
+          onTierChange={setRankingTier}
           onQueryChange={setRankingQuery}
           onResetFilters={() => {
             setRankingContinent("ALL");
             setRankingCountry("ALL");
             setRankingPosition("ALL");
+            setRankingTier("ALL");
             setRankingQuery("");
           }}
           onToggleCompare={toggleCompare}
@@ -977,6 +1003,7 @@ function BestXiView({
   builderCountries,
   builderCountry,
   builderPosition,
+  builderTier,
   candidatePlayers,
   candidateQuery,
   compareIds,
@@ -1006,6 +1033,7 @@ function BestXiView({
   onLoadSavedSquad,
   onPlayerSelect,
   onPositionChange,
+  onTierChange,
   onRenameSavedSquad,
   onResetPositions,
   onSave,
@@ -1031,6 +1059,7 @@ function BestXiView({
   builderCountries: LegendData["countries"];
   builderCountry: string | FilterValue;
   builderPosition: PositionCode | FilterValue;
+  builderTier: LegendTierId | FilterValue;
   candidatePlayers: Array<{ player: LegendPlayer; rating: number }>;
   candidateQuery: string;
   compareIds: string[];
@@ -1060,6 +1089,7 @@ function BestXiView({
   onLoadSavedSquad: (saved: SavedSquad) => void;
   onPlayerSelect: (playerId: string) => void;
   onPositionChange: (value: PositionCode | FilterValue) => void;
+  onTierChange: (value: LegendTierId | FilterValue) => void;
   onRenameSavedSquad: (savedId: string, name: string) => void;
   onResetPositions: () => void;
   onSave: () => void;
@@ -1175,6 +1205,17 @@ function BestXiView({
               ))}
             </select>
           </label>
+          <label className="field">
+            <span>레전드 티어</span>
+            <select value={builderTier} onChange={(event) => onTierChange(event.target.value as LegendTierId | FilterValue)}>
+              <option value="ALL">전체</option>
+              {legendTiers.map((tier) => (
+                <option key={tier.id} value={tier.id}>
+                  {tier.label} ({tier.range})
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="toggles vertical">
             <label>
               <input checked={topOnly} onChange={(event) => onTopOnlyChange(event.target.checked)} type="checkbox" />
@@ -1223,7 +1264,7 @@ function BestXiView({
                 <button onClick={() => onAssignPlayer(player.id)} type="button">
                   <strong>{player.name}</strong>
                   <span>
-                    {player.country} · {player.primaryPosition} · {rating}
+                    {player.country} · {player.primaryPosition} · {rating} · {getLegendTier(player.overallScore).label}
                   </span>
                 </button>
                 <div>
@@ -1491,10 +1532,12 @@ function RankingsView({
   continent,
   countries,
   country,
+  tier,
   onPlayerSelect,
   onContinentChange,
   onCountryChange,
   onPositionChange,
+  onTierChange,
   onQueryChange,
   onResetFilters,
   onToggleCompare,
@@ -1509,10 +1552,12 @@ function RankingsView({
   continent: Continent | FilterValue;
   countries: LegendData["countries"];
   country: string | FilterValue;
+  tier: LegendTierId | FilterValue;
   onPlayerSelect: (playerId: string) => void;
   onContinentChange: (value: Continent | FilterValue) => void;
   onCountryChange: (value: string | FilterValue) => void;
   onPositionChange: (value: PositionCode | FilterValue) => void;
+  onTierChange: (value: LegendTierId | FilterValue) => void;
   onQueryChange: (query: string) => void;
   onResetFilters: () => void;
   onToggleCompare: (playerId: string) => void;
@@ -1579,6 +1624,17 @@ function RankingsView({
               ))}
             </select>
           </label>
+          <label className="field">
+            <span>레전드 티어</span>
+            <select value={tier} onChange={(event) => onTierChange(event.target.value as LegendTierId | FilterValue)}>
+              <option value="ALL">전체</option>
+              {legendTiers.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label} ({item.range})
+                </option>
+              ))}
+            </select>
+          </label>
           <button className="ghost-button compact-button" onClick={onResetFilters} type="button">
             필터 초기화
           </button>
@@ -1621,7 +1677,7 @@ function RankingsView({
                 <button onClick={() => onPlayerSelect(player.id)} type="button">
                   <strong>{player.name}</strong>
                   <small>
-                    {player.country} · {player.continent} · {player.primaryPosition}
+                    {player.country} · {player.continent} · {player.primaryPosition} · {getLegendTier(player.overallScore).label}
                   </small>
                 </button>
                 <em>{rating}</em>
@@ -1699,7 +1755,7 @@ function CompareView({
               <button onClick={() => onPlayerSelect(player.id)} type="button">
                 <strong>{player.name}</strong>
                 <span>
-                  {player.country} · {player.primaryPosition}
+                  {player.country} · {player.primaryPosition} · {getLegendTier(player.overallScore).label}
                 </span>
               </button>
               <div>
@@ -1737,6 +1793,7 @@ function CompareView({
                 <p>
                   {player.country} · {player.primaryPosition} · {ratePlayer(player, weights)}
                 </p>
+                <span className={`tier-badge ${getLegendTier(player.overallScore).id}`}>{getLegendTier(player.overallScore).label}</span>
                 <ScoreBars player={player} />
                 {(Object.keys(scoreLabels) as ScoreKey[]).map((key) => (
                   <div className="compare-row" key={key}>
@@ -1802,12 +1859,15 @@ function PlayerDetailDrawer({
         <span>{player.continent}</span>
         <span>{player.country}</span>
         <span>{player.primaryPosition}</span>
+        <span className={`tier-badge ${getLegendTier(player.overallScore).id}`}>{getLegendTier(player.overallScore).label}</span>
         <span>{statusLabels[player.status]}</span>
       </div>
       <div className="official-score-panel">
         <span>공식 총점</span>
         <strong>{player.overallScore}</strong>
-        <em>{scoreModeLabels[player.scoreMode]}</em>
+        <em>
+          {scoreModeLabels[player.scoreMode]} · {getLegendTier(player.overallScore).range}
+        </em>
       </div>
       <div className="drawer-actions">
         <button className="primary-inline" onClick={() => onToggleCompare(player.id)} type="button">
@@ -1930,6 +1990,7 @@ function PlayerMiniCard({ onClick, player, rating }: { onClick: () => void; play
       <span>
         {player.primaryPosition} · 공식 {player.overallScore} · 기준 {rating}
       </span>
+      <span className={`tier-badge ${getLegendTier(player.overallScore).id}`}>{getLegendTier(player.overallScore).label}</span>
       <em>{statusLabels[player.status]}</em>
     </button>
   );
@@ -1952,7 +2013,7 @@ function PlayerRow({
       <div>
         <strong>{player.name}</strong>
         <small>
-          {player.country} · {player.primaryPosition}
+          {player.country} · {player.primaryPosition} · {getLegendTier(player.overallScore).label}
         </small>
       </div>
       <em>{rating}</em>
@@ -1970,6 +2031,30 @@ function ScoreBars({ player }: { player: LegendPlayer }) {
       ))}
     </div>
   );
+}
+
+function getLegendTier(score: number): LegendTier {
+  if (score >= 95) {
+    return legendTiers[0];
+  }
+
+  if (score >= 90) {
+    return legendTiers[1];
+  }
+
+  if (score >= 85) {
+    return legendTiers[2];
+  }
+
+  if (score >= 80) {
+    return legendTiers[3];
+  }
+
+  if (score >= 75) {
+    return legendTiers[4];
+  }
+
+  return legendTiers[5];
 }
 
 function getOpenProfileSections(value: boolean): Record<ScoreKey, boolean> {
