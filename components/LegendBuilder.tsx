@@ -11,7 +11,7 @@ type WeightMap = Record<ScoreKey, number>;
 type FilterValue = "ALL";
 type PitchRole = Exclude<PositionCode, "LEGEND">;
 type LegendTierId = "pantheon" | "all-time" | "national" | "borderline" | "watchlist" | "archive";
-type SimTeamSource = "country" | "current" | "world";
+type SimTeamSource = "country" | "current" | "saved" | "world";
 
 type LegendTier = {
   id: LegendTierId;
@@ -368,6 +368,8 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [simTeamBSource, setSimTeamBSource] = useState<SimTeamSource>("country");
   const [simTeamACountry, setSimTeamACountry] = useState(defaultCountry);
   const [simTeamBCountry, setSimTeamBCountry] = useState(defaultBattleCountry);
+  const [simTeamASavedId, setSimTeamASavedId] = useState("");
+  const [simTeamBSavedId, setSimTeamBSavedId] = useState("");
   const [simTacticsA, setSimTacticsA] = useState<SimulationTactics>({ ...defaultTactics, style: "possession" });
   const [simTacticsB, setSimTacticsB] = useState<SimulationTactics>({ ...defaultTactics, style: "counter" });
   const [simSeed, setSimSeed] = useState("legends-match-1");
@@ -583,12 +585,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
         "team-a",
         simTeamASource,
         simTeamACountry,
+        simTeamASavedId,
         starters,
         data.players,
+        savedSquads,
+        playerById,
         weights,
         formation.name,
       ),
-    [data.players, formation.name, simTeamACountry, simTeamASource, starters, weights],
+    [data.players, formation.name, playerById, savedSquads, simTeamACountry, simTeamASavedId, simTeamASource, starters, weights],
   );
   const simTeamB = useMemo(
     () =>
@@ -596,12 +601,15 @@ export function LegendBuilder({ data }: { data: LegendData }) {
         "team-b",
         simTeamBSource,
         simTeamBCountry,
+        simTeamBSavedId,
         starters,
         data.players,
+        savedSquads,
+        playerById,
         weights,
         formation.name,
       ),
-    [data.players, formation.name, simTeamBCountry, simTeamBSource, starters, weights],
+    [data.players, formation.name, playerById, savedSquads, simTeamBCountry, simTeamBSavedId, simTeamBSource, starters, weights],
   );
 
   const rankingPool = useMemo(() => {
@@ -1183,6 +1191,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   }
 
   function runSimulation(nextSeed?: string) {
+    if (simTeamA.slots.length < 7 || simTeamB.slots.length < 7) {
+      return;
+    }
+
     const seed = nextSeed ?? (simSeed.trim() || `legends-match-${Date.now()}`);
     setSimSeed(seed);
     setSimResult(
@@ -1536,19 +1548,24 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           onRun={() => runSimulation()}
           onSeedChange={setSimSeed}
           onTeamACountryChange={setSimTeamACountry}
+          onTeamASavedSquadChange={setSimTeamASavedId}
           onTeamASourceChange={setSimTeamASource}
           onTeamBCountryChange={setSimTeamBCountry}
+          onTeamBSavedSquadChange={setSimTeamBSavedId}
           onTeamBSourceChange={setSimTeamBSource}
           onTacticsAChange={setSimTacticsA}
           onTacticsBChange={setSimTacticsB}
           randomness={simRandomness}
           result={simResult}
           seed={simSeed}
+          savedSquads={savedSquads}
           teamA={simTeamA}
           teamACountry={simTeamACountry}
+          teamASavedSquadId={simTeamASavedId}
           teamASource={simTeamASource}
           teamB={simTeamB}
           teamBCountry={simTeamBCountry}
+          teamBSavedSquadId={simTeamBSavedId}
           teamBSource={simTeamBSource}
           tacticsA={simTacticsA}
           tacticsB={simTacticsB}
@@ -4212,19 +4229,24 @@ function MatchSimulatorView({
   onRun,
   onSeedChange,
   onTeamACountryChange,
+  onTeamASavedSquadChange,
   onTeamASourceChange,
   onTeamBCountryChange,
+  onTeamBSavedSquadChange,
   onTeamBSourceChange,
   onTacticsAChange,
   onTacticsBChange,
   randomness,
   result,
   seed,
+  savedSquads,
   teamA,
   teamACountry,
+  teamASavedSquadId,
   teamASource,
   teamB,
   teamBCountry,
+  teamBSavedSquadId,
   teamBSource,
   tacticsA,
   tacticsB,
@@ -4237,19 +4259,24 @@ function MatchSimulatorView({
   onRun: () => void;
   onSeedChange: (value: string) => void;
   onTeamACountryChange: (value: string) => void;
+  onTeamASavedSquadChange: (value: string) => void;
   onTeamASourceChange: (value: SimTeamSource) => void;
   onTeamBCountryChange: (value: string) => void;
+  onTeamBSavedSquadChange: (value: string) => void;
   onTeamBSourceChange: (value: SimTeamSource) => void;
   onTacticsAChange: (value: SimulationTactics) => void;
   onTacticsBChange: (value: SimulationTactics) => void;
   randomness: RandomnessLevel;
   result: SimulatedMatchResult | null;
   seed: string;
+  savedSquads: SavedSquad[];
   teamA: SimulationTeamInput;
   teamACountry: string;
+  teamASavedSquadId: string;
   teamASource: SimTeamSource;
   teamB: SimulationTeamInput;
   teamBCountry: string;
+  teamBSavedSquadId: string;
   teamBSource: SimTeamSource;
   tacticsA: SimulationTactics;
   tacticsB: SimulationTactics;
@@ -4270,9 +4297,12 @@ function MatchSimulatorView({
           countries={countries}
           label="Team A"
           onCountryChange={onTeamACountryChange}
+          onSavedSquadChange={onTeamASavedSquadChange}
           onSourceChange={onTeamASourceChange}
           onTacticsChange={onTacticsAChange}
+          savedSquads={savedSquads}
           selectedCountry={teamACountry}
+          selectedSavedSquadId={teamASavedSquadId}
           source={teamASource}
           tactics={tacticsA}
           team={teamA}
@@ -4281,9 +4311,12 @@ function MatchSimulatorView({
           countries={countries}
           label="Team B"
           onCountryChange={onTeamBCountryChange}
+          onSavedSquadChange={onTeamBSavedSquadChange}
           onSourceChange={onTeamBSourceChange}
           onTacticsChange={onTacticsBChange}
+          savedSquads={savedSquads}
           selectedCountry={teamBCountry}
+          selectedSavedSquadId={teamBSavedSquadId}
           source={teamBSource}
           tactics={tacticsB}
           team={teamB}
@@ -4301,10 +4334,10 @@ function MatchSimulatorView({
           <input className="search-input" onChange={(event) => onSeedChange(event.target.value)} type="text" value={seed} />
         </label>
         <div className="sim-actions">
-          <button className="primary-button" onClick={onRun} type="button">
+          <button className="primary-button" disabled={teamA.slots.length < 7 || teamB.slots.length < 7} onClick={onRun} type="button">
             시뮬레이션 실행
           </button>
-          <button className="ghost-button" onClick={onRandomSeed} type="button">
+          <button className="ghost-button" disabled={teamA.slots.length < 7 || teamB.slots.length < 7} onClick={onRandomSeed} type="button">
             새 경기 다시 돌리기
           </button>
         </div>
@@ -4408,9 +4441,12 @@ function TeamSimControl({
   countries,
   label,
   onCountryChange,
+  onSavedSquadChange,
   onSourceChange,
   onTacticsChange,
+  savedSquads,
   selectedCountry,
+  selectedSavedSquadId,
   source,
   tactics,
   team,
@@ -4418,13 +4454,18 @@ function TeamSimControl({
   countries: LegendData["countries"];
   label: string;
   onCountryChange: (value: string) => void;
+  onSavedSquadChange: (value: string) => void;
   onSourceChange: (value: SimTeamSource) => void;
   onTacticsChange: (value: SimulationTactics) => void;
+  savedSquads: SavedSquad[];
   selectedCountry: string;
+  selectedSavedSquadId: string;
   source: SimTeamSource;
   tactics: SimulationTactics;
   team: SimulationTeamInput;
 }) {
+  const effectiveSavedSquadId = selectedSavedSquadId || savedSquads[0]?.id || "";
+
   return (
     <section className="sim-team-control">
       <div className="section-heading compact-heading">
@@ -4435,10 +4476,29 @@ function TeamSimControl({
         <span>팀 소스</span>
         <select value={source} onChange={(event) => onSourceChange(event.target.value as SimTeamSource)}>
           <option value="current">현재 Best XI</option>
+          <option disabled={savedSquads.length === 0} value="saved">
+            저장한 XI
+          </option>
           <option value="world">World Auto XI</option>
           <option value="country">국가 Auto XI</option>
         </select>
       </label>
+      {source === "saved" ? (
+        savedSquads.length ? (
+          <label className="field">
+            <span>저장 조합</span>
+            <select value={effectiveSavedSquadId} onChange={(event) => onSavedSquadChange(event.target.value)}>
+              {savedSquads.map((saved) => (
+                <option key={saved.id} value={saved.id}>
+                  {saved.name} · {saved.formationName}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <p className="sim-inline-empty">저장한 XI가 없습니다. Best XI에서 먼저 조합을 저장하세요.</p>
+        )
+      ) : null}
       {source === "country" ? (
         <label className="field">
           <span>국가</span>
@@ -4452,11 +4512,15 @@ function TeamSimControl({
         </label>
       ) : null}
       <div className="sim-team-preview">
-        {team.slots.slice(0, 5).map((slot) => (
-          <span key={slot.id}>
-            {slot.role} {slot.player.name}
-          </span>
-        ))}
+        {team.slots.length ? (
+          team.slots.slice(0, 5).map((slot) => (
+            <span key={slot.id}>
+              {slot.role} {slot.player.name}
+            </span>
+          ))
+        ) : (
+          <span>선택 가능한 선수가 없습니다</span>
+        )}
       </div>
       <div className="sim-tactics-grid">
         <label className="field">
@@ -5342,8 +5406,11 @@ function createSimulationTeam(
   id: string,
   source: SimTeamSource,
   country: string,
+  savedSquadId: string,
   currentStarters: Array<{ slot: FormationSlot; player: LegendPlayer; rating: number }>,
   players: LegendPlayer[],
+  savedSquads: SavedSquad[],
+  playerById: Map<string, LegendPlayer>,
   weights: WeightMap,
   currentFormationName: string,
 ): SimulationTeamInput {
@@ -5357,6 +5424,40 @@ function createSimulationTeam(
         player,
         role: isPitchRole(slot.label) ? slot.label : slot.accepts[0],
       })),
+    };
+  }
+
+  if (source === "saved") {
+    const saved = savedSquads.find((item) => item.id === savedSquadId) ?? savedSquads[0];
+
+    if (!saved) {
+      return {
+        id,
+        name: "Saved XI",
+        slots: [],
+      };
+    }
+
+    return {
+      id,
+      name: saved.name,
+      slots: saved.slots
+        .map((savedSlot) => {
+          const player = playerById.get(savedSlot.playerId);
+          if (!player) {
+            return null;
+          }
+
+          const formationSlot = formations[saved.formationId]?.slots.find((slot) => slot.id === savedSlot.slotId);
+
+          return {
+            id: savedSlot.slotId,
+            label: savedSlot.slotLabel,
+            player,
+            role: isPitchRole(savedSlot.slotLabel) ? savedSlot.slotLabel : formationSlot?.accepts[0] ?? player.primaryPosition,
+          };
+        })
+        .filter(Boolean) as SimulationTeamInput["slots"],
     };
   }
 

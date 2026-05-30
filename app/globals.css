@@ -2818,6 +2818,17 @@ td strong {
   padding: 5px 8px;
 }
 
+.sim-inline-empty {
+  background: rgba(183, 67, 67, 0.08);
+  border: 1px solid rgba(183, 67, 67, 0.16);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 0;
+  padding: 10px;
+}
+
 .sim-tactics-grid {
   display: grid;
   gap: 10px;
