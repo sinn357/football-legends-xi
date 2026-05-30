@@ -2994,11 +2994,25 @@ td strong {
   font-size: 12px;
 }
 
+.tournament-rounds {
+  display: grid;
+  gap: 14px;
+}
+
+.tournament-round {
+  background: rgba(255, 250, 240, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
 .tournament-bracket {
   align-items: stretch;
   display: grid;
   gap: 14px;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
 .tournament-match-card {

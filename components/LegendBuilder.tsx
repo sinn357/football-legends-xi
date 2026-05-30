@@ -13,6 +13,7 @@ type PitchRole = Exclude<PositionCode, "LEGEND">;
 type LegendTierId = "pantheon" | "all-time" | "national" | "borderline" | "watchlist" | "archive";
 type SimTeamSource = "country" | "current" | "saved" | "world";
 type SimMatchMode = "best-of-3" | "home-away" | "single";
+type TournamentSize = 4 | 8;
 
 type SimSeriesMatch = {
   homeTeamId: string;
@@ -52,7 +53,7 @@ type TournamentMatch = {
   id: string;
   label: string;
   result: SimulatedMatchResult;
-  stage: "Final" | "Semifinal";
+  stage: "Final" | "Quarterfinal" | "Semifinal";
   teamA: SimulationTeamInput;
   teamB: SimulationTeamInput;
   winner: SimulationTeamInput;
@@ -64,6 +65,7 @@ type TournamentRun = {
   createdAt: string;
   matches: TournamentMatch[];
   seed: string;
+  size: TournamentSize;
 };
 
 type LegendTier = {
@@ -433,6 +435,7 @@ export function LegendBuilder({ data }: { data: LegendData }) {
   const [simResult, setSimResult] = useState<SimulatedMatchResult | null>(null);
   const [simSeriesResults, setSimSeriesResults] = useState<SimSeriesMatch[]>([]);
   const [simHistory, setSimHistory] = useState<SimHistoryEntry[]>([]);
+  const [tournamentSize, setTournamentSize] = useState<TournamentSize>(4);
   const [tournamentCountries, setTournamentCountries] = useState<string[]>(defaultTournamentCountries);
   const [tournamentRun, setTournamentRun] = useState<TournamentRun | null>(null);
   const [compareQuery, setCompareQuery] = useState("");
@@ -1292,8 +1295,14 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     setTournamentRun(null);
   }
 
+  function updateTournamentSize(value: TournamentSize) {
+    setTournamentSize(value);
+    setTournamentCountries((current) => ensureUniqueTournamentCountries(current, data.countries, value));
+    setTournamentRun(null);
+  }
+
   function runTournament() {
-    const countries = ensureUniqueTournamentCountries(tournamentCountries, data.countries);
+    const countries = ensureUniqueTournamentCountries(tournamentCountries, data.countries, tournamentSize);
     const teams = countries.map((country, index) =>
       createSimulationTeam(`tournament-${index + 1}`, "country", country, "", starters, data.players, savedSquads, playerById, weights, formation.name),
     );
@@ -1303,18 +1312,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
     }
 
     const seed = `tournament-${Date.now()}`;
-    const semifinalA = runTournamentMatch("semi-1", "Semifinal 1", teams[0], teams[3], `${seed}-semi-1`, simRandomness);
-    const semifinalB = runTournamentMatch("semi-2", "Semifinal 2", teams[1], teams[2], `${seed}-semi-2`, simRandomness);
-    const final = runTournamentMatch("final", "Final", semifinalA.winner, semifinalB.winner, `${seed}-final`, simRandomness);
+    const run = createTournamentRun(teams, countries, tournamentSize, seed, simRandomness);
 
     setTournamentCountries(countries);
-    setTournamentRun({
-      champion: final.winner,
-      countries,
-      createdAt: new Date().toISOString(),
-      matches: [semifinalA, semifinalB, final],
-      seed,
-    });
+    setTournamentRun(run);
   }
 
   function toggleShortlist(playerId: string) {
@@ -1695,8 +1696,10 @@ export function LegendBuilder({ data }: { data: LegendData }) {
           inspector={inspector}
           onCountryChange={updateTournamentCountry}
           onRun={runTournament}
+          onSizeChange={updateTournamentSize}
           run={tournamentRun}
           selectedCountries={tournamentCountries}
+          size={tournamentSize}
         />
       ) : null}
 
@@ -4814,27 +4817,40 @@ function TournamentView({
   inspector,
   onCountryChange,
   onRun,
+  onSizeChange,
   run,
   selectedCountries,
+  size,
 }: {
   countries: LegendData["countries"];
   inspector: ReactNode;
   onCountryChange: (index: number, country: string) => void;
   onRun: () => void;
+  onSizeChange: (value: TournamentSize) => void;
   run: TournamentRun | null;
   selectedCountries: string[];
+  size: TournamentSize;
 }) {
-  const duplicateCount = selectedCountries.length - new Set(selectedCountries).size;
+  const activeCountries = selectedCountries.slice(0, size);
+  const duplicateCount = activeCountries.length - new Set(activeCountries).size;
+  const roundOrder: TournamentMatch["stage"][] = size === 8 ? ["Quarterfinal", "Semifinal", "Final"] : ["Semifinal", "Final"];
 
   return (
     <section className="tournament-grid">
       <aside className="sim-sidebar">
         <div className="section-heading">
           <p className="eyebrow">Tournament</p>
-          <h2>4팀 미니 토너먼트</h2>
+          <h2>{size}팀 토너먼트</h2>
         </div>
+        <label className="field">
+          <span>대회 규모</span>
+          <select value={size} onChange={(event) => onSizeChange(Number(event.target.value) as TournamentSize)}>
+            <option value={4}>4 Teams</option>
+            <option value={8}>8 Teams</option>
+          </select>
+        </label>
         <div className="tournament-seed-list">
-          {selectedCountries.map((country, index) => (
+          {activeCountries.map((country, index) => (
             <label className="field" key={`tournament-seed-${index}`}>
               <span>Seed {index + 1}</span>
               <select value={country} onChange={(event) => onCountryChange(index, event.target.value)}>
@@ -4860,22 +4876,35 @@ function TournamentView({
               <span>Champion</span>
               <strong>{run.champion.name}</strong>
               <small>
-                {run.countries.join(" · ")} · {formatSavedDate(run.createdAt)}
+                {run.size} teams · {run.countries.join(" · ")} · {formatSavedDate(run.createdAt)}
               </small>
             </div>
-            <div className="tournament-bracket">
-              <TournamentMatchCard match={run.matches[0]} />
-              <TournamentMatchCard match={run.matches[2]} featured />
-              <TournamentMatchCard match={run.matches[1]} />
+            <div className="tournament-rounds">
+              {roundOrder.map((stage) => {
+                const stageMatches = run.matches.filter((match) => match.stage === stage);
+                return (
+                  <section className="tournament-round" key={stage}>
+                    <div className="section-heading compact-heading">
+                      <p className="eyebrow">{stage}</p>
+                      <h3>{stageMatches.length} matches</h3>
+                    </div>
+                    <div className="tournament-bracket">
+                      {stageMatches.map((match) => (
+                        <TournamentMatchCard featured={stage === "Final"} key={match.id} match={match} />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
           </>
         ) : (
           <section className="sim-panel">
             <div className="section-heading">
               <p className="eyebrow">Ready</p>
-              <h2>국가 4개를 고르고 실행하세요</h2>
+              <h2>국가 {size}개를 고르고 실행하세요</h2>
             </div>
-            <p className="empty-state">각 국가는 4-3-3 Auto XI로 구성되고, 준결승 2경기와 결승 1경기를 단판으로 시뮬레이션합니다.</p>
+            <p className="empty-state">각 국가는 4-3-3 Auto XI로 구성되고, 모든 라운드를 단판으로 시뮬레이션합니다.</p>
           </section>
         )}
       </section>
@@ -5002,7 +5031,66 @@ function runSimulationSeries(
   return matches;
 }
 
-function runTournamentMatch(id: string, label: string, teamA: SimulationTeamInput, teamB: SimulationTeamInput, seed: string, randomness: RandomnessLevel): TournamentMatch {
+function createTournamentRun(
+  teams: SimulationTeamInput[],
+  countries: string[],
+  size: TournamentSize,
+  seed: string,
+  randomness: RandomnessLevel,
+): TournamentRun {
+  const matches: TournamentMatch[] = [];
+
+  if (size === 8) {
+    const quarterfinalPairs: Array<[number, number]> = [
+      [0, 7],
+      [3, 4],
+      [1, 6],
+      [2, 5],
+    ];
+    const quarterfinals = quarterfinalPairs.map(([homeIndex, awayIndex], index) =>
+      runTournamentMatch(`qf-${index + 1}`, `Quarterfinal ${index + 1}`, "Quarterfinal", teams[homeIndex], teams[awayIndex], `${seed}-qf-${index + 1}`, randomness),
+    );
+    const semifinalA = runTournamentMatch("semi-1", "Semifinal 1", "Semifinal", quarterfinals[0].winner, quarterfinals[1].winner, `${seed}-semi-1`, randomness);
+    const semifinalB = runTournamentMatch("semi-2", "Semifinal 2", "Semifinal", quarterfinals[2].winner, quarterfinals[3].winner, `${seed}-semi-2`, randomness);
+    const final = runTournamentMatch("final", "Final", "Final", semifinalA.winner, semifinalB.winner, `${seed}-final`, randomness);
+
+    matches.push(...quarterfinals, semifinalA, semifinalB, final);
+
+    return {
+      champion: final.winner,
+      countries,
+      createdAt: new Date().toISOString(),
+      matches,
+      seed,
+      size,
+    };
+  }
+
+  const semifinalA = runTournamentMatch("semi-1", "Semifinal 1", "Semifinal", teams[0], teams[3], `${seed}-semi-1`, randomness);
+  const semifinalB = runTournamentMatch("semi-2", "Semifinal 2", "Semifinal", teams[1], teams[2], `${seed}-semi-2`, randomness);
+  const final = runTournamentMatch("final", "Final", "Final", semifinalA.winner, semifinalB.winner, `${seed}-final`, randomness);
+
+  matches.push(semifinalA, semifinalB, final);
+
+  return {
+    champion: final.winner,
+    countries,
+    createdAt: new Date().toISOString(),
+    matches,
+    seed,
+    size,
+  };
+}
+
+function runTournamentMatch(
+  id: string,
+  label: string,
+  stage: TournamentMatch["stage"],
+  teamA: SimulationTeamInput,
+  teamB: SimulationTeamInput,
+  seed: string,
+  randomness: RandomnessLevel,
+): TournamentMatch {
   const [match] = runSimulationSeries(teamA, teamB, defaultTactics, defaultTactics, randomness, seed, "single");
   const result = match.result;
   const winner = getTournamentWinner(result, teamA, teamB);
@@ -5011,7 +5099,7 @@ function runTournamentMatch(id: string, label: string, teamA: SimulationTeamInpu
     id,
     label,
     result,
-    stage: label === "Final" ? "Final" : "Semifinal",
+    stage,
     teamA,
     teamB,
     winner,
@@ -6051,11 +6139,11 @@ function formatDecadeLabel(decade: number) {
 }
 
 function getDefaultTournamentCountries(countries: LegendData["countries"]) {
-  const preferred = ["Brazil", "Argentina", "France", "Germany"];
+  const preferred = ["Brazil", "Argentina", "France", "Germany", "Italy", "Netherlands", "Spain", "England"];
   const selected = preferred.map((name) => countries.find((country) => country.name === name)?.name).filter(Boolean) as string[];
 
   for (const country of countries) {
-    if (selected.length >= 4) {
+    if (selected.length >= 8) {
       break;
     }
 
@@ -6064,14 +6152,14 @@ function getDefaultTournamentCountries(countries: LegendData["countries"]) {
     }
   }
 
-  return selected.slice(0, 4);
+  return selected.slice(0, 8);
 }
 
-function ensureUniqueTournamentCountries(selectedCountries: string[], countries: LegendData["countries"]) {
+function ensureUniqueTournamentCountries(selectedCountries: string[], countries: LegendData["countries"], size: TournamentSize) {
   const next = selectedCountries.filter(Boolean);
 
   for (const country of countries) {
-    if (next.length >= 4) {
+    if (next.length >= size) {
       break;
     }
 
@@ -6080,7 +6168,7 @@ function ensureUniqueTournamentCountries(selectedCountries: string[], countries:
     }
   }
 
-  return next.slice(0, 4);
+  return next.slice(0, size);
 }
 
 function getPrimaryScoreKey(player: LegendPlayer) {
