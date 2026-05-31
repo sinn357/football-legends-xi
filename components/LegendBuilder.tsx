@@ -4806,7 +4806,12 @@ function LiveMatchViewer({
   const currentMinute = activeEvent?.minute ?? (frameIndex >= events.length ? 90 : 0);
   const progress = events.length ? Math.round((frameIndex / events.length) * 100) : 0;
   const ballPosition = getLiveBallPosition(activeEvent, teamA.id, frameIndex, events.length);
+  const eventPath = activeEvent ? getLiveEventPath(activeEvent, teamA.id) : null;
   const latestEvents = visibleEvents.slice(-5).reverse();
+  const playerNameById = new Map([...teamA.slots, ...teamB.slots].map((slot) => [slot.player.id, slot.player.name]));
+  const possessionTeam = activeEvent?.teamId === teamA.id ? teamA.name : activeEvent?.teamId === teamB.id ? teamB.name : "Neutral";
+  const primaryActor = activeEvent?.scorerId ? playerNameById.get(activeEvent.scorerId) : null;
+  const secondaryActor = activeEvent?.assisterId ? playerNameById.get(activeEvent.assisterId) : null;
 
   useEffect(() => {
     setFrameIndex(0);
@@ -4843,11 +4848,24 @@ function LiveMatchViewer({
             </strong>
             <span>{teamB.name}</span>
           </div>
+          <div className="live-possession-row">
+            <span>Possession</span>
+            <strong>{possessionTeam}</strong>
+            <em>{secondaryActor && primaryActor ? `${secondaryActor} -> ${primaryActor}` : primaryActor ?? "Shape reset"}</em>
+          </div>
           <div className="live-pitch" aria-label="Animated match pitch">
             <div className="live-pitch-line halfway" />
             <div className="live-pitch-line center-circle" />
             <div className="live-box left" />
             <div className="live-box right" />
+            {eventPath ? (
+              <svg className="live-action-layer" key={`${activeEvent?.minute}-${activeEvent?.teamId}-${activeEvent?.eventType}-${frameIndex}`} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path className="live-pass-path" d={eventPath.passPath} />
+                {eventPath.shotPath ? <path className={`live-shot-path ${activeEvent?.outcome === "goal" ? "goal" : ""}`} d={eventPath.shotPath} /> : null}
+                <circle className="live-path-start" cx={eventPath.start.x} cy={eventPath.start.y} r="1.4" />
+                <circle className="live-path-end" cx={eventPath.end.x} cy={eventPath.end.y} r="1.7" />
+              </svg>
+            ) : null}
             {[
               ...teamA.slots.map((slot) => ({ side: "A" as const, slot, teamId: teamA.id })),
               ...teamB.slots.map((slot) => ({ side: "B" as const, slot, teamId: teamB.id })),
@@ -4929,6 +4947,13 @@ type LivePoint = {
 
 type LiveMatchEvent = SimulatedMatchResult["events"][number];
 
+type LiveEventPath = {
+  end: LivePoint;
+  passPath: string;
+  shotPath: string | null;
+  start: LivePoint;
+};
+
 function getLivePlayerPosition(slot: SimulationTeamInput["slots"][number], side: "A" | "B", activeEvent: LiveMatchEvent | null, teamAId: string, frameIndex: number): LivePoint {
   const base = getRolePitchPoint(slot.role, side);
 
@@ -4989,6 +5014,55 @@ function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string
     x: startX + (endX - startX) * phase + (toRight ? shotBoost : -shotBoost),
     y: lane.y + Math.sin(frameIndex) * 2.2,
   });
+}
+
+function getLiveEventPath(event: LiveMatchEvent, teamAId: string): LiveEventPath {
+  const lane = getEventLane(event);
+  const toRight = event.teamId === teamAId;
+  const start = clampPoint({
+    x: toRight ? lane.buildX : 100 - lane.buildX,
+    y: lane.y + getLaneCurveOffset(event) * 0.35,
+  });
+  const end = clampPoint({
+    x: toRight ? lane.targetX : 100 - lane.targetX,
+    y: lane.y,
+  });
+  const passControl = clampPoint({
+    x: (start.x + end.x) / 2,
+    y: lane.y + getLaneCurveOffset(event),
+  });
+  const goalPoint = clampPoint({
+    x: toRight ? 94 : 6,
+    y: event.outcome === "goal" ? 50 : lane.y + (event.outcome === "blocked" ? 8 : event.outcome === "saved" ? -4 : 12),
+  });
+  const shotControl = clampPoint({
+    x: (end.x + goalPoint.x) / 2,
+    y: (end.y + goalPoint.y) / 2 - 5,
+  });
+  const shouldShowShot = Boolean(event.scorerId) || event.xg >= 0.08;
+
+  return {
+    end,
+    passPath: `M ${start.x} ${start.y} Q ${passControl.x} ${passControl.y} ${end.x} ${end.y}`,
+    shotPath: shouldShowShot ? `M ${end.x} ${end.y} Q ${shotControl.x} ${shotControl.y} ${goalPoint.x} ${goalPoint.y}` : null,
+    start,
+  };
+}
+
+function getLaneCurveOffset(event: LiveMatchEvent) {
+  if (event.eventType === "wideAttack") {
+    return event.minute % 2 === 0 ? -10 : 10;
+  }
+
+  if (event.eventType === "counter") {
+    return event.minute % 2 === 0 ? -7 : 7;
+  }
+
+  if (event.eventType === "setPiece") {
+    return event.minute % 2 === 0 ? -13 : 13;
+  }
+
+  return event.minute % 2 === 0 ? -4 : 4;
 }
 
 function getEventLane(event: LiveMatchEvent) {

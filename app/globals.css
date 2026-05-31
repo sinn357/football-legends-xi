@@ -3183,6 +3183,44 @@ td strong {
   font-size: 24px;
 }
 
+.live-possession-row {
+  align-items: center;
+  background: rgba(255, 250, 240, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 86px minmax(0, 0.8fr) minmax(0, 1.2fr);
+  padding: 9px 12px;
+}
+
+.live-possession-row span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.live-possession-row strong,
+.live-possession-row em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-possession-row strong {
+  color: var(--main);
+  font-size: 13px;
+}
+
+.live-possession-row em {
+  color: var(--gold);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  text-align: right;
+}
+
 .live-pitch {
   aspect-ratio: 16 / 10;
   background:
@@ -3237,6 +3275,54 @@ td strong {
 .live-box.right {
   border-right: 0;
   right: 0;
+}
+
+.live-action-layer {
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.live-pass-path,
+.live-shot-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.live-pass-path {
+  animation: livePathDraw 760ms ease-out both;
+  stroke: rgba(244, 239, 227, 0.74);
+  stroke-dasharray: 7 7;
+  stroke-width: 3;
+}
+
+.live-shot-path {
+  animation: livePathDraw 520ms ease-out 180ms both;
+  stroke: rgba(200, 162, 74, 0.92);
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  stroke-width: 4;
+}
+
+.live-shot-path.goal {
+  filter: drop-shadow(0 0 5px rgba(200, 162, 74, 0.65));
+  stroke: #ffd166;
+  stroke-width: 5;
+}
+
+.live-path-start,
+.live-path-end {
+  fill: var(--gold);
+  opacity: 0.88;
+  vector-effect: non-scaling-stroke;
+}
+
+.live-path-end {
+  animation: goalPulse 700ms ease infinite alternate;
 }
 
 .live-player-dot {
@@ -3453,6 +3539,16 @@ td strong {
 
   to {
     box-shadow: 0 0 0 10px rgba(200, 162, 74, 0), 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes livePathDraw {
+  from {
+    stroke-dashoffset: 140;
+  }
+
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
