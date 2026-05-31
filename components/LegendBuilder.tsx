@@ -4816,6 +4816,7 @@ function LiveMatchViewer({
   const ballPosition = getLiveBallPosition(activeEvent, teamA.id, sceneStep, frameIndex, events.length, activeTactic);
   const eventPath = activeEvent ? getLiveEventPath(activeEvent, teamA.id, activeTactic) : null;
   const pressurePoint = activeEvent ? getLivePressurePoint(activeEvent, teamA.id) : null;
+  const isFinishStep = Boolean(activeEvent && sceneStep === 2);
   const latestEvents = visibleEvents.slice(-5).reverse();
   const playerNameById = new Map([...teamA.slots, ...teamB.slots].map((slot) => [slot.player.id, slot.player.name]));
   const possessionTeam = activeEvent?.teamId === teamA.id ? teamA.name : activeEvent?.teamId === teamB.id ? teamB.name : "Neutral";
@@ -4863,7 +4864,7 @@ function LiveMatchViewer({
       </div>
       <div className="live-match-shell">
         <div className="live-pitch-wrap">
-          <div className="live-scoreline">
+          <div className={`live-scoreline ${activeEvent?.outcome === "goal" && isFinishStep ? "goal-pulse" : ""}`}>
             <span>{teamA.name}</span>
             <strong>
               {liveScoreA}-{liveScoreB}
@@ -4885,6 +4886,7 @@ function LiveMatchViewer({
             <div className="live-pitch-line center-circle" />
             <div className="live-box left" />
             <div className="live-box right" />
+            {activeEvent?.outcome === "goal" && isFinishStep ? <div className={`live-goal-net ${activeEvent.teamId === teamA.id ? "right" : "left"}`} /> : null}
             {activeEvent && defendingTactic.style === "low-block" ? (
               <div className={`live-low-block-zone ${activeEvent.defendingTeamId === teamA.id ? "left" : "right"}`} />
             ) : null}
@@ -4897,6 +4899,11 @@ function LiveMatchViewer({
                 <circle className="live-path-start" cx={eventPath.start.x} cy={eventPath.start.y} r="1.4" />
                 <circle className="live-path-end" cx={eventPath.end.x} cy={eventPath.end.y} r="1.7" />
               </svg>
+            ) : null}
+            {activeEvent && eventPath && isFinishStep ? (
+              <div className={`live-outcome-marker ${activeEvent.outcome}`} style={{ left: `${eventPath.goalPoint.x}%`, top: `${eventPath.goalPoint.y}%` }}>
+                <span>{formatOutcomeLabel(activeEvent.outcome)}</span>
+              </div>
             ) : null}
             {activeEvent && defendingTactic.style === "high-press" && pressurePoint ? <span className="live-press-ring" style={{ left: `${pressurePoint.x}%`, top: `${pressurePoint.y}%` }} /> : null}
             {[
@@ -4920,9 +4927,9 @@ function LiveMatchViewer({
                 </button>
               );
             })}
-            <span className={activeEvent?.outcome === "goal" ? "live-ball goal" : "live-ball"} style={{ left: `${ballPosition.x}%`, top: `${ballPosition.y}%` }} />
+            <span className={`live-ball ${activeEvent && isFinishStep ? activeEvent.outcome : ""}`} style={{ left: `${ballPosition.x}%`, top: `${ballPosition.y}%` }} />
             {activeEvent ? (
-              <div className={`live-event-flash ${activeEvent.outcome === "goal" ? "goal" : ""}`}>
+              <div className={`live-event-flash ${isFinishStep ? activeEvent.outcome : ""}`}>
                 <span>{activeEvent.eventType}</span>
                 <strong>{sceneStep < 2 ? getLiveSceneStepLabel(sceneStep) : activeEvent.outcome.toUpperCase()}</strong>
               </div>
@@ -5017,6 +5024,7 @@ type LiveMatchEvent = SimulatedMatchResult["events"][number];
 type LiveEventPath = {
   directPath: string;
   end: LivePoint;
+  goalPoint: LivePoint;
   passPath: string;
   shotPath: string | null;
   start: LivePoint;
@@ -5124,6 +5132,7 @@ function getLiveEventPath(event: LiveMatchEvent, teamAId: string, tactics: Simul
   return {
     directPath: `M ${start.x} ${start.y} L ${end.x} ${end.y}`,
     end,
+    goalPoint,
     passPath: `M ${start.x} ${start.y} Q ${passControl.x} ${passControl.y} ${end.x} ${end.y}`,
     shotPath: shouldShowShot ? `M ${end.x} ${end.y} Q ${shotControl.x} ${shotControl.y} ${goalPoint.x} ${goalPoint.y}` : null,
     start,
@@ -5199,6 +5208,22 @@ function getLiveSceneStepLabel(sceneStep: number) {
   }
 
   return "Finish";
+}
+
+function formatOutcomeLabel(outcome: LiveMatchEvent["outcome"]) {
+  if (outcome === "goal") {
+    return "Goal";
+  }
+
+  if (outcome === "saved") {
+    return "Save";
+  }
+
+  if (outcome === "blocked") {
+    return "Block";
+  }
+
+  return "Miss";
 }
 
 function getLaneCurveOffset(event: LiveMatchEvent) {

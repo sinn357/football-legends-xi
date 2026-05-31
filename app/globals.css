@@ -3183,6 +3183,11 @@ td strong {
   font-size: 24px;
 }
 
+.live-scoreline.goal-pulse {
+  animation: scorePulse 700ms ease-out both;
+  border-color: rgba(200, 162, 74, 0.62);
+}
+
 .live-possession-row {
   align-items: center;
   background: rgba(255, 250, 240, 0.06);
@@ -3307,6 +3312,26 @@ td strong {
   right: 0;
 }
 
+.live-goal-net {
+  animation: goalNetFlash 760ms ease-out both;
+  background: repeating-linear-gradient(90deg, rgba(255, 209, 102, 0.26) 0 3px, transparent 3px 9px);
+  border: 1px solid rgba(255, 209, 102, 0.65);
+  bottom: 34%;
+  pointer-events: none;
+  position: absolute;
+  top: 34%;
+  width: 4%;
+  z-index: 6;
+}
+
+.live-goal-net.left {
+  left: 0;
+}
+
+.live-goal-net.right {
+  right: 0;
+}
+
 .live-low-block-zone {
   background: linear-gradient(90deg, rgba(18, 61, 50, 0.36), rgba(18, 61, 50, 0));
   bottom: 18%;
@@ -3389,6 +3414,43 @@ td strong {
 
 .live-path-end {
   animation: goalPulse 700ms ease infinite alternate;
+}
+
+.live-outcome-marker {
+  align-items: center;
+  animation: outcomePop 680ms ease-out both;
+  background: rgba(18, 61, 50, 0.88);
+  border: 1px solid rgba(244, 239, 227, 0.32);
+  border-radius: 999px;
+  color: #fffaf0;
+  display: grid;
+  font-size: 11px;
+  font-weight: 900;
+  height: 48px;
+  justify-items: center;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  z-index: 9;
+}
+
+.live-outcome-marker.goal {
+  background: rgba(200, 162, 74, 0.96);
+  color: #173d31;
+}
+
+.live-outcome-marker.saved {
+  background: rgba(36, 80, 150, 0.92);
+}
+
+.live-outcome-marker.blocked {
+  background: rgba(110, 91, 56, 0.94);
+}
+
+.live-outcome-marker.miss {
+  background: rgba(91, 100, 96, 0.9);
 }
 
 .live-press-ring {
@@ -3478,6 +3540,18 @@ td strong {
   animation: goalPulse 700ms ease infinite alternate;
 }
 
+.live-ball.saved {
+  box-shadow: 0 0 0 7px rgba(36, 80, 150, 0.22), 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.live-ball.blocked {
+  box-shadow: 0 0 0 7px rgba(110, 91, 56, 0.24), 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.live-ball.miss {
+  opacity: 0.72;
+}
+
 .live-event-flash {
   background: rgba(18, 61, 50, 0.82);
   border: 1px solid rgba(244, 239, 227, 0.26);
@@ -3497,6 +3571,18 @@ td strong {
 .live-event-flash.goal {
   background: rgba(200, 162, 74, 0.92);
   color: #173d31;
+}
+
+.live-event-flash.saved {
+  background: rgba(36, 80, 150, 0.9);
+}
+
+.live-event-flash.blocked {
+  background: rgba(110, 91, 56, 0.9);
+}
+
+.live-event-flash.miss {
+  background: rgba(91, 100, 96, 0.9);
 }
 
 .live-event-flash span {
@@ -3650,6 +3736,50 @@ td strong {
 
   to {
     box-shadow: 0 0 0 10px rgba(200, 162, 74, 0), 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes goalNetFlash {
+  from {
+    opacity: 0;
+    transform: scaleX(0.45);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scaleX(1.15);
+  }
+
+  to {
+    opacity: 0.7;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes outcomePop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.64);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes scorePulse {
+  from {
+    box-shadow: 0 0 0 0 rgba(200, 162, 74, 0.4);
+  }
+
+  to {
+    box-shadow: 0 0 0 12px rgba(200, 162, 74, 0);
   }
 }
 
