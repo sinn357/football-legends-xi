@@ -4801,17 +4801,19 @@ function LiveMatchViewer({
 }) {
   const [frameIndex, setFrameIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [sceneStep, setSceneStep] = useState(0);
   const [speed, setSpeed] = useState(1);
   const events = result.events;
   const activeEvent = frameIndex > 0 ? events[Math.min(frameIndex - 1, events.length - 1)] : null;
-  const visibleEvents = events.slice(0, frameIndex);
+  const completedEventCount = frameIndex === 0 ? 0 : Math.max(0, Math.min(events.length, frameIndex - (sceneStep < 2 ? 1 : 0)));
+  const visibleEvents = events.slice(0, completedEventCount);
   const liveScoreA = visibleEvents.filter((event) => event.teamId === teamA.id && event.outcome === "goal").length;
   const liveScoreB = visibleEvents.filter((event) => event.teamId === teamB.id && event.outcome === "goal").length;
   const currentMinute = activeEvent?.minute ?? (frameIndex >= events.length ? 90 : 0);
-  const progress = events.length ? Math.round((frameIndex / events.length) * 100) : 0;
+  const progress = events.length ? Math.round((Math.min(events.length * 3, (frameIndex === 0 ? 0 : (frameIndex - 1) * 3 + sceneStep + 1)) / (events.length * 3)) * 100) : 0;
   const activeTactic = activeEvent?.teamId === teamA.id ? tacticsA : activeEvent?.teamId === teamB.id ? tacticsB : tacticsA;
   const defendingTactic = activeEvent?.defendingTeamId === teamA.id ? tacticsA : activeEvent?.defendingTeamId === teamB.id ? tacticsB : tacticsB;
-  const ballPosition = getLiveBallPosition(activeEvent, teamA.id, frameIndex, events.length, activeTactic);
+  const ballPosition = getLiveBallPosition(activeEvent, teamA.id, sceneStep, frameIndex, events.length, activeTactic);
   const eventPath = activeEvent ? getLiveEventPath(activeEvent, teamA.id, activeTactic) : null;
   const pressurePoint = activeEvent ? getLivePressurePoint(activeEvent, teamA.id) : null;
   const latestEvents = visibleEvents.slice(-5).reverse();
@@ -4823,19 +4825,32 @@ function LiveMatchViewer({
   useEffect(() => {
     setFrameIndex(0);
     setIsPlaying(true);
+    setSceneStep(0);
   }, [result.matchSeed]);
 
   useEffect(() => {
-    if (!isPlaying || frameIndex >= events.length) {
+    if (!isPlaying || (frameIndex >= events.length && sceneStep >= 2)) {
       return;
     }
 
     const timer = window.setTimeout(() => {
+      if (frameIndex === 0) {
+        setFrameIndex(1);
+        setSceneStep(0);
+        return;
+      }
+
+      if (sceneStep < 2) {
+        setSceneStep((current) => Math.min(2, current + 1));
+        return;
+      }
+
       setFrameIndex((current) => Math.min(events.length, current + 1));
-    }, Math.round(1250 / speed));
+      setSceneStep(0);
+    }, Math.round(520 / speed));
 
     return () => window.clearTimeout(timer);
-  }, [events.length, frameIndex, isPlaying, speed]);
+  }, [events.length, frameIndex, isPlaying, sceneStep, speed]);
 
   return (
     <section className="live-match-panel">
@@ -4862,10 +4877,10 @@ function LiveMatchViewer({
           </div>
           <div className="live-tactic-row">
             <span>{teamA.name}: {formatTacticStyle(tacticsA.style)}</span>
-            <strong>{activeEvent ? `${formatTacticStyle(activeTactic.style)} phase` : "Pre-match shape"}</strong>
+            <strong>{activeEvent ? `${formatTacticStyle(activeTactic.style)} ${getLiveSceneStepLabel(sceneStep)}` : "Pre-match shape"}</strong>
             <span>{teamB.name}: {formatTacticStyle(tacticsB.style)}</span>
           </div>
-          <div className="live-pitch" aria-label="Animated match pitch">
+          <div className={`live-pitch live-step-${sceneStep}`} aria-label="Animated match pitch">
             <div className="live-pitch-line halfway" />
             <div className="live-pitch-line center-circle" />
             <div className="live-box left" />
@@ -4874,9 +4889,9 @@ function LiveMatchViewer({
               <div className={`live-low-block-zone ${activeEvent.defendingTeamId === teamA.id ? "left" : "right"}`} />
             ) : null}
             {eventPath ? (
-              <svg className="live-action-layer" key={`${activeEvent?.minute}-${activeEvent?.teamId}-${activeEvent?.eventType}-${frameIndex}`} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <svg className="live-action-layer" key={`${activeEvent?.minute}-${activeEvent?.teamId}-${activeEvent?.eventType}-${frameIndex}-${sceneStep}`} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <path className="live-pass-path" d={eventPath.passPath} />
-                {eventPath.shotPath ? <path className={`live-shot-path ${activeEvent?.outcome === "goal" ? "goal" : ""}`} d={eventPath.shotPath} /> : null}
+                {eventPath.shotPath && sceneStep >= 2 ? <path className={`live-shot-path ${activeEvent?.outcome === "goal" ? "goal" : ""}`} d={eventPath.shotPath} /> : null}
                 {activeTactic.style === "possession" ? <path className="live-support-path" d={eventPath.supportPath} /> : null}
                 {activeTactic.style === "counter" || activeTactic.style === "direct" ? <path className="live-direct-path" d={eventPath.directPath} /> : null}
                 <circle className="live-path-start" cx={eventPath.start.x} cy={eventPath.start.y} r="1.4" />
@@ -4909,9 +4924,16 @@ function LiveMatchViewer({
             {activeEvent ? (
               <div className={`live-event-flash ${activeEvent.outcome === "goal" ? "goal" : ""}`}>
                 <span>{activeEvent.eventType}</span>
-                <strong>{activeEvent.outcome.toUpperCase()}</strong>
+                <strong>{sceneStep < 2 ? getLiveSceneStepLabel(sceneStep) : activeEvent.outcome.toUpperCase()}</strong>
               </div>
             ) : null}
+          </div>
+          <div className="live-scene-steps" aria-label="장면 단계">
+            {["Build", "Connect", "Finish"].map((label, index) => (
+              <span className={activeEvent && sceneStep === index ? "active" : ""} key={label}>
+                {label}
+              </span>
+            ))}
           </div>
           <div className="live-progress">
             <span style={{ width: `${progress}%` }} />
@@ -4920,8 +4942,35 @@ function LiveMatchViewer({
             <button onClick={() => setIsPlaying((current) => !current)} type="button">
               {isPlaying ? "Pause" : "Play"}
             </button>
-            <button onClick={() => setFrameIndex(0)} type="button">
+            <button
+              onClick={() => {
+                setFrameIndex(0);
+                setSceneStep(0);
+              }}
+              type="button"
+            >
               Restart
+            </button>
+            <button
+              disabled={frameIndex >= events.length && sceneStep >= 2}
+              onClick={() => {
+                if (frameIndex === 0) {
+                  setFrameIndex(1);
+                  setSceneStep(0);
+                  return;
+                }
+
+                if (sceneStep < 2) {
+                  setSceneStep((current) => Math.min(2, current + 1));
+                  return;
+                }
+
+                setFrameIndex((current) => Math.min(events.length, current + 1));
+                setSceneStep(0);
+              }}
+              type="button"
+            >
+              Step
             </button>
             <label>
               <span>Speed</span>
@@ -5023,7 +5072,7 @@ function getLivePlayerPosition(
   return clampPoint(point);
 }
 
-function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string, frameIndex: number, totalFrames: number, tactics: SimulationTactics): LivePoint {
+function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string, sceneStep: number, frameIndex: number, totalFrames: number, tactics: SimulationTactics): LivePoint {
   if (!activeEvent) {
     return {
       x: frameIndex >= totalFrames ? 50 : 50,
@@ -5033,15 +5082,15 @@ function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string
 
   const lane = getEventLane(activeEvent);
   const toRight = activeEvent.teamId === teamAId;
-  const phase = (frameIndex % 3) / 2;
+  const phase = sceneStep / 2;
   const startX = toRight ? lane.buildX : 100 - lane.buildX;
   const tacticReach = tactics.style === "counter" || tactics.style === "direct" ? 5 : tactics.style === "possession" ? -3 : 0;
   const endX = (toRight ? lane.targetX : 100 - lane.targetX) + (toRight ? tacticReach : -tacticReach);
-  const shotBoost = activeEvent.outcome === "goal" ? 4 : activeEvent.outcome === "saved" ? 1 : -2;
+  const shotBoost = sceneStep < 2 ? 0 : activeEvent.outcome === "goal" ? 4 : activeEvent.outcome === "saved" ? 1 : -2;
 
   return clampPoint({
     x: startX + (endX - startX) * phase + (toRight ? shotBoost : -shotBoost),
-    y: lane.y + Math.sin(frameIndex) * 2.2,
+    y: lane.y + Math.sin(frameIndex + sceneStep) * 2.2,
   });
 }
 
@@ -5138,6 +5187,18 @@ function formatTacticStyle(style: SimulationTactics["style"]) {
     .split("-")
     .map((part) => part[0].toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function getLiveSceneStepLabel(sceneStep: number) {
+  if (sceneStep === 0) {
+    return "Build";
+  }
+
+  if (sceneStep === 1) {
+    return "Connect";
+  }
+
+  return "Finish";
 }
 
 function getLaneCurveOffset(event: LiveMatchEvent) {
