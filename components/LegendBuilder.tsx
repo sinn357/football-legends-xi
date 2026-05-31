@@ -4651,6 +4651,7 @@ function MatchSimulatorView({
 
         {result ? (
           <>
+            <LiveMatchViewer onPlayerSelect={onPlayerSelect} result={result} teamA={teamA} teamB={teamB} />
             {seriesSummary ? (
               <section className="sim-panel">
                 <div className="section-heading row">
@@ -4781,6 +4782,272 @@ function MatchSimulatorView({
       {inspector}
     </section>
   );
+}
+
+function LiveMatchViewer({
+  onPlayerSelect,
+  result,
+  teamA,
+  teamB,
+}: {
+  onPlayerSelect: (playerId: string) => void;
+  result: SimulatedMatchResult;
+  teamA: SimulationTeamInput;
+  teamB: SimulationTeamInput;
+}) {
+  const [frameIndex, setFrameIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [speed, setSpeed] = useState(1);
+  const events = result.events;
+  const activeEvent = frameIndex > 0 ? events[Math.min(frameIndex - 1, events.length - 1)] : null;
+  const visibleEvents = events.slice(0, frameIndex);
+  const liveScoreA = visibleEvents.filter((event) => event.teamId === teamA.id && event.outcome === "goal").length;
+  const liveScoreB = visibleEvents.filter((event) => event.teamId === teamB.id && event.outcome === "goal").length;
+  const currentMinute = activeEvent?.minute ?? (frameIndex >= events.length ? 90 : 0);
+  const progress = events.length ? Math.round((frameIndex / events.length) * 100) : 0;
+  const ballPosition = getLiveBallPosition(activeEvent, teamA.id, frameIndex, events.length);
+  const latestEvents = visibleEvents.slice(-5).reverse();
+
+  useEffect(() => {
+    setFrameIndex(0);
+    setIsPlaying(true);
+  }, [result.matchSeed]);
+
+  useEffect(() => {
+    if (!isPlaying || frameIndex >= events.length) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setFrameIndex((current) => Math.min(events.length, current + 1));
+    }, Math.round(1250 / speed));
+
+    return () => window.clearTimeout(timer);
+  }, [events.length, frameIndex, isPlaying, speed]);
+
+  return (
+    <section className="live-match-panel">
+      <div className="section-heading row">
+        <div>
+          <p className="eyebrow">Watch Match</p>
+          <h2>실시간 경기 보기</h2>
+        </div>
+        <span className="saved-count">{currentMinute}'</span>
+      </div>
+      <div className="live-match-shell">
+        <div className="live-pitch-wrap">
+          <div className="live-scoreline">
+            <span>{teamA.name}</span>
+            <strong>
+              {liveScoreA}-{liveScoreB}
+            </strong>
+            <span>{teamB.name}</span>
+          </div>
+          <div className="live-pitch" aria-label="Animated match pitch">
+            <div className="live-pitch-line halfway" />
+            <div className="live-pitch-line center-circle" />
+            <div className="live-box left" />
+            <div className="live-box right" />
+            {[
+              ...teamA.slots.map((slot) => ({ side: "A" as const, slot, teamId: teamA.id })),
+              ...teamB.slots.map((slot) => ({ side: "B" as const, slot, teamId: teamB.id })),
+            ].map(({ side, slot, teamId }) => {
+              const position = getLivePlayerPosition(slot, side, activeEvent, teamA.id, frameIndex);
+              const isActor = activeEvent?.scorerId === slot.player.id || activeEvent?.assisterId === slot.player.id;
+
+              return (
+                <button
+                  className={`live-player-dot ${side === "A" ? "team-a" : "team-b"} ${isActor ? "actor" : ""}`}
+                  key={`${teamId}-${slot.id}-${slot.player.id}`}
+                  onClick={() => onPlayerSelect(slot.player.id)}
+                  style={{ left: `${position.x}%`, top: `${position.y}%` }}
+                  title={`${slot.role} ${slot.player.name}`}
+                  type="button"
+                >
+                  <span>{slot.role}</span>
+                  <em>{getShortName(slot.player.name)}</em>
+                </button>
+              );
+            })}
+            <span className={activeEvent?.outcome === "goal" ? "live-ball goal" : "live-ball"} style={{ left: `${ballPosition.x}%`, top: `${ballPosition.y}%` }} />
+            {activeEvent ? (
+              <div className={`live-event-flash ${activeEvent.outcome === "goal" ? "goal" : ""}`}>
+                <span>{activeEvent.eventType}</span>
+                <strong>{activeEvent.outcome.toUpperCase()}</strong>
+              </div>
+            ) : null}
+          </div>
+          <div className="live-progress">
+            <span style={{ width: `${progress}%` }} />
+          </div>
+          <div className="live-controls">
+            <button onClick={() => setIsPlaying((current) => !current)} type="button">
+              {isPlaying ? "Pause" : "Play"}
+            </button>
+            <button onClick={() => setFrameIndex(0)} type="button">
+              Restart
+            </button>
+            <label>
+              <span>Speed</span>
+              <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
+                <option value={0.75}>0.75x</option>
+                <option value={1}>1x</option>
+                <option value={1.5}>1.5x</option>
+                <option value={2}>2x</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <aside className="live-event-board">
+          <div>
+            <span>Current</span>
+            <strong>{activeEvent ? `${activeEvent.minute}' ${activeEvent.outcome.toUpperCase()}` : frameIndex >= events.length ? "Full Time" : "Kickoff"}</strong>
+            <p>{activeEvent?.description ?? "경기 시작 전 포메이션이 정렬되어 있습니다."}</p>
+          </div>
+          <div className="live-event-feed">
+            {latestEvents.length ? (
+              latestEvents.map((event, index) => (
+                <article className={event.outcome === "goal" ? "goal" : ""} key={`${event.minute}-${event.teamId}-${index}`}>
+                  <span>{event.minute}'</span>
+                  <p>{event.description}</p>
+                </article>
+              ))
+            ) : (
+              <p className="sim-inline-empty">재생이 시작되면 주요 장면이 쌓입니다.</p>
+            )}
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+type LivePoint = {
+  x: number;
+  y: number;
+};
+
+type LiveMatchEvent = SimulatedMatchResult["events"][number];
+
+function getLivePlayerPosition(slot: SimulationTeamInput["slots"][number], side: "A" | "B", activeEvent: LiveMatchEvent | null, teamAId: string, frameIndex: number): LivePoint {
+  const base = getRolePitchPoint(slot.role, side);
+
+  if (!activeEvent) {
+    return base;
+  }
+
+  const attackingSide: "A" | "B" = activeEvent.teamId === teamAId ? "A" : "B";
+  const isAttacking = side === attackingSide;
+  const direction = side === "A" ? 1 : -1;
+  const lane = getEventLane(activeEvent);
+  const wave = ((frameIndex + slot.player.id.length) % 4) - 1.5;
+  let point: LivePoint = {
+    x: base.x + (isAttacking ? direction * 8 : direction * 4),
+    y: base.y + wave * 1.6,
+  };
+
+  if (activeEvent.assisterId === slot.player.id) {
+    point = {
+      x: activeEvent.teamId === teamAId ? lane.buildX : 100 - lane.buildX,
+      y: lane.y + (slot.role === "LW" || slot.role === "LB" ? -4 : slot.role === "RW" || slot.role === "RB" ? 4 : 0),
+    };
+  }
+
+  if (activeEvent.scorerId === slot.player.id) {
+    point = {
+      x: activeEvent.teamId === teamAId ? lane.targetX : 100 - lane.targetX,
+      y: lane.y,
+    };
+  }
+
+  if (!isAttacking && (slot.role === "CB" || slot.role === "DM" || slot.role === "GK")) {
+    point = {
+      x: base.x - direction * (activeEvent.xg >= 0.16 ? 8 : 4),
+      y: base.y + (lane.y - 50) * 0.16,
+    };
+  }
+
+  return clampPoint(point);
+}
+
+function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string, frameIndex: number, totalFrames: number): LivePoint {
+  if (!activeEvent) {
+    return {
+      x: frameIndex >= totalFrames ? 50 : 50,
+      y: 50,
+    };
+  }
+
+  const lane = getEventLane(activeEvent);
+  const toRight = activeEvent.teamId === teamAId;
+  const phase = (frameIndex % 3) / 2;
+  const startX = toRight ? lane.buildX : 100 - lane.buildX;
+  const endX = toRight ? lane.targetX : 100 - lane.targetX;
+  const shotBoost = activeEvent.outcome === "goal" ? 4 : activeEvent.outcome === "saved" ? 1 : -2;
+
+  return clampPoint({
+    x: startX + (endX - startX) * phase + (toRight ? shotBoost : -shotBoost),
+    y: lane.y + Math.sin(frameIndex) * 2.2,
+  });
+}
+
+function getEventLane(event: LiveMatchEvent) {
+  const laneByType: Record<LiveMatchEvent["eventType"], { buildX: number; targetX: number; y: number }> = {
+    centralCombination: { buildX: 54, targetX: 80, y: 50 },
+    counter: { buildX: 44, targetX: 84, y: event.minute % 2 === 0 ? 38 : 62 },
+    error: { buildX: 60, targetX: 78, y: 50 },
+    lateMoment: { buildX: 58, targetX: 84, y: 50 },
+    openPlay: { buildX: 52, targetX: 78, y: event.minute % 2 === 0 ? 45 : 55 },
+    pressWin: { buildX: 58, targetX: 76, y: event.minute % 2 === 0 ? 42 : 58 },
+    setPiece: { buildX: 66, targetX: 82, y: event.minute % 2 === 0 ? 35 : 65 },
+    wideAttack: { buildX: 57, targetX: 80, y: event.minute % 2 === 0 ? 22 : 78 },
+  };
+
+  return laneByType[event.eventType];
+}
+
+function getRolePitchPoint(role: PositionCode, side: "A" | "B"): LivePoint {
+  const byRole: Record<PositionCode, LivePoint> = {
+    AM: { x: 57, y: 50 },
+    CB: { x: 24, y: 50 },
+    CM: { x: 46, y: 50 },
+    DM: { x: 38, y: 50 },
+    GK: { x: 8, y: 50 },
+    LB: { x: 27, y: 25 },
+    LEGEND: { x: 50, y: 50 },
+    LW: { x: 66, y: 24 },
+    RB: { x: 27, y: 75 },
+    RW: { x: 66, y: 76 },
+    SS: { x: 63, y: 50 },
+    ST: { x: 74, y: 50 },
+  };
+  const point = byRole[role] ?? byRole.LEGEND;
+
+  if (side === "A") {
+    return point;
+  }
+
+  return {
+    x: 100 - point.x,
+    y: 100 - point.y,
+  };
+}
+
+function clampPoint(point: LivePoint): LivePoint {
+  return {
+    x: Math.max(5, Math.min(95, point.x)),
+    y: Math.max(9, Math.min(91, point.y)),
+  };
+}
+
+function getShortName(name: string) {
+  const parts = name.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 3);
+  }
+
+  return parts[parts.length - 1]?.slice(0, 4) ?? name.slice(0, 3);
 }
 
 function TeamSimControl({
