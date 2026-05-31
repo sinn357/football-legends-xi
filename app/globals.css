@@ -3637,6 +3637,34 @@ td strong {
   transition: width 500ms ease;
 }
 
+.live-clock-row {
+  align-items: center;
+  color: var(--muted);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.live-clock-row span,
+.live-clock-row strong {
+  background: rgba(255, 250, 240, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 7px 10px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.live-clock-row strong {
+  color: var(--main);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .live-controls {
   align-items: center;
   display: flex;

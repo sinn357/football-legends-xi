@@ -35,5 +35,5 @@ npm run dev
 - 최대 4명 선수 비교
 - 브라우저 로컬 저장소 기반 XI 저장 및 비교
 - 웹 기반 매치 시뮬레이션 설계 확정: Godot 없이 Next.js 앱 안에서 순수 엔진과 UI를 단계적으로 구현
-- Sim 결과 기반 Watch Match: 2D 피치 위 선수 22명, 공, 패스 라인/슛 궤적, 전술별 움직임 보정, Build/Connect/Finish 3단계 장면 재생, Finish 결과 마커/골문 플래시, 이벤트 피드 애니메이션
+- Sim 결과 기반 Watch Match: 2D 피치 위 선수 22명, 공, 패스 라인/슛 궤적, 전술별 움직임 보정, 90분 경기 시간축, Quick/Standard/Extended/Tactical 재생 길이, Build/Connect/Finish 3단계 장면 재생, Finish 결과 마커/골문 플래시, 이벤트 피드 애니메이션
 - 4팀 더블 라운드로빈 Season 모드: 순위표, 득점/도움/평점/MVP 리더보드, 라운드별 결과 생성

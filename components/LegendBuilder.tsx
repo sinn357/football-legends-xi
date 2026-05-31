@@ -29,6 +29,7 @@ type PitchRole = Exclude<PositionCode, "LEGEND">;
 type LegendTierId = "pantheon" | "all-time" | "national" | "borderline" | "watchlist" | "archive";
 type SimTeamSource = "country" | "current" | "saved" | "world";
 type SimMatchMode = "best-of-3" | "home-away" | "single";
+type LivePlaybackModeId = "quick" | "standard" | "extended" | "tactical";
 type TournamentSize = 4 | 8;
 
 type SimSeriesMatch = {
@@ -228,6 +229,13 @@ type ChallengeOption = {
   target: number;
   test: (player: LegendPlayer) => boolean;
 };
+
+const livePlaybackModes: Array<{ description: string; durationSeconds: number; id: LivePlaybackModeId; label: string }> = [
+  { description: "결과 확인", durationSeconds: 90, id: "quick", label: "Quick" },
+  { description: "기본 감상", durationSeconds: 180, id: "standard", label: "Standard" },
+  { description: "빅매치", durationSeconds: 300, id: "extended", label: "Extended" },
+  { description: "전술 관찰", durationSeconds: 480, id: "tactical", label: "Tactical" },
+];
 
 const scoreLabels: Record<ScoreKey, string> = {
   teamCareer: "팀 커리어",
@@ -4801,16 +4809,21 @@ function LiveMatchViewer({
 }) {
   const [frameIndex, setFrameIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [playbackMode, setPlaybackMode] = useState<LivePlaybackModeId>("standard");
   const [sceneStep, setSceneStep] = useState(0);
   const [speed, setSpeed] = useState(1);
   const events = result.events;
+  const totalSceneSteps = Math.max(1, events.length * 3);
   const activeEvent = frameIndex > 0 ? events[Math.min(frameIndex - 1, events.length - 1)] : null;
+  const currentSceneStep = frameIndex === 0 ? 0 : Math.min(totalSceneSteps, (frameIndex - 1) * 3 + sceneStep + 1);
   const completedEventCount = frameIndex === 0 ? 0 : Math.max(0, Math.min(events.length, frameIndex - (sceneStep < 2 ? 1 : 0)));
   const visibleEvents = events.slice(0, completedEventCount);
   const liveScoreA = visibleEvents.filter((event) => event.teamId === teamA.id && event.outcome === "goal").length;
   const liveScoreB = visibleEvents.filter((event) => event.teamId === teamB.id && event.outcome === "goal").length;
-  const currentMinute = activeEvent?.minute ?? (frameIndex >= events.length ? 90 : 0);
-  const progress = events.length ? Math.round((Math.min(events.length * 3, (frameIndex === 0 ? 0 : (frameIndex - 1) * 3 + sceneStep + 1)) / (events.length * 3)) * 100) : 0;
+  const selectedPlaybackMode = livePlaybackModes.find((mode) => mode.id === playbackMode) ?? livePlaybackModes[1];
+  const stepDelay = Math.max(360, Math.round((selectedPlaybackMode.durationSeconds * 1000) / totalSceneSteps / speed));
+  const progress = Math.round((currentSceneStep / totalSceneSteps) * 100);
+  const matchClock = formatLiveMatchClock(currentSceneStep, totalSceneSteps);
   const activeTactic = activeEvent?.teamId === teamA.id ? tacticsA : activeEvent?.teamId === teamB.id ? tacticsB : tacticsA;
   const defendingTactic = activeEvent?.defendingTeamId === teamA.id ? tacticsA : activeEvent?.defendingTeamId === teamB.id ? tacticsB : tacticsB;
   const ballPosition = getLiveBallPosition(activeEvent, teamA.id, sceneStep, frameIndex, events.length, activeTactic);
@@ -4848,10 +4861,10 @@ function LiveMatchViewer({
 
       setFrameIndex((current) => Math.min(events.length, current + 1));
       setSceneStep(0);
-    }, Math.round(520 / speed));
+    }, stepDelay);
 
     return () => window.clearTimeout(timer);
-  }, [events.length, frameIndex, isPlaying, sceneStep, speed]);
+  }, [events.length, frameIndex, isPlaying, sceneStep, stepDelay]);
 
   return (
     <section className="live-match-panel">
@@ -4860,7 +4873,7 @@ function LiveMatchViewer({
           <p className="eyebrow">Watch Match</p>
           <h2>실시간 경기 보기</h2>
         </div>
-        <span className="saved-count">{currentMinute}'</span>
+        <span className="saved-count">{matchClock}</span>
       </div>
       <div className="live-match-shell">
         <div className="live-pitch-wrap">
@@ -4945,6 +4958,11 @@ function LiveMatchViewer({
           <div className="live-progress">
             <span style={{ width: `${progress}%` }} />
           </div>
+          <div className="live-clock-row">
+            <span>00:00</span>
+            <strong>{formatPlaybackDuration(selectedPlaybackMode.durationSeconds / speed)} real · 90:00 match</strong>
+            <span>90:00</span>
+          </div>
           <div className="live-controls">
             <button onClick={() => setIsPlaying((current) => !current)} type="button">
               {isPlaying ? "Pause" : "Play"}
@@ -4980,6 +4998,16 @@ function LiveMatchViewer({
               Step
             </button>
             <label>
+              <span>Length</span>
+              <select value={playbackMode} onChange={(event) => setPlaybackMode(event.target.value as LivePlaybackModeId)}>
+                {livePlaybackModes.map((mode) => (
+                  <option key={mode.id} value={mode.id}>
+                    {mode.label} · {formatPlaybackDuration(mode.durationSeconds)} · {mode.description}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
               <span>Speed</span>
               <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
                 <option value={0.75}>0.75x</option>
@@ -4993,7 +5021,7 @@ function LiveMatchViewer({
         <aside className="live-event-board">
           <div>
             <span>Current</span>
-            <strong>{activeEvent ? `${activeEvent.minute}' ${activeEvent.outcome.toUpperCase()}` : frameIndex >= events.length ? "Full Time" : "Kickoff"}</strong>
+            <strong>{activeEvent ? `${matchClock} · ${activeEvent.minute}' ${activeEvent.outcome.toUpperCase()}` : frameIndex >= events.length ? "90:00 · Full Time" : "00:00 · Kickoff"}</strong>
             <p>{activeEvent?.description ?? "경기 시작 전 포메이션이 정렬되어 있습니다."}</p>
           </div>
           <div className="live-event-feed">
@@ -5208,6 +5236,32 @@ function getLiveSceneStepLabel(sceneStep: number) {
   }
 
   return "Finish";
+}
+
+function formatLiveMatchClock(currentStep: number, totalSteps: number) {
+  const matchMinute = Math.min(90, Math.round((currentStep / Math.max(1, totalSteps)) * 90));
+
+  if (currentStep >= totalSteps) {
+    return "90:00 FT";
+  }
+
+  if (matchMinute === 45) {
+    return "45:00 HT";
+  }
+
+  return `${String(matchMinute).padStart(2, "0")}:00`;
+}
+
+function formatPlaybackDuration(seconds: number) {
+  const totalSeconds = Math.max(1, Math.round(seconds));
+  const minutes = Math.floor(totalSeconds / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  if (minutes === 0) {
+    return `${remainingSeconds}s`;
+  }
+
+  return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
 function formatOutcomeLabel(outcome: LiveMatchEvent["outcome"]) {
