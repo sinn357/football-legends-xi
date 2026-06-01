@@ -4529,7 +4529,7 @@ function MatchSimulatorView({
 }) {
   const statsA = result?.stats[teamA.id] ?? null;
   const statsB = result?.stats[teamB.id] ?? null;
-  const topEvents = result?.events.filter((event) => event.outcome === "goal" || event.xg >= 0.1).slice(0, 12) ?? [];
+  const topEvents = result?.events.filter((event) => event.outcome === "goal" || event.xg >= 0.1 || event.card).slice(0, 12) ?? [];
   const topRatings = result?.playerRatings.slice(0, 10) ?? [];
   const seriesSummary = seriesResults.length ? getSeriesSummary(seriesResults, teamA, teamB, matchMode) : null;
   const historySummary = getSimHistorySummary(simHistory);
@@ -4719,6 +4719,7 @@ function MatchSimulatorView({
               <Metric label="Stops" value={`${statsA?.defensiveActions ?? 0}-${statsB?.defensiveActions ?? 0}`} detail="수비 액션" />
               <Metric label="GK" value={`${statsA?.keeperSaves ?? 0}-${statsB?.keeperSaves ?? 0}`} detail="GK 처리" />
               <Metric label="Set" value={`${statsA?.setPieces ?? 0}-${statsB?.setPieces ?? 0}`} detail="세트피스 장면" />
+              <Metric label="Cards" value={`${formatCardMetric(statsA)}-${formatCardMetric(statsB)}`} detail={`파울 ${statsA?.fouls ?? 0}-${statsB?.fouls ?? 0}`} />
               <Metric label="Seed" value={result.matchSeed.slice(-8)} detail="동일 seed 재현 가능" />
             </div>
 
@@ -4960,6 +4961,11 @@ function LiveMatchViewer({
             {activeEvent && eventPath && !isActiveChance && isDefensiveMoment ? (
               <div className="live-defensive-marker" style={{ left: `${eventPath.end.x}%`, top: `${eventPath.end.y}%` }}>
                 <span>{getLiveFinishLabel(activeEvent)}</span>
+              </div>
+            ) : null}
+            {activeEvent?.card && eventPath && isFinishStep ? (
+              <div className={`live-card-marker ${activeEvent.card}`} style={{ left: `${eventPath.end.x}%`, top: `${eventPath.end.y}%` }}>
+                <span>{formatCardLabel(activeEvent.card)}</span>
               </div>
             ) : null}
             {activeEvent && defendingTactic.style === "high-press" && pressurePoint ? <span className="live-press-ring" style={{ left: `${pressurePoint.x}%`, top: `${pressurePoint.y}%` }} /> : null}
@@ -5350,6 +5356,10 @@ function getLiveFinishLabel(event: LiveMatchEvent) {
     return event.outcome.toUpperCase();
   }
 
+  if (event.card) {
+    return formatCardLabel(event.card).toUpperCase();
+  }
+
   if (event.eventType === "circulation") {
     return "KEEP";
   }
@@ -5461,7 +5471,7 @@ function getFlowEventDetail(event: LiveMatchEvent) {
   }
 
   if (eventType === "foul") {
-    return "Contact stops the sequence";
+    return event.card ? `${formatCardLabel(event.card)} after contact` : "Contact stops the sequence";
   }
 
   return "Tempo settles before the next action";
@@ -5477,7 +5487,7 @@ function getFlowEventIntensity(eventType: LiveMatchEvent["eventType"]) {
   }
 
   if (eventType === "offside" || eventType === "foul") {
-    return "Reset";
+    return eventType === "foul" ? "Discipline" : "Reset";
   }
 
   return "Controlled";
@@ -5565,6 +5575,10 @@ function formatOutcomeLabel(outcome: LiveMatchEvent["outcome"]) {
 }
 
 function getTimelineEventTitle(event: LiveMatchEvent) {
+  if (event.card) {
+    return `${formatCardLabel(event.card).toUpperCase()} · FOUL`;
+  }
+
   if (event.eventType === "setPiece") {
     return `${formatLiveSetPieceLabel(event.setPieceSituation).toUpperCase()} · ${event.outcome.toUpperCase()}`;
   }
@@ -5590,6 +5604,14 @@ function formatLiveSetPieceLabel(situation: LiveMatchEvent["setPieceSituation"])
   }
 
   return "Set piece";
+}
+
+function formatCardMetric(stats: SimulatedMatchResult["stats"][string] | null) {
+  return `${stats?.yellowCards ?? 0}/${stats?.redCards ?? 0}`;
+}
+
+function formatCardLabel(card: LiveMatchEvent["card"]) {
+  return card === "red" ? "Red" : "Yellow";
 }
 
 function getLiveSetPieceClass(event: LiveMatchEvent) {

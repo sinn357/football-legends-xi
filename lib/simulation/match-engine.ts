@@ -3,6 +3,7 @@ import { buildTeamSimulationProfile } from "./team-metrics";
 import { applyTactics, defaultTactics, getTacticTempoMultiplier } from "./tactics";
 import type {
   AppliedTeamProfile,
+  CardDecision,
   MatchEvent,
   MatchEventType,
   MatchTeamStats,
@@ -297,15 +298,17 @@ function simulateFlowEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamP
     const possessionTeam = side === "A" ? profileA : profileB;
     const opponent = side === "A" ? profileB : profileA;
     const eventType = pickFlowEventType(possessionTeam.adjustedMetrics, opponent.adjustedMetrics, possessionTeam.tactics, opponent.tactics, random);
-    const acting = isDefensiveFlowEventType(eventType) ? opponent : possessionTeam;
-    const defending = isDefensiveFlowEventType(eventType) ? possessionTeam : opponent;
+    const acting = isDefensiveFlowEventType(eventType) || eventType === "foul" ? opponent : possessionTeam;
+    const defending = isDefensiveFlowEventType(eventType) || eventType === "foul" ? possessionTeam : opponent;
     const primary = pickFlowPlayer(acting, eventType, random);
     const secondary = random.chance(0.46) ? pickFlowPlayer(acting, eventType, random, primary?.player.id) : undefined;
     const setPieceSituation = eventType === "setPiece" ? pickSetPieceSituation(acting.adjustedMetrics, defending.adjustedMetrics, random) : undefined;
+    const card = eventType === "foul" ? resolveCardDecision(acting, minute, random) : undefined;
 
     events.push({
+      card,
       defendingTeamId: defending.team.id,
-      description: describeFlowEvent(minute, acting, defending, eventType, primary?.player.name, secondary?.player.name, setPieceSituation),
+      description: describeFlowEvent(minute, acting, defending, eventType, primary?.player.name, secondary?.player.name, setPieceSituation, card),
       eventType,
       minute,
       outcome: getFlowOutcome(eventType),
@@ -352,7 +355,7 @@ function pickFlowEventType(attacking: TeamMetrics, defending: TeamMetrics, tacti
       { item: "interception" as const, weight: 5 + defending.defensiveSecurity * 0.12 + defending.midfieldControl * 0.08 + (defendingTactics.lineHeight === "high" ? 4 : 0) },
       { item: "tackle" as const, weight: 5 + defending.defensiveSecurity * 0.1 + defending.pressingPower * 0.11 + (defendingTactics.style === "high-press" ? 4 : 0) },
       { item: "keeperClaim" as const, weight: 2 + defending.goalkeeperImpact * 0.11 + (defendingTactics.style === "low-block" ? 3 : 0) },
-      { item: "foul" as const, weight: 3 + defending.pressingPower * 0.1 + defending.roleConflict * 0.08 + (defendingTactics.risk === "aggressive" ? 5 : 0) },
+      { item: "foul" as const, weight: 5 + defending.pressingPower * 0.12 + defending.roleConflict * 0.09 + (defendingTactics.risk === "aggressive" ? 6 : 0) },
       { item: "offside" as const, weight: 2 + attacking.transitionThreat * 0.08 + (defendingTactics.lineHeight === "high" ? 5 : 0) },
       { item: "clearance" as const, weight: 5 + defending.defensiveSecurity * 0.11 + (defendingTactics.style === "low-block" ? 6 : 0) },
       { item: "setPiece" as const, weight: 3 + attacking.setPieceThreat * 0.08 + (tactics.style === "direct" ? 4 : 0) },
@@ -371,6 +374,21 @@ function pickSetPieceSituation(attacking: TeamMetrics, defending: TeamMetrics, r
     ],
     random,
   );
+}
+
+function resolveCardDecision(offendingProfile: AppliedTeamProfile, minute: number, random: SeededRandom): CardDecision | undefined {
+  const riskModifier = offendingProfile.tactics.risk === "aggressive" ? 0.13 : offendingProfile.tactics.risk === "conservative" ? -0.08 : 0;
+  const styleModifier = offendingProfile.tactics.style === "high-press" ? 0.07 : offendingProfile.tactics.style === "low-block" ? 0.03 : 0;
+  const lateModifier = minute >= 70 ? 0.04 : 0;
+  const disciplineLoad = offendingProfile.adjustedMetrics.roleConflict * 0.0012 + offendingProfile.adjustedMetrics.pressingPower * 0.0009;
+  const yellowChance = Math.max(0.24, Math.min(0.72, 0.32 + riskModifier + styleModifier + lateModifier + disciplineLoad));
+  const redChance = Math.max(0.006, Math.min(0.055, 0.008 + Math.max(0, riskModifier) * 0.13 + offendingProfile.adjustedMetrics.roleConflict * 0.00018 + (minute >= 80 ? 0.008 : 0)));
+
+  if (!random.chance(yellowChance)) {
+    return undefined;
+  }
+
+  return random.chance(redChance) ? "red" : "yellow";
 }
 
 function calculateXg(attacking: TeamMetrics, defending: TeamMetrics, eventType: MatchEventType, random: SeededRandom, randomness: RandomnessLevel, setPieceSituation?: SetPieceSituation) {
@@ -598,6 +616,19 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
 
   for (const event of events) {
     if (!isChanceEvent(event)) {
+      if (event.eventType === "foul") {
+        const teamStats = stats[event.teamId];
+        teamStats.fouls += 1;
+
+        if (event.card === "yellow") {
+          teamStats.yellowCards += 1;
+        }
+
+        if (event.card === "red") {
+          teamStats.redCards += 1;
+        }
+      }
+
       if (isDefensiveFlowEventType(event.eventType)) {
         const teamStats = stats[event.teamId];
         teamStats.defensiveActions += 1;
@@ -646,15 +677,18 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
 function createEmptyStats(metrics: TeamMetrics): MatchTeamStats {
   return {
     defensiveActions: 0,
+    fouls: 0,
     goals: 0,
     keeperSaves: 0,
     passFlow: Math.round(metrics.midfieldControl * 0.55 + metrics.progression * 0.25 + metrics.chemistry * 0.2),
     possession: 50,
     pressingWins: 0,
+    redCards: 0,
     setPieces: 0,
     setPieceThreat: 0,
     shots: 0,
     shotsOnTarget: 0,
+    yellowCards: 0,
     xg: 0,
   };
 }
@@ -696,6 +730,10 @@ function buildPlayerRatings(
           const defensiveBonus = isDefensiveFlowEventType(event.eventType) ? 0.038 : 0.018;
           player.involvement += isDefensiveFlowEventType(event.eventType) ? 0.028 : 0.015;
           player.rating += defensiveBonus;
+
+          if (event.eventType === "foul") {
+            player.rating -= event.card === "red" ? 0.55 : event.card === "yellow" ? 0.2 : 0.06;
+          }
         }
       }
 
@@ -1006,6 +1044,9 @@ function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedT
     const pressWins = chanceEvents.filter((event) => event.eventType === "pressWin").length;
     const setPieces = chanceEvents.filter((event) => event.eventType === "setPiece").length;
     const penalties = chanceEvents.filter((event) => event.setPieceSituation === "penalty").length;
+    const fouls = flowEvents.filter((event) => event.eventType === "foul").length;
+    const yellowCards = flowEvents.filter((event) => event.card === "yellow").length;
+    const redCards = flowEvents.filter((event) => event.card === "red").length;
     const highXg = chanceEvents.filter((event) => event.xg >= 0.14).length;
     const circulation = flowEvents.filter((event) => event.eventType === "circulation" || event.eventType === "switchPlay").length;
     const defensiveFlow = flowEvents.filter((event) => isDefensiveFlowEventType(event.eventType)).length;
@@ -1037,6 +1078,11 @@ function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedT
 
     if (defensiveFlow >= 5) {
       notes.push(`${profile.team.name}은 태클/인터셉트/세컨볼 ${defensiveFlow}회로 상대 흐름을 끊는 장면이 많았습니다.`);
+    }
+
+    if (fouls >= 3 || yellowCards + redCards > 0) {
+      const cardText = yellowCards + redCards > 0 ? ` 카드 ${yellowCards + redCards}장` : "";
+      notes.push(`${profile.team.name}은 파울 ${fouls}회${cardText}으로 경기 리듬을 끊거나 위험을 감수했습니다.`);
     }
 
     return notes;
@@ -1146,17 +1192,19 @@ function describeFlowEvent(
   primaryName?: string,
   secondaryName?: string,
   setPieceSituation?: SetPieceSituation,
+  card?: CardDecision,
 ) {
   const subject = primaryName ?? acting.team.name;
   const support = secondaryName ? ` ${secondaryName}와 함께` : "";
   const setPieceText = setPieceSituation ? getSetPieceSituationText(setPieceSituation) : "세트피스";
+  const cardText = card ? ` ${getCardDecisionText(card)}를 받았습니다.` : "";
   const typeText: Record<MatchEventType, string> = {
     centralCombination: "중앙에서 짧은 연결을 이어갔습니다.",
     circulation: "후방과 중원을 오가며 점유를 안정시켰습니다.",
     clearance: `${defending.team.name}의 압박을 피해 위험 지역에서 걷어냈습니다.`,
     counter: "전환 타이밍을 노리며 전방으로 속도를 붙였습니다.",
     error: `${defending.team.name}의 압박 속에서 공 소유가 흔들렸습니다.`,
-    foul: "경합 과정에서 파울로 흐름이 끊겼습니다.",
+    foul: `경합 과정에서 파울로 흐름을 끊었습니다.${cardText}`,
     interception: `${defending.team.name}의 패스 길을 읽고 끊어냈습니다.`,
     keeperClaim: "골문 앞 공중볼을 안정적으로 잡아냈습니다.",
     lateMoment: "후반 집중 싸움에서 볼 소유를 지켜냈습니다.",
@@ -1212,6 +1260,10 @@ function getSetPieceSituationText(situation: SetPieceSituation) {
   }
 
   return "와이드 프리킥";
+}
+
+function getCardDecisionText(card: CardDecision) {
+  return card === "red" ? "레드카드" : "옐로카드";
 }
 
 function selectByWeight<T>(items: Array<{ item: T; weight: number }>, random: SeededRandom): T {

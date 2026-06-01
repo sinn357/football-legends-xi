@@ -5,6 +5,7 @@ export { buildTeamSimulationProfile } from "./team-metrics";
 export { applyTactics, defaultTactics } from "./tactics";
 export type {
   AppliedTeamProfile,
+  CardDecision,
   MatchEvent,
   MatchEventType,
   MatchTeamStats,

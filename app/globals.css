@@ -3608,6 +3608,38 @@ td strong {
   z-index: 9;
 }
 
+.live-card-marker {
+  align-items: center;
+  animation: outcomePop 520ms ease-out both;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 7px rgba(0, 0, 0, 0.16),
+    0 12px 22px rgba(0, 0, 0, 0.26);
+  color: #173d31;
+  display: grid;
+  font-size: 9px;
+  font-weight: 950;
+  height: 42px;
+  justify-items: center;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%) rotate(-4deg);
+  width: 30px;
+  z-index: 10;
+}
+
+.live-card-marker.yellow {
+  background: #ffd166;
+  border: 1px solid rgba(255, 250, 240, 0.82);
+}
+
+.live-card-marker.red {
+  background: #d94f45;
+  border: 1px solid rgba(255, 250, 240, 0.72);
+  color: #fffaf0;
+}
+
 .live-press-ring {
   animation: pressRing 900ms ease infinite;
   border: 2px solid rgba(255, 209, 102, 0.72);
