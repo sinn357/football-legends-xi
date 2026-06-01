@@ -4808,6 +4808,7 @@ function LiveMatchViewer({
   teamB: SimulationTeamInput;
 }) {
   const [frameIndex, setFrameIndex] = useState(0);
+  const [flowFrame, setFlowFrame] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [playbackMode, setPlaybackMode] = useState<LivePlaybackModeId>("standard");
   const [sceneStep, setSceneStep] = useState(0);
@@ -4824,9 +4825,10 @@ function LiveMatchViewer({
   const stepDelay = Math.max(360, Math.round((selectedPlaybackMode.durationSeconds * 1000) / totalSceneSteps / speed));
   const progress = Math.round((currentSceneStep / totalSceneSteps) * 100);
   const matchClock = formatLiveMatchClock(currentSceneStep, totalSceneSteps);
+  const liveFlowState = getLiveFlowState(activeEvent, sceneStep, frameIndex, events.length);
   const activeTactic = activeEvent?.teamId === teamA.id ? tacticsA : activeEvent?.teamId === teamB.id ? tacticsB : tacticsA;
   const defendingTactic = activeEvent?.defendingTeamId === teamA.id ? tacticsA : activeEvent?.defendingTeamId === teamB.id ? tacticsB : tacticsB;
-  const ballPosition = getLiveBallPosition(activeEvent, teamA.id, sceneStep, frameIndex, events.length, activeTactic);
+  const ballPosition = getLiveBallPosition(activeEvent, teamA.id, sceneStep, frameIndex, flowFrame, events.length, activeTactic);
   const eventPath = activeEvent ? getLiveEventPath(activeEvent, teamA.id, activeTactic) : null;
   const pressurePoint = activeEvent ? getLivePressurePoint(activeEvent, teamA.id) : null;
   const isFinishStep = Boolean(activeEvent && sceneStep === 2);
@@ -4838,6 +4840,7 @@ function LiveMatchViewer({
 
   useEffect(() => {
     setFrameIndex(0);
+    setFlowFrame(0);
     setIsPlaying(true);
     setSceneStep(0);
   }, [result.matchSeed]);
@@ -4865,6 +4868,18 @@ function LiveMatchViewer({
 
     return () => window.clearTimeout(timer);
   }, [events.length, frameIndex, isPlaying, sceneStep, stepDelay]);
+
+  useEffect(() => {
+    if (!isPlaying || (frameIndex >= events.length && sceneStep >= 2)) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setFlowFrame((current) => current + 1);
+    }, Math.max(220, Math.round(480 / speed)));
+
+    return () => window.clearInterval(timer);
+  }, [events.length, frameIndex, isPlaying, sceneStep, speed]);
 
   return (
     <section className="live-match-panel">
@@ -4894,11 +4909,17 @@ function LiveMatchViewer({
             <strong>{activeEvent ? `${formatTacticStyle(activeTactic.style)} ${getLiveSceneStepLabel(sceneStep)}` : "Pre-match shape"}</strong>
             <span>{teamB.name}: {formatTacticStyle(tacticsB.style)}</span>
           </div>
+          <div className="live-flow-row">
+            <span>{liveFlowState.phase}</span>
+            <strong>{liveFlowState.detail}</strong>
+            <em>{liveFlowState.intensity}</em>
+          </div>
           <div className={`live-pitch live-step-${sceneStep}`} aria-label="Animated match pitch">
             <div className="live-pitch-line halfway" />
             <div className="live-pitch-line center-circle" />
             <div className="live-box left" />
             <div className="live-box right" />
+            <div className={`live-flow-zone ${liveFlowState.zone}`} />
             {activeEvent?.outcome === "goal" && isFinishStep ? <div className={`live-goal-net ${activeEvent.teamId === teamA.id ? "right" : "left"}`} /> : null}
             {activeEvent && defendingTactic.style === "low-block" ? (
               <div className={`live-low-block-zone ${activeEvent.defendingTeamId === teamA.id ? "left" : "right"}`} />
@@ -4923,7 +4944,7 @@ function LiveMatchViewer({
               ...teamA.slots.map((slot) => ({ side: "A" as const, slot, teamId: teamA.id })),
               ...teamB.slots.map((slot) => ({ side: "B" as const, slot, teamId: teamB.id })),
             ].map(({ side, slot, teamId }) => {
-              const position = getLivePlayerPosition(slot, side, activeEvent, teamA.id, frameIndex, side === "A" ? tacticsA : tacticsB);
+              const position = getLivePlayerPosition(slot, side, activeEvent, teamA.id, frameIndex, sceneStep, flowFrame, side === "A" ? tacticsA : tacticsB);
               const isActor = activeEvent?.scorerId === slot.player.id || activeEvent?.assisterId === slot.player.id;
 
               return (
@@ -5065,36 +5086,47 @@ function getLivePlayerPosition(
   activeEvent: LiveMatchEvent | null,
   teamAId: string,
   frameIndex: number,
+  sceneStep: number,
+  flowFrame: number,
   tactics: SimulationTactics,
 ): LivePoint {
   const base = getRolePitchPoint(slot.role, side);
+  const flowSeed = slot.player.id.length + slot.role.length * 3;
+  const idleDrift = {
+    x: Math.sin((flowFrame + flowSeed) * 0.55) * 0.8,
+    y: Math.cos((flowFrame + flowSeed) * 0.43) * 1.05,
+  };
 
   if (!activeEvent) {
-    return base;
+    return clampPoint({
+      x: base.x + idleDrift.x,
+      y: base.y + idleDrift.y,
+    });
   }
 
   const attackingSide: "A" | "B" = activeEvent.teamId === teamAId ? "A" : "B";
   const isAttacking = side === attackingSide;
   const direction = side === "A" ? 1 : -1;
   const lane = getEventLane(activeEvent);
-  const wave = ((frameIndex + slot.player.id.length) % 4) - 1.5;
+  const wave = Math.sin((flowFrame + frameIndex + flowSeed) * 0.62);
+  const scenePush = direction * sceneStep * (isAttacking ? 1.8 : 0.9);
   const tacticShift = getLiveTacticShift(tactics, isAttacking, direction, activeEvent, slot.role);
   let point: LivePoint = {
-    x: base.x + (isAttacking ? direction * 8 : direction * 4) + tacticShift.x,
-    y: base.y + wave * 1.6 + tacticShift.y,
+    x: base.x + (isAttacking ? direction * 8 : direction * 4) + tacticShift.x + scenePush + idleDrift.x * 0.8,
+    y: base.y + wave * 1.8 + tacticShift.y + idleDrift.y * 0.45,
   };
 
   if (activeEvent.assisterId === slot.player.id) {
     point = {
       x: (activeEvent.teamId === teamAId ? lane.buildX : 100 - lane.buildX) + tacticShift.x * 0.35,
-      y: lane.y + tacticShift.y * 0.35 + (slot.role === "LW" || slot.role === "LB" ? -4 : slot.role === "RW" || slot.role === "RB" ? 4 : 0),
+      y: lane.y + tacticShift.y * 0.35 + wave * 1.2 + (slot.role === "LW" || slot.role === "LB" ? -4 : slot.role === "RW" || slot.role === "RB" ? 4 : 0),
     };
   }
 
   if (activeEvent.scorerId === slot.player.id) {
     point = {
       x: (activeEvent.teamId === teamAId ? lane.targetX : 100 - lane.targetX) + tacticShift.x * 0.25,
-      y: lane.y + tacticShift.y * 0.25,
+      y: lane.y + tacticShift.y * 0.25 + Math.sin(flowFrame * 0.8) * 0.9,
     };
   }
 
@@ -5108,17 +5140,18 @@ function getLivePlayerPosition(
   return clampPoint(point);
 }
 
-function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string, sceneStep: number, frameIndex: number, totalFrames: number, tactics: SimulationTactics): LivePoint {
+function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string, sceneStep: number, frameIndex: number, flowFrame: number, totalFrames: number, tactics: SimulationTactics): LivePoint {
   if (!activeEvent) {
     return {
-      x: frameIndex >= totalFrames ? 50 : 50,
-      y: 50,
+      x: 50 + Math.sin(flowFrame * 0.5) * (frameIndex >= totalFrames ? 0 : 1.4),
+      y: 50 + Math.cos(flowFrame * 0.4) * (frameIndex >= totalFrames ? 0 : 1.2),
     };
   }
 
   const lane = getEventLane(activeEvent);
   const toRight = activeEvent.teamId === teamAId;
-  const phase = sceneStep / 2;
+  const flowPulse = (Math.sin(flowFrame * 0.7) + 1) / 2;
+  const phase = Math.min(1, (sceneStep + flowPulse * 0.55) / 2);
   const startX = toRight ? lane.buildX : 100 - lane.buildX;
   const tacticReach = tactics.style === "counter" || tactics.style === "direct" ? 5 : tactics.style === "possession" ? -3 : 0;
   const endX = (toRight ? lane.targetX : 100 - lane.targetX) + (toRight ? tacticReach : -tacticReach);
@@ -5126,7 +5159,7 @@ function getLiveBallPosition(activeEvent: LiveMatchEvent | null, teamAId: string
 
   return clampPoint({
     x: startX + (endX - startX) * phase + (toRight ? shotBoost : -shotBoost),
-    y: lane.y + Math.sin(frameIndex + sceneStep) * 2.2,
+    y: lane.y + Math.sin(frameIndex + sceneStep + flowFrame * 0.75) * 2.2,
   });
 }
 
@@ -5217,6 +5250,51 @@ function getLiveTacticShift(tactics: SimulationTactics, isAttacking: boolean, di
   }
 
   return { x, y };
+}
+
+function getLiveFlowState(activeEvent: LiveMatchEvent | null, sceneStep: number, frameIndex: number, totalFrames: number) {
+  if (frameIndex >= totalFrames && sceneStep >= 2) {
+    return {
+      detail: "Referee closes the match",
+      intensity: "Settled",
+      phase: "Full-time",
+      zone: "reset",
+    };
+  }
+
+  if (!activeEvent) {
+    return {
+      detail: "Teams hold their starting shapes",
+      intensity: "Low tempo",
+      phase: "Kickoff shape",
+      zone: "midfield",
+    };
+  }
+
+  if (sceneStep === 0) {
+    return {
+      detail: activeEvent.eventType === "counter" ? "Turnover opens transition space" : "Back line and midfield circulate",
+      intensity: activeEvent.xg >= 0.14 ? "Rising" : "Measured",
+      phase: "Build-up",
+      zone: "build",
+    };
+  }
+
+  if (sceneStep === 1) {
+    return {
+      detail: activeEvent.assisterId ? "Connector receives between lines" : "Second ball contested centrally",
+      intensity: activeEvent.xg >= 0.16 ? "High pressure" : "Medium pressure",
+      phase: "Midfield contest",
+      zone: "midfield",
+    };
+  }
+
+  return {
+    detail: activeEvent.outcome === "goal" ? "Final action hits the net" : "Defence reacts to the shot",
+    intensity: activeEvent.outcome === "goal" ? "Peak" : "Recovery",
+    phase: "Final third",
+    zone: "final",
+  };
 }
 
 function formatTacticStyle(style: SimulationTactics["style"]) {
