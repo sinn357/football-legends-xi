@@ -102,6 +102,8 @@ export type MatchEventType =
   | "counter"
   | "error"
   | "foul"
+  | "interception"
+  | "keeperClaim"
   | "lateMoment"
   | "openPlay"
   | "offside"
@@ -109,10 +111,12 @@ export type MatchEventType =
   | "secondBall"
   | "setPiece"
   | "switchPlay"
+  | "tackle"
   | "wideAttack";
 
 export type MatchEvent = {
   assisterId?: string;
+  defensivePlayerId?: string;
   defendingTeamId: string;
   description: string;
   eventType: MatchEventType;
@@ -127,7 +131,9 @@ export type MatchEvent = {
 };
 
 export type MatchTeamStats = {
+  defensiveActions: number;
   goals: number;
+  keeperSaves: number;
   passFlow: number;
   possession: number;
   pressingWins: number;

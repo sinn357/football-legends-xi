@@ -3527,6 +3527,28 @@ td strong {
   background: rgba(91, 100, 96, 0.9);
 }
 
+.live-defensive-marker {
+  align-items: center;
+  animation: outcomePop 620ms ease-out both;
+  background: rgba(24, 75, 63, 0.94);
+  border: 1px solid rgba(244, 239, 227, 0.42);
+  border-radius: 999px;
+  box-shadow: 0 0 0 7px rgba(24, 75, 63, 0.18);
+  color: #fffaf0;
+  display: grid;
+  font-size: 10px;
+  font-weight: 900;
+  height: 58px;
+  justify-items: center;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  z-index: 9;
+}
+
 .live-press-ring {
   animation: pressRing 900ms ease infinite;
   border: 2px solid rgba(255, 209, 102, 0.72);

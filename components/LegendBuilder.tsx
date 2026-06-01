@@ -4716,6 +4716,8 @@ function MatchSimulatorView({
               <Metric label="Shots" value={`${statsA?.shots ?? 0}-${statsB?.shots ?? 0}`} detail="전체 슈팅" />
               <Metric label="SOT" value={`${statsA?.shotsOnTarget ?? 0}-${statsB?.shotsOnTarget ?? 0}`} detail="유효 슈팅" />
               <Metric label="Press" value={`${statsA?.pressingWins ?? 0}-${statsB?.pressingWins ?? 0}`} detail="압박 탈취" />
+              <Metric label="Stops" value={`${statsA?.defensiveActions ?? 0}-${statsB?.defensiveActions ?? 0}`} detail="수비 액션" />
+              <Metric label="GK" value={`${statsA?.keeperSaves ?? 0}-${statsB?.keeperSaves ?? 0}`} detail="GK 처리" />
               <Metric label="Seed" value={result.matchSeed.slice(-8)} detail="동일 seed 재현 가능" />
             </div>
 
@@ -4833,6 +4835,7 @@ function LiveMatchViewer({
   const pressurePoint = activeEvent ? getLivePressurePoint(activeEvent, teamA.id) : null;
   const isFinishStep = Boolean(activeEvent && sceneStep === 2);
   const isActiveChance = Boolean(activeEvent && isLiveChanceEvent(activeEvent));
+  const isDefensiveMoment = Boolean(activeEvent && isLiveDefensiveEvent(activeEvent) && isFinishStep);
   const latestEvents = visibleEvents.slice(-5).reverse();
   const playerNameById = new Map([...teamA.slots, ...teamB.slots].map((slot) => [slot.player.id, slot.player.name]));
   const possessionTeam = activeEvent?.teamId === teamA.id ? teamA.name : activeEvent?.teamId === teamB.id ? teamB.name : "Neutral";
@@ -4940,6 +4943,11 @@ function LiveMatchViewer({
             {activeEvent && eventPath && isActiveChance && isFinishStep ? (
               <div className={`live-outcome-marker ${activeEvent.outcome}`} style={{ left: `${eventPath.goalPoint.x}%`, top: `${eventPath.goalPoint.y}%` }}>
                 <span>{formatOutcomeLabel(activeEvent.outcome)}</span>
+              </div>
+            ) : null}
+            {activeEvent && eventPath && !isActiveChance && isDefensiveMoment ? (
+              <div className="live-defensive-marker" style={{ left: `${eventPath.end.x}%`, top: `${eventPath.end.y}%` }}>
+                <span>{getLiveFinishLabel(activeEvent)}</span>
               </div>
             ) : null}
             {activeEvent && defendingTactic.style === "high-press" && pressurePoint ? <span className="live-press-ring" style={{ left: `${pressurePoint.x}%`, top: `${pressurePoint.y}%` }} /> : null}
@@ -5313,6 +5321,14 @@ function isLiveChanceEvent(event: LiveMatchEvent) {
   return event.phase !== "flow";
 }
 
+function isLiveDefensiveEvent(event: LiveMatchEvent) {
+  if (event.phase === "flow") {
+    return ["clearance", "interception", "keeperClaim", "secondBall", "tackle"].includes(event.eventType);
+  }
+
+  return event.outcome === "saved" || event.outcome === "blocked";
+}
+
 function getLiveFinishLabel(event: LiveMatchEvent) {
   if (isLiveChanceEvent(event)) {
     return event.outcome.toUpperCase();
@@ -5328,6 +5344,18 @@ function getLiveFinishLabel(event: LiveMatchEvent) {
 
   if (event.eventType === "secondBall") {
     return "DUEL";
+  }
+
+  if (event.eventType === "interception") {
+    return "INTERCEPT";
+  }
+
+  if (event.eventType === "tackle") {
+    return "TACKLE";
+  }
+
+  if (event.eventType === "keeperClaim") {
+    return "CLAIM";
   }
 
   if (event.eventType === "clearance") {
@@ -5346,12 +5374,20 @@ function getLiveFinishLabel(event: LiveMatchEvent) {
 }
 
 function getFlowEventPhase(eventType: LiveMatchEvent["eventType"]) {
-  if (eventType === "clearance") {
+  if (eventType === "clearance" || eventType === "keeperClaim") {
     return "Defensive reset";
+  }
+
+  if (eventType === "interception") {
+    return "Interception";
   }
 
   if (eventType === "secondBall") {
     return "Second ball";
+  }
+
+  if (eventType === "tackle") {
+    return "Tackle";
   }
 
   if (eventType === "foul" || eventType === "offside") {
@@ -5378,6 +5414,18 @@ function getFlowEventDetail(eventType: LiveMatchEvent["eventType"]) {
     return "Loose ball contested after contact";
   }
 
+  if (eventType === "interception") {
+    return "Passing lane read and cut";
+  }
+
+  if (eventType === "tackle") {
+    return "Carrier stopped before progression";
+  }
+
+  if (eventType === "keeperClaim") {
+    return "Keeper claims the danger early";
+  }
+
   if (eventType === "clearance") {
     return "Defence clears and pushes out";
   }
@@ -5394,7 +5442,7 @@ function getFlowEventDetail(eventType: LiveMatchEvent["eventType"]) {
 }
 
 function getFlowEventIntensity(eventType: LiveMatchEvent["eventType"]) {
-  if (eventType === "secondBall" || eventType === "clearance") {
+  if (eventType === "interception" || eventType === "keeperClaim" || eventType === "secondBall" || eventType === "tackle" || eventType === "clearance") {
     return "Contact";
   }
 
@@ -5406,7 +5454,7 @@ function getFlowEventIntensity(eventType: LiveMatchEvent["eventType"]) {
 }
 
 function getFlowEventZone(eventType: LiveMatchEvent["eventType"]) {
-  if (eventType === "clearance") {
+  if (eventType === "clearance" || eventType === "keeperClaim") {
     return "reset";
   }
 
@@ -5499,7 +5547,7 @@ function getLaneCurveOffset(event: LiveMatchEvent) {
     return event.minute % 2 === 0 ? -13 : 13;
   }
 
-  if (event.eventType === "secondBall" || event.eventType === "foul") {
+  if (event.eventType === "interception" || event.eventType === "secondBall" || event.eventType === "tackle" || event.eventType === "foul") {
     return event.minute % 2 === 0 ? -5 : 5;
   }
 
@@ -5514,6 +5562,8 @@ function getEventLane(event: LiveMatchEvent) {
     counter: { buildX: 44, targetX: 84, y: event.minute % 2 === 0 ? 38 : 62 },
     error: { buildX: 60, targetX: 78, y: 50 },
     foul: { buildX: 42, targetX: 53, y: event.minute % 2 === 0 ? 44 : 56 },
+    interception: { buildX: 52, targetX: 42, y: event.minute % 2 === 0 ? 44 : 56 },
+    keeperClaim: { buildX: 16, targetX: 10, y: 50 },
     lateMoment: { buildX: 58, targetX: 84, y: 50 },
     openPlay: { buildX: 52, targetX: 78, y: event.minute % 2 === 0 ? 45 : 55 },
     offside: { buildX: 48, targetX: 76, y: event.minute % 2 === 0 ? 40 : 60 },
@@ -5521,6 +5571,7 @@ function getEventLane(event: LiveMatchEvent) {
     secondBall: { buildX: 39, targetX: 56, y: event.minute % 2 === 0 ? 47 : 53 },
     setPiece: { buildX: 66, targetX: 82, y: event.minute % 2 === 0 ? 35 : 65 },
     switchPlay: { buildX: 31, targetX: 66, y: event.minute % 2 === 0 ? 28 : 72 },
+    tackle: { buildX: 50, targetX: 43, y: event.minute % 2 === 0 ? 38 : 62 },
     wideAttack: { buildX: 57, targetX: 80, y: event.minute % 2 === 0 ? 22 : 78 },
   };
 
