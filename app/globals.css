@@ -4029,6 +4029,63 @@ td strong {
   overflow: auto;
 }
 
+.live-highlight-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.live-highlight-heading em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.live-highlight-filters {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.live-highlight-filters button {
+  align-items: center;
+  background: rgba(255, 250, 240, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 2px;
+  justify-items: center;
+  min-width: 0;
+  padding: 7px 4px;
+}
+
+.live-highlight-filters button.active {
+  background: rgba(255, 209, 102, 0.14);
+  border-color: rgba(255, 209, 102, 0.5);
+  color: var(--main);
+}
+
+.live-highlight-filters button span {
+  font-size: 9px;
+  line-height: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-highlight-filters button em {
+  color: var(--gold);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+}
+
 .live-highlight-list button {
   display: grid;
   gap: 4px;

@@ -30,6 +30,7 @@ type LegendTierId = "pantheon" | "all-time" | "national" | "borderline" | "watch
 type SimTeamSource = "country" | "current" | "saved" | "world";
 type SimMatchMode = "best-of-3" | "home-away" | "single";
 type LivePlaybackModeId = "quick" | "standard" | "extended" | "tactical";
+type LiveReplayFilterId = "all" | "cards" | "chances" | "goals" | "setPieces";
 type TournamentSize = 4 | 8;
 
 type SimSeriesMatch = {
@@ -235,6 +236,14 @@ const livePlaybackModes: Array<{ description: string; durationSeconds: number; i
   { description: "기본 감상", durationSeconds: 180, id: "standard", label: "Standard" },
   { description: "빅매치", durationSeconds: 300, id: "extended", label: "Extended" },
   { description: "전술 관찰", durationSeconds: 480, id: "tactical", label: "Tactical" },
+];
+
+const liveReplayFilters: Array<{ id: LiveReplayFilterId; label: string }> = [
+  { id: "all", label: "All" },
+  { id: "goals", label: "Goals" },
+  { id: "chances", label: "Chances" },
+  { id: "cards", label: "Cards" },
+  { id: "setPieces", label: "Set" },
 ];
 
 const scoreLabels: Record<ScoreKey, string> = {
@@ -4816,6 +4825,7 @@ function LiveMatchViewer({
   const [flowFrame, setFlowFrame] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [playbackMode, setPlaybackMode] = useState<LivePlaybackModeId>("standard");
+  const [replayFilter, setReplayFilter] = useState<LiveReplayFilterId>("all");
   const [sceneStep, setSceneStep] = useState(0);
   const [speed, setSpeed] = useState(1);
   const events = result.events;
@@ -4841,7 +4851,9 @@ function LiveMatchViewer({
   const isActiveChance = Boolean(activeEvent && isLiveChanceEvent(activeEvent));
   const isDefensiveMoment = Boolean(activeEvent && isLiveDefensiveEvent(activeEvent) && isFinishStep);
   const latestEvents = visibleEvents.slice(-5).reverse();
-  const replayMoments = useMemo(() => events.map((event, index) => ({ event, index })).filter(({ event }) => isLiveReplayMoment(event)).slice(0, 14), [events]);
+  const allReplayMoments = useMemo(() => events.map((event, index) => ({ event, index })).filter(({ event }) => isLiveReplayMoment(event)), [events]);
+  const replayFilterCounts = useMemo(() => getLiveReplayFilterCounts(allReplayMoments), [allReplayMoments]);
+  const replayMoments = useMemo(() => allReplayMoments.filter(({ event }) => isLiveReplayMomentInFilter(event, replayFilter)).slice(0, 14), [allReplayMoments, replayFilter]);
   const activeReplayIndex = activeEvent ? events.indexOf(activeEvent) : -1;
   const previousReplayMoment = [...replayMoments].reverse().find((moment) => moment.index < activeReplayIndex) ?? replayMoments[replayMoments.length - 1] ?? null;
   const nextReplayMoment = replayMoments.find((moment) => moment.index > activeReplayIndex) ?? replayMoments[0] ?? null;
@@ -4856,6 +4868,7 @@ function LiveMatchViewer({
     setFrameIndex(0);
     setFlowFrame(0);
     setIsPlaying(true);
+    setReplayFilter("all");
     setSceneStep(0);
   }, [result.matchSeed]);
 
@@ -5115,7 +5128,18 @@ function LiveMatchViewer({
             ) : null}
           </div>
           <div className="live-highlight-list">
-            <span>Highlights</span>
+            <div className="live-highlight-heading">
+              <span>Highlights</span>
+              <em>{replayMoments.length}/{allReplayMoments.length}</em>
+            </div>
+            <div className="live-highlight-filters" aria-label="Highlight filters">
+              {liveReplayFilters.map((filter) => (
+                <button className={replayFilter === filter.id ? "active" : ""} key={filter.id} onClick={() => setReplayFilter(filter.id)} type="button">
+                  <span>{filter.label}</span>
+                  <em>{replayFilterCounts[filter.id]}</em>
+                </button>
+              ))}
+            </div>
             {replayMoments.length ? (
               replayMoments.map(({ event, index }) => (
                 <button className={index === activeReplayIndex ? "active" : ""} key={`${event.minute}-${event.teamId}-${event.eventType}-${index}`} onClick={() => jumpToReplayMoment(index)} type="button">
@@ -5642,6 +5666,36 @@ function getTimelineEventTitle(event: LiveMatchEvent) {
 
 function isLiveReplayMoment(event: LiveMatchEvent) {
   return event.outcome === "goal" || event.xg >= 0.1 || Boolean(event.card) || event.setPieceSituation === "penalty" || event.momentumSwing >= 7;
+}
+
+function isLiveReplayMomentInFilter(event: LiveMatchEvent, filter: LiveReplayFilterId) {
+  if (filter === "all") {
+    return true;
+  }
+
+  if (filter === "goals") {
+    return event.outcome === "goal";
+  }
+
+  if (filter === "chances") {
+    return event.xg >= 0.1;
+  }
+
+  if (filter === "cards") {
+    return Boolean(event.card);
+  }
+
+  return Boolean(event.setPieceSituation);
+}
+
+function getLiveReplayFilterCounts(moments: Array<{ event: LiveMatchEvent; index: number }>): Record<LiveReplayFilterId, number> {
+  return liveReplayFilters.reduce(
+    (counts, filter) => ({
+      ...counts,
+      [filter.id]: moments.filter(({ event }) => isLiveReplayMomentInFilter(event, filter.id)).length,
+    }),
+    {} as Record<LiveReplayFilterId, number>,
+  );
 }
 
 function getLiveReplayMomentTitle(event: LiveMatchEvent) {
