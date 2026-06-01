@@ -11,6 +11,7 @@ export type {
   PlayerMatchRating,
   PlayerSimulationAttributes,
   RandomnessLevel,
+  SetPieceSituation,
   SimulatedMatchResult,
   SimulateMatchOptions,
   SimulationSlot,

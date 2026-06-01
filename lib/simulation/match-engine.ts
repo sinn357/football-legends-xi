@@ -8,6 +8,7 @@ import type {
   MatchTeamStats,
   PlayerMatchRating,
   RandomnessLevel,
+  SetPieceSituation,
   SimulatedMatchResult,
   SimulateMatchOptions,
   SimulationTactics,
@@ -43,7 +44,7 @@ const eventTypes: MatchEventType[] = [
 ];
 const chanceEventTypes = new Set<MatchEventType>(["openPlay", "centralCombination", "wideAttack", "counter", "pressWin", "setPiece", "error", "lateMoment"]);
 const defensiveFlowEventTypes = new Set<MatchEventType>(["clearance", "interception", "keeperClaim", "secondBall", "tackle"]);
-const flowEventTypes: MatchEventType[] = ["circulation", "switchPlay", "secondBall", "interception", "tackle", "keeperClaim", "foul", "offside", "clearance"];
+const flowEventTypes: MatchEventType[] = ["circulation", "switchPlay", "secondBall", "interception", "tackle", "keeperClaim", "foul", "offside", "clearance", "setPiece"];
 
 export function simulateMatch(
   teamA: SimulationTeamInput,
@@ -250,10 +251,11 @@ function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfi
     const attacking = side === "A" ? profileA : profileB;
     const defending = side === "A" ? profileB : profileA;
     const eventType = pickEventType(attacking.adjustedMetrics, defending.adjustedMetrics, minute, random);
-    const xg = calculateXg(attacking.adjustedMetrics, defending.adjustedMetrics, eventType, random, randomness);
+    const setPieceSituation = eventType === "setPiece" ? pickSetPieceSituation(attacking.adjustedMetrics, defending.adjustedMetrics, random) : undefined;
+    const xg = calculateXg(attacking.adjustedMetrics, defending.adjustedMetrics, eventType, random, randomness, setPieceSituation);
     const outcome = resolveOutcome(xg, attacking.adjustedMetrics, defending.adjustedMetrics, random);
     const scorer = outcome === "goal" || xg > 0.08 ? pickEventPlayer(attacking, eventType, "scorer", random) : undefined;
-    const assister = scorer && random.chance(0.58) ? pickEventPlayer(attacking, eventType, "assister", random, scorer.player.id) : undefined;
+    const assister = scorer && setPieceSituation !== "penalty" && random.chance(eventType === "setPiece" ? 0.72 : 0.58) ? pickEventPlayer(attacking, eventType, "assister", random, scorer.player.id) : undefined;
     const defensivePlayer =
       outcome === "saved"
         ? pickFlowPlayer(defending, "keeperClaim", random)
@@ -265,7 +267,7 @@ function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfi
       assisterId: assister?.player.id,
       defensivePlayerId: defensivePlayer?.player.id,
       defendingTeamId: defending.team.id,
-      description: describeEvent(minute, attacking, defending, eventType, outcome, scorer?.player.name, assister?.player.name, defensivePlayer?.player.name),
+      description: describeEvent(minute, attacking, defending, eventType, outcome, scorer?.player.name, assister?.player.name, defensivePlayer?.player.name, setPieceSituation),
       eventType,
       minute,
       outcome,
@@ -273,6 +275,7 @@ function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfi
       primaryPlayerId: scorer?.player.id,
       scorerId: scorer?.player.id,
       secondaryPlayerId: assister?.player.id,
+      setPieceSituation,
       teamId: attacking.team.id,
       xg,
     });
@@ -298,16 +301,18 @@ function simulateFlowEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamP
     const defending = isDefensiveFlowEventType(eventType) ? possessionTeam : opponent;
     const primary = pickFlowPlayer(acting, eventType, random);
     const secondary = random.chance(0.46) ? pickFlowPlayer(acting, eventType, random, primary?.player.id) : undefined;
+    const setPieceSituation = eventType === "setPiece" ? pickSetPieceSituation(acting.adjustedMetrics, defending.adjustedMetrics, random) : undefined;
 
     events.push({
       defendingTeamId: defending.team.id,
-      description: describeFlowEvent(minute, acting, defending, eventType, primary?.player.name, secondary?.player.name),
+      description: describeFlowEvent(minute, acting, defending, eventType, primary?.player.name, secondary?.player.name, setPieceSituation),
       eventType,
       minute,
       outcome: getFlowOutcome(eventType),
       phase: "flow",
       primaryPlayerId: primary?.player.id,
       secondaryPlayerId: secondary?.player.id,
+      setPieceSituation,
       teamId: acting.team.id,
       xg: 0,
     });
@@ -350,12 +355,25 @@ function pickFlowEventType(attacking: TeamMetrics, defending: TeamMetrics, tacti
       { item: "foul" as const, weight: 3 + defending.pressingPower * 0.1 + defending.roleConflict * 0.08 + (defendingTactics.risk === "aggressive" ? 5 : 0) },
       { item: "offside" as const, weight: 2 + attacking.transitionThreat * 0.08 + (defendingTactics.lineHeight === "high" ? 5 : 0) },
       { item: "clearance" as const, weight: 5 + defending.defensiveSecurity * 0.11 + (defendingTactics.style === "low-block" ? 6 : 0) },
+      { item: "setPiece" as const, weight: 3 + attacking.setPieceThreat * 0.08 + (tactics.style === "direct" ? 4 : 0) },
     ],
     random,
   );
 }
 
-function calculateXg(attacking: TeamMetrics, defending: TeamMetrics, eventType: MatchEventType, random: SeededRandom, randomness: RandomnessLevel) {
+function pickSetPieceSituation(attacking: TeamMetrics, defending: TeamMetrics, random: SeededRandom): SetPieceSituation {
+  return selectByWeight(
+    [
+      { item: "corner" as const, weight: 8 + attacking.setPieceThreat * 0.1 + Math.max(0, 88 - defending.defensiveSecurity) * 0.04 },
+      { item: "freeKick" as const, weight: 5 + attacking.setPieceThreat * 0.09 },
+      { item: "wideFreeKick" as const, weight: 6 + attacking.progression * 0.07 + Math.max(0, 86 - defending.wideSecurity) * 0.06 },
+      { item: "penalty" as const, weight: 0.7 + Math.max(0, attacking.attackPower - defending.defensiveSecurity) * 0.035 + attacking.setPieceThreat * 0.01 },
+    ],
+    random,
+  );
+}
+
+function calculateXg(attacking: TeamMetrics, defending: TeamMetrics, eventType: MatchEventType, random: SeededRandom, randomness: RandomnessLevel, setPieceSituation?: SetPieceSituation) {
   const typeBase: Record<MatchEventType, number> = {
     centralCombination: 0.09,
     circulation: 0,
@@ -378,7 +396,28 @@ function calculateXg(attacking: TeamMetrics, defending: TeamMetrics, eventType: 
   const quality = attacking.chanceQuality * 0.24 + attacking.attackPower * 0.18 + attacking.progression * 0.12 - defending.defensiveSecurity * 0.18 - defending.goalkeeperImpact * 0.08;
   const volatility = randomness === "controlled" ? 0.75 : randomness === "wild" ? 1.35 : 1;
   const randomBoost = random.between(-0.025, 0.085) * volatility;
-  return round2(Math.max(0.015, Math.min(0.55, typeBase[eventType] + quality / 1000 + randomBoost)));
+  const setPieceBoost = getSetPieceXgBoost(setPieceSituation);
+  return round2(Math.max(0.015, Math.min(0.6, typeBase[eventType] + setPieceBoost + quality / 1000 + randomBoost)));
+}
+
+function getSetPieceXgBoost(situation?: SetPieceSituation) {
+  if (situation === "penalty") {
+    return 0.25;
+  }
+
+  if (situation === "corner") {
+    return 0.035;
+  }
+
+  if (situation === "freeKick") {
+    return 0.025;
+  }
+
+  if (situation === "wideFreeKick") {
+    return 0.015;
+  }
+
+  return 0;
 }
 
 function pickFlowPlayer(profile: AppliedTeamProfile, eventType: MatchEventType, random: SeededRandom, excludePlayerId?: string) {
@@ -457,6 +496,12 @@ function getRoleFlowWeight(role: string, eventType: MatchEventType) {
   if (eventType === "offside") {
     if (role === "ST" || role === "SS" || role === "LW" || role === "RW") return 1.34;
     if (role === "GK" || role === "CB") return 0.2;
+  }
+
+  if (eventType === "setPiece") {
+    if (role === "CM" || role === "AM" || role === "CB") return 1.28;
+    if (role === "LB" || role === "RB" || role === "ST") return 1.14;
+    if (role === "GK") return 0.15;
   }
 
   return 1;
@@ -586,6 +631,7 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
     }
 
     if (event.eventType === "setPiece") {
+      teamStats.setPieces += 1;
       teamStats.setPieceThreat = round2(teamStats.setPieceThreat + event.xg);
     }
   }
@@ -605,6 +651,7 @@ function createEmptyStats(metrics: TeamMetrics): MatchTeamStats {
     passFlow: Math.round(metrics.midfieldControl * 0.55 + metrics.progression * 0.25 + metrics.chemistry * 0.2),
     possession: 50,
     pressingWins: 0,
+    setPieces: 0,
     setPieceThreat: 0,
     shots: 0,
     shotsOnTarget: 0,
@@ -958,6 +1005,7 @@ function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedT
     const counters = chanceEvents.filter((event) => event.eventType === "counter").length;
     const pressWins = chanceEvents.filter((event) => event.eventType === "pressWin").length;
     const setPieces = chanceEvents.filter((event) => event.eventType === "setPiece").length;
+    const penalties = chanceEvents.filter((event) => event.setPieceSituation === "penalty").length;
     const highXg = chanceEvents.filter((event) => event.xg >= 0.14).length;
     const circulation = flowEvents.filter((event) => event.eventType === "circulation" || event.eventType === "switchPlay").length;
     const defensiveFlow = flowEvents.filter((event) => isDefensiveFlowEventType(event.eventType)).length;
@@ -973,6 +1021,10 @@ function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedT
 
     if (setPieces >= 3) {
       notes.push(`${profile.team.name}은 세트피스 ${setPieces}회로 공중전/세컨볼 루트를 확보했습니다.`);
+    }
+
+    if (penalties > 0) {
+      notes.push(`${profile.team.name}은 페널티 상황 ${penalties}회로 경기의 큰 분기점을 만들었습니다.`);
     }
 
     if (goals > 0 && highXg >= goals) {
@@ -1052,9 +1104,11 @@ function describeEvent(
   scorerName?: string,
   assisterName?: string,
   defensivePlayerName?: string,
+  setPieceSituation?: SetPieceSituation,
 ) {
   const subject = scorerName ?? attacking.team.name;
   const creator = assisterName ? `${assisterName}의 전개 이후 ` : "";
+  const setPieceText = setPieceSituation ? getSetPieceSituationText(setPieceSituation) : "세트피스";
   const outcomeText: Record<MatchEvent["outcome"], string> = {
     blocked: defensivePlayerName ? `${defensivePlayerName}이 막아냈습니다.` : "수비에 막혔습니다.",
     goal: "골로 연결했습니다.",
@@ -1075,7 +1129,7 @@ function describeEvent(
     offside: "수비 라인 뒤를 노리는 움직임을 만들었고",
     pressWin: "전방 압박 성공 직후 찬스를 잡았고",
     secondBall: "세컨볼 경합에서 우위를 잡았고",
-    setPiece: "세트피스에서 위협적인 장면을 만들었고",
+    setPiece: `${setPieceText}에서 위협적인 장면을 만들었고`,
     switchPlay: "반대편으로 전환하며 공간을 열었고",
     tackle: "몸싸움으로 전진을 저지했고",
     wideAttack: "측면 공격으로 수비를 흔들었고",
@@ -1091,9 +1145,11 @@ function describeFlowEvent(
   eventType: MatchEventType,
   primaryName?: string,
   secondaryName?: string,
+  setPieceSituation?: SetPieceSituation,
 ) {
   const subject = primaryName ?? acting.team.name;
   const support = secondaryName ? ` ${secondaryName}와 함께` : "";
+  const setPieceText = setPieceSituation ? getSetPieceSituationText(setPieceSituation) : "세트피스";
   const typeText: Record<MatchEventType, string> = {
     centralCombination: "중앙에서 짧은 연결을 이어갔습니다.",
     circulation: "후방과 중원을 오가며 점유를 안정시켰습니다.",
@@ -1108,7 +1164,7 @@ function describeFlowEvent(
     offside: "라인 뒤 침투를 시도했지만 오프사이드에 걸렸습니다.",
     pressWin: "전방 압박으로 다음 공격권을 만들었습니다.",
     secondBall: "세컨볼 경합을 따내며 중원 싸움을 이어갔습니다.",
-    setPiece: "세트피스 이전 위치 싸움을 가져갔습니다.",
+    setPiece: `${setPieceText} 이전 위치 싸움을 가져갔습니다.`,
     switchPlay: "반대편으로 전환하며 수비 블록을 흔들었습니다.",
     tackle: "타이밍 좋은 태클로 전진을 멈췄습니다.",
     wideAttack: "측면에서 폭을 유지하며 다음 크로스 각도를 봤습니다.",
@@ -1140,6 +1196,22 @@ function getFlowOutcome(eventType: MatchEventType): MatchEvent["outcome"] {
   }
 
   return "saved";
+}
+
+function getSetPieceSituationText(situation: SetPieceSituation) {
+  if (situation === "corner") {
+    return "코너킥";
+  }
+
+  if (situation === "freeKick") {
+    return "직접 프리킥";
+  }
+
+  if (situation === "penalty") {
+    return "페널티킥";
+  }
+
+  return "와이드 프리킥";
 }
 
 function selectByWeight<T>(items: Array<{ item: T; weight: number }>, random: SeededRandom): T {

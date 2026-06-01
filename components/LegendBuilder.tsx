@@ -4718,6 +4718,7 @@ function MatchSimulatorView({
               <Metric label="Press" value={`${statsA?.pressingWins ?? 0}-${statsB?.pressingWins ?? 0}`} detail="압박 탈취" />
               <Metric label="Stops" value={`${statsA?.defensiveActions ?? 0}-${statsB?.defensiveActions ?? 0}`} detail="수비 액션" />
               <Metric label="GK" value={`${statsA?.keeperSaves ?? 0}-${statsB?.keeperSaves ?? 0}`} detail="GK 처리" />
+              <Metric label="Set" value={`${statsA?.setPieces ?? 0}-${statsB?.setPieces ?? 0}`} detail="세트피스 장면" />
               <Metric label="Seed" value={result.matchSeed.slice(-8)} detail="동일 seed 재현 가능" />
             </div>
 
@@ -4750,7 +4751,7 @@ function MatchSimulatorView({
                     <span>{event.minute}'</span>
                     <div>
                       <strong>
-                        {event.outcome.toUpperCase()} · xG {event.xg.toFixed(2)}
+                        {getTimelineEventTitle(event)} · xG {event.xg.toFixed(2)}
                       </strong>
                       <p>{event.description}</p>
                     </div>
@@ -4926,6 +4927,17 @@ function LiveMatchViewer({
             <div className="live-box left" />
             <div className="live-box right" />
             <div className={`live-flow-zone ${liveFlowState.zone}`} />
+            {activeEvent?.eventType === "setPiece" && eventPath ? (
+              <div
+                className={`live-set-piece-zone ${getLiveSetPieceClass(activeEvent)}`}
+                style={{
+                  left: `${eventPath.start.x}%`,
+                  top: `${eventPath.start.y}%`,
+                }}
+              >
+                <span>{formatLiveSetPieceLabel(activeEvent.setPieceSituation)}</span>
+              </div>
+            ) : null}
             {activeEvent?.outcome === "goal" && isActiveChance && isFinishStep ? <div className={`live-goal-net ${activeEvent.teamId === teamA.id ? "right" : "left"}`} /> : null}
             {activeEvent && defendingTactic.style === "low-block" ? (
               <div className={`live-low-block-zone ${activeEvent.defendingTeamId === teamA.id ? "left" : "right"}`} />
@@ -5284,7 +5296,7 @@ function getLiveFlowState(activeEvent: LiveMatchEvent | null, sceneStep: number,
 
   if (activeEvent.phase === "flow") {
     return {
-      detail: getFlowEventDetail(activeEvent.eventType),
+      detail: getFlowEventDetail(activeEvent),
       intensity: getFlowEventIntensity(activeEvent.eventType),
       phase: getFlowEventPhase(activeEvent.eventType),
       zone: getFlowEventZone(activeEvent.eventType),
@@ -5293,26 +5305,26 @@ function getLiveFlowState(activeEvent: LiveMatchEvent | null, sceneStep: number,
 
   if (sceneStep === 0) {
     return {
-      detail: activeEvent.eventType === "counter" ? "Turnover opens transition space" : "Back line and midfield circulate",
+      detail: activeEvent.eventType === "setPiece" ? `${formatLiveSetPieceLabel(activeEvent.setPieceSituation)} shape is loaded` : activeEvent.eventType === "counter" ? "Turnover opens transition space" : "Back line and midfield circulate",
       intensity: activeEvent.xg >= 0.14 ? "Rising" : "Measured",
-      phase: "Build-up",
-      zone: "build",
+      phase: activeEvent.eventType === "setPiece" ? "Set piece setup" : "Build-up",
+      zone: activeEvent.eventType === "setPiece" ? "final" : "build",
     };
   }
 
   if (sceneStep === 1) {
     return {
-      detail: activeEvent.assisterId ? "Connector receives between lines" : "Second ball contested centrally",
+      detail: activeEvent.eventType === "setPiece" ? "Delivery and box runs are timed" : activeEvent.assisterId ? "Connector receives between lines" : "Second ball contested centrally",
       intensity: activeEvent.xg >= 0.16 ? "High pressure" : "Medium pressure",
-      phase: "Midfield contest",
-      zone: "midfield",
+      phase: activeEvent.eventType === "setPiece" ? "Delivery" : "Midfield contest",
+      zone: activeEvent.eventType === "setPiece" ? "final" : "midfield",
     };
   }
 
   return {
-    detail: activeEvent.outcome === "goal" ? "Final action hits the net" : "Defence reacts to the shot",
+    detail: activeEvent.eventType === "setPiece" ? `${formatLiveSetPieceLabel(activeEvent.setPieceSituation)} ends as ${formatOutcomeLabel(activeEvent.outcome)}` : activeEvent.outcome === "goal" ? "Final action hits the net" : "Defence reacts to the shot",
     intensity: activeEvent.outcome === "goal" ? "Peak" : "Recovery",
-    phase: "Final third",
+    phase: activeEvent.eventType === "setPiece" ? "Set piece finish" : "Final third",
     zone: "final",
   };
 }
@@ -5330,6 +5342,10 @@ function isLiveDefensiveEvent(event: LiveMatchEvent) {
 }
 
 function getLiveFinishLabel(event: LiveMatchEvent) {
+  if (event.eventType === "setPiece") {
+    return isLiveChanceEvent(event) ? formatLiveSetPieceLabel(event.setPieceSituation).toUpperCase() : "SET";
+  }
+
   if (isLiveChanceEvent(event)) {
     return event.outcome.toUpperCase();
   }
@@ -5374,6 +5390,10 @@ function getLiveFinishLabel(event: LiveMatchEvent) {
 }
 
 function getFlowEventPhase(eventType: LiveMatchEvent["eventType"]) {
+  if (eventType === "setPiece") {
+    return "Set piece setup";
+  }
+
   if (eventType === "clearance" || eventType === "keeperClaim") {
     return "Defensive reset";
   }
@@ -5401,7 +5421,13 @@ function getFlowEventPhase(eventType: LiveMatchEvent["eventType"]) {
   return "Possession flow";
 }
 
-function getFlowEventDetail(eventType: LiveMatchEvent["eventType"]) {
+function getFlowEventDetail(event: LiveMatchEvent) {
+  const eventType = event.eventType;
+
+  if (eventType === "setPiece") {
+    return `${formatLiveSetPieceLabel(event.setPieceSituation)} positioning before delivery`;
+  }
+
   if (eventType === "circulation") {
     return "Short passing rhythm between lines";
   }
@@ -5442,6 +5468,10 @@ function getFlowEventDetail(eventType: LiveMatchEvent["eventType"]) {
 }
 
 function getFlowEventIntensity(eventType: LiveMatchEvent["eventType"]) {
+  if (eventType === "setPiece") {
+    return "Dead ball";
+  }
+
   if (eventType === "interception" || eventType === "keeperClaim" || eventType === "secondBall" || eventType === "tackle" || eventType === "clearance") {
     return "Contact";
   }
@@ -5454,6 +5484,10 @@ function getFlowEventIntensity(eventType: LiveMatchEvent["eventType"]) {
 }
 
 function getFlowEventZone(eventType: LiveMatchEvent["eventType"]) {
+  if (eventType === "setPiece") {
+    return "final";
+  }
+
   if (eventType === "clearance" || eventType === "keeperClaim") {
     return "reset";
   }
@@ -5530,6 +5564,46 @@ function formatOutcomeLabel(outcome: LiveMatchEvent["outcome"]) {
   return "Miss";
 }
 
+function getTimelineEventTitle(event: LiveMatchEvent) {
+  if (event.eventType === "setPiece") {
+    return `${formatLiveSetPieceLabel(event.setPieceSituation).toUpperCase()} · ${event.outcome.toUpperCase()}`;
+  }
+
+  return event.outcome.toUpperCase();
+}
+
+function formatLiveSetPieceLabel(situation: LiveMatchEvent["setPieceSituation"]) {
+  if (situation === "corner") {
+    return "Corner";
+  }
+
+  if (situation === "freeKick") {
+    return "Free kick";
+  }
+
+  if (situation === "wideFreeKick") {
+    return "Wide free kick";
+  }
+
+  if (situation === "penalty") {
+    return "Penalty";
+  }
+
+  return "Set piece";
+}
+
+function getLiveSetPieceClass(event: LiveMatchEvent) {
+  if (event.setPieceSituation === "freeKick") {
+    return "free-kick";
+  }
+
+  if (event.setPieceSituation === "wideFreeKick") {
+    return "wide-free-kick";
+  }
+
+  return event.setPieceSituation ?? "set-piece";
+}
+
 function getLaneCurveOffset(event: LiveMatchEvent) {
   if (event.eventType === "wideAttack") {
     return event.minute % 2 === 0 ? -10 : 10;
@@ -5544,6 +5618,14 @@ function getLaneCurveOffset(event: LiveMatchEvent) {
   }
 
   if (event.eventType === "setPiece") {
+    if (event.setPieceSituation === "penalty") {
+      return 0;
+    }
+
+    if (event.setPieceSituation === "freeKick") {
+      return event.minute % 2 === 0 ? -6 : 6;
+    }
+
     return event.minute % 2 === 0 ? -13 : 13;
   }
 
@@ -5555,6 +5637,10 @@ function getLaneCurveOffset(event: LiveMatchEvent) {
 }
 
 function getEventLane(event: LiveMatchEvent) {
+  if (event.eventType === "setPiece") {
+    return getSetPieceLane(event);
+  }
+
   const laneByType: Record<LiveMatchEvent["eventType"], { buildX: number; targetX: number; y: number }> = {
     centralCombination: { buildX: 54, targetX: 80, y: 50 },
     circulation: { buildX: 29, targetX: 48, y: 48 },
@@ -5576,6 +5662,22 @@ function getEventLane(event: LiveMatchEvent) {
   };
 
   return laneByType[event.eventType];
+}
+
+function getSetPieceLane(event: LiveMatchEvent) {
+  if (event.setPieceSituation === "penalty") {
+    return { buildX: 76, targetX: 88, y: 50 };
+  }
+
+  if (event.setPieceSituation === "corner") {
+    return { buildX: 82, targetX: 86, y: event.minute % 2 === 0 ? 18 : 82 };
+  }
+
+  if (event.setPieceSituation === "wideFreeKick") {
+    return { buildX: 67, targetX: 84, y: event.minute % 2 === 0 ? 27 : 73 };
+  }
+
+  return { buildX: 68, targetX: 84, y: 50 };
 }
 
 function getRolePitchPoint(role: PositionCode, side: "A" | "B"): LivePoint {

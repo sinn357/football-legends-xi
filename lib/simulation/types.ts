@@ -5,6 +5,7 @@ export type TacticTempo = "slow" | "normal" | "fast";
 export type TacticLineHeight = "low" | "mid" | "high";
 export type TacticRisk = "conservative" | "normal" | "aggressive";
 export type RandomnessLevel = "controlled" | "normal" | "wild";
+export type SetPieceSituation = "corner" | "freeKick" | "penalty" | "wideFreeKick";
 
 export type SimulationTactics = {
   lineHeight: TacticLineHeight;
@@ -126,6 +127,7 @@ export type MatchEvent = {
   primaryPlayerId?: string;
   scorerId?: string;
   secondaryPlayerId?: string;
+  setPieceSituation?: SetPieceSituation;
   teamId: string;
   xg: number;
 };
@@ -137,6 +139,7 @@ export type MatchTeamStats = {
   passFlow: number;
   possession: number;
   pressingWins: number;
+  setPieces: number;
   setPieceThreat: number;
   shots: number;
   shotsOnTarget: number;

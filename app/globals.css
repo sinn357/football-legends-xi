@@ -3344,6 +3344,65 @@ td strong {
   width: 26%;
 }
 
+.live-set-piece-zone {
+  align-items: center;
+  animation: setPiecePulse 1.25s ease-in-out infinite alternate;
+  background: rgba(255, 209, 102, 0.16);
+  border: 1px solid rgba(255, 209, 102, 0.76);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 7px rgba(255, 209, 102, 0.1),
+    0 10px 22px rgba(0, 0, 0, 0.18);
+  color: #fffaf0;
+  display: flex;
+  height: 58px;
+  justify-content: center;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  z-index: 2;
+}
+
+.live-set-piece-zone span {
+  background: rgba(18, 61, 50, 0.88);
+  border: 1px solid rgba(244, 239, 227, 0.24);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  max-width: 78px;
+  padding: 5px 7px;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translateY(-38px);
+  white-space: nowrap;
+}
+
+.live-set-piece-zone.corner {
+  border-radius: 14px 999px 999px 999px;
+  height: 66px;
+  width: 66px;
+}
+
+.live-set-piece-zone.free-kick {
+  background: rgba(244, 239, 227, 0.13);
+  border-color: rgba(244, 239, 227, 0.7);
+}
+
+.live-set-piece-zone.wide-free-kick {
+  height: 68px;
+  width: 48px;
+}
+
+.live-set-piece-zone.penalty {
+  background: rgba(200, 162, 74, 0.22);
+  border-color: rgba(200, 162, 74, 0.86);
+  box-shadow:
+    0 0 0 9px rgba(200, 162, 74, 0.12),
+    0 10px 22px rgba(0, 0, 0, 0.2);
+}
+
 .live-pitch-line,
 .live-box {
   border-color: rgba(244, 239, 227, 0.44);
@@ -3880,6 +3939,18 @@ td strong {
   to {
     filter: saturate(1.18);
     transform: translateX(4px);
+  }
+}
+
+@keyframes setPiecePulse {
+  from {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
   }
 }
 
