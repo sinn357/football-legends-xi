@@ -243,7 +243,7 @@ function normalizeMatchupMetrics(metrics: TeamMetrics): TeamMetrics {
 function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, random: SeededRandom, randomness: RandomnessLevel) {
   const tempoMultiplier = (getTacticTempoMultiplier(profileA.tactics) + getTacticTempoMultiplier(profileB.tactics)) / 2;
   const randomnessMultiplier = randomness === "controlled" ? 0.9 : randomness === "wild" ? 1.18 : 1;
-  const baseEvents = Math.round(random.between(22, 32) * tempoMultiplier * randomnessMultiplier);
+  const baseEvents = Math.round(random.between(17, 25) * tempoMultiplier * randomnessMultiplier);
   const events: MatchEvent[] = [];
 
   for (let index = 0; index < baseEvents; index += 1) {
@@ -293,7 +293,7 @@ function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfi
 
 function simulateFlowEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, baseEvents: number, tempoMultiplier: number, random: SeededRandom, randomness: RandomnessLevel) {
   const randomnessMultiplier = randomness === "controlled" ? 0.75 : randomness === "wild" ? 1.16 : 1;
-  const flowEvents = Math.round(baseEvents * random.between(0.85, 1.15) * tempoMultiplier * randomnessMultiplier);
+  const flowEvents = Math.round((baseEvents + random.between(4, 8)) * random.between(0.92, 1.18) * tempoMultiplier * randomnessMultiplier);
   const events: MatchEvent[] = [];
 
   for (let index = 0; index < flowEvents; index += 1) {
@@ -390,8 +390,8 @@ function resolveCardDecision(offendingProfile: AppliedTeamProfile, minute: numbe
   const styleModifier = offendingProfile.tactics.style === "high-press" ? 0.07 : offendingProfile.tactics.style === "low-block" ? 0.03 : 0;
   const lateModifier = minute >= 70 ? 0.04 : 0;
   const disciplineLoad = offendingProfile.adjustedMetrics.roleConflict * 0.0012 + offendingProfile.adjustedMetrics.pressingPower * 0.0009;
-  const yellowChance = Math.max(0.24, Math.min(0.72, 0.32 + riskModifier + styleModifier + lateModifier + disciplineLoad));
-  const redChance = Math.max(0.006, Math.min(0.055, 0.008 + Math.max(0, riskModifier) * 0.13 + offendingProfile.adjustedMetrics.roleConflict * 0.00018 + (minute >= 80 ? 0.008 : 0)));
+  const yellowChance = Math.max(0.18, Math.min(0.58, 0.26 + riskModifier + styleModifier + lateModifier + disciplineLoad));
+  const redChance = Math.max(0.004, Math.min(0.042, 0.006 + Math.max(0, riskModifier) * 0.11 + offendingProfile.adjustedMetrics.roleConflict * 0.00015 + (minute >= 80 ? 0.006 : 0)));
 
   if (!random.chance(yellowChance)) {
     return undefined;
@@ -402,29 +402,29 @@ function resolveCardDecision(offendingProfile: AppliedTeamProfile, minute: numbe
 
 function calculateXg(attacking: TeamMetrics, defending: TeamMetrics, eventType: MatchEventType, random: SeededRandom, randomness: RandomnessLevel, setPieceSituation?: SetPieceSituation) {
   const typeBase: Record<MatchEventType, number> = {
-    centralCombination: 0.09,
+    centralCombination: 0.08,
     circulation: 0,
     clearance: 0,
-    counter: 0.11,
-    error: 0.14,
+    counter: 0.1,
+    error: 0.13,
     foul: 0,
     interception: 0,
     keeperClaim: 0,
-    lateMoment: 0.08,
-    openPlay: 0.07,
+    lateMoment: 0.075,
+    openPlay: 0.062,
     offside: 0,
-    pressWin: 0.1,
+    pressWin: 0.09,
     secondBall: 0,
-    setPiece: 0.075,
+    setPiece: 0.068,
     switchPlay: 0,
     tackle: 0,
-    wideAttack: 0.065,
+    wideAttack: 0.058,
   };
   const quality = attacking.chanceQuality * 0.24 + attacking.attackPower * 0.18 + attacking.progression * 0.12 - defending.defensiveSecurity * 0.18 - defending.goalkeeperImpact * 0.08;
   const volatility = randomness === "controlled" ? 0.75 : randomness === "wild" ? 1.35 : 1;
   const randomBoost = random.between(-0.025, 0.085) * volatility;
   const setPieceBoost = getSetPieceXgBoost(setPieceSituation);
-  return round2(Math.max(0.015, Math.min(0.6, typeBase[eventType] + setPieceBoost + quality / 1000 + randomBoost)));
+  return round2(Math.max(0.012, Math.min(0.54, typeBase[eventType] + setPieceBoost + quality / 1050 + randomBoost)));
 }
 
 function calculateMomentumSwing(eventType: MatchEventType, outcome: MatchEvent["outcome"], xg: number, minute: number, card?: CardDecision) {
@@ -598,13 +598,13 @@ function getRoleFlowWeight(role: string, eventType: MatchEventType) {
 }
 
 function resolveOutcome(xg: number, attacking: TeamMetrics, defending: TeamMetrics, random: SeededRandom): MatchEvent["outcome"] {
-  const goalChance = Math.min(0.72, xg * (0.76 + attacking.finishing / 125) * (1.12 - defending.goalkeeperImpact / 240));
+  const goalChance = Math.min(0.58, xg * (0.48 + attacking.finishing / 190) * (1.03 - defending.goalkeeperImpact / 230));
 
   if (random.chance(goalChance)) {
     return "goal";
   }
 
-  const onTargetChance = Math.min(0.82, xg * 2.4 + attacking.finishing / 240);
+  const onTargetChance = Math.min(0.72, xg * 1.75 + attacking.finishing / 360);
 
   if (random.chance(onTargetChance)) {
     return "saved";

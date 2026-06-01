@@ -5665,7 +5665,7 @@ function getTimelineEventTitle(event: LiveMatchEvent) {
 }
 
 function isLiveReplayMoment(event: LiveMatchEvent) {
-  return event.outcome === "goal" || event.xg >= 0.1 || Boolean(event.card) || event.setPieceSituation === "penalty" || event.momentumSwing >= 7;
+  return event.outcome === "goal" || event.xg >= 0.15 || Boolean(event.card) || event.setPieceSituation === "penalty" || event.momentumSwing >= 7.8;
 }
 
 function isLiveReplayMomentInFilter(event: LiveMatchEvent, filter: LiveReplayFilterId) {
@@ -5678,7 +5678,7 @@ function isLiveReplayMomentInFilter(event: LiveMatchEvent, filter: LiveReplayFil
   }
 
   if (filter === "chances") {
-    return event.xg >= 0.1;
+    return event.xg >= 0.15;
   }
 
   if (filter === "cards") {
@@ -5707,7 +5707,7 @@ function getLiveReplayMomentTitle(event: LiveMatchEvent) {
     return "GOAL";
   }
 
-  if (event.xg >= 0.1) {
+  if (event.xg >= 0.15) {
     return `${event.outcome.toUpperCase()} · xG ${event.xg.toFixed(2)}`;
   }
 

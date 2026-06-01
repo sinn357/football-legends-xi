@@ -5352,6 +5352,90 @@ td strong {
     grid-template-columns: 1fr;
   }
 
+  .live-scoreline {
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
+    padding: 9px;
+  }
+
+  .live-scoreline strong {
+    font-size: 21px;
+  }
+
+  .live-possession-row {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .live-possession-row em {
+    text-align: left;
+  }
+
+  .live-pitch {
+    aspect-ratio: auto;
+    height: clamp(240px, 62vw, 300px);
+    min-height: 0;
+  }
+
+  .live-player-dot {
+    height: 34px;
+    min-width: 34px;
+    width: 34px;
+  }
+
+  .live-player-dot span {
+    font-size: 8px;
+  }
+
+  .live-player-dot em {
+    font-size: 7px;
+    max-width: 28px;
+  }
+
+  .live-ball {
+    height: 12px;
+    width: 12px;
+  }
+
+  .live-event-flash {
+    padding: 8px 10px;
+    top: 8px;
+  }
+
+  .live-event-flash strong {
+    font-size: 13px;
+  }
+
+  .live-controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .live-controls button,
+  .live-controls label {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .live-controls label {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 5px;
+    grid-column: span 3;
+  }
+
+  .live-controls select {
+    width: 100%;
+  }
+
+  .live-highlight-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .live-replay-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .player-token {
     width: 100px;
   }
