@@ -4832,11 +4832,14 @@ function LiveMatchViewer({
   const eventPath = activeEvent ? getLiveEventPath(activeEvent, teamA.id, activeTactic) : null;
   const pressurePoint = activeEvent ? getLivePressurePoint(activeEvent, teamA.id) : null;
   const isFinishStep = Boolean(activeEvent && sceneStep === 2);
+  const isActiveChance = Boolean(activeEvent && isLiveChanceEvent(activeEvent));
   const latestEvents = visibleEvents.slice(-5).reverse();
   const playerNameById = new Map([...teamA.slots, ...teamB.slots].map((slot) => [slot.player.id, slot.player.name]));
   const possessionTeam = activeEvent?.teamId === teamA.id ? teamA.name : activeEvent?.teamId === teamB.id ? teamB.name : "Neutral";
-  const primaryActor = activeEvent?.scorerId ? playerNameById.get(activeEvent.scorerId) : null;
-  const secondaryActor = activeEvent?.assisterId ? playerNameById.get(activeEvent.assisterId) : null;
+  const primaryActorId = activeEvent?.scorerId ?? activeEvent?.primaryPlayerId;
+  const secondaryActorId = activeEvent?.assisterId ?? activeEvent?.secondaryPlayerId;
+  const primaryActor = primaryActorId ? playerNameById.get(primaryActorId) : null;
+  const secondaryActor = secondaryActorId ? playerNameById.get(secondaryActorId) : null;
 
   useEffect(() => {
     setFrameIndex(0);
@@ -4892,7 +4895,7 @@ function LiveMatchViewer({
       </div>
       <div className="live-match-shell">
         <div className="live-pitch-wrap">
-          <div className={`live-scoreline ${activeEvent?.outcome === "goal" && isFinishStep ? "goal-pulse" : ""}`}>
+          <div className={`live-scoreline ${activeEvent?.outcome === "goal" && isActiveChance && isFinishStep ? "goal-pulse" : ""}`}>
             <span>{teamA.name}</span>
             <strong>
               {liveScoreA}-{liveScoreB}
@@ -4920,7 +4923,7 @@ function LiveMatchViewer({
             <div className="live-box left" />
             <div className="live-box right" />
             <div className={`live-flow-zone ${liveFlowState.zone}`} />
-            {activeEvent?.outcome === "goal" && isFinishStep ? <div className={`live-goal-net ${activeEvent.teamId === teamA.id ? "right" : "left"}`} /> : null}
+            {activeEvent?.outcome === "goal" && isActiveChance && isFinishStep ? <div className={`live-goal-net ${activeEvent.teamId === teamA.id ? "right" : "left"}`} /> : null}
             {activeEvent && defendingTactic.style === "low-block" ? (
               <div className={`live-low-block-zone ${activeEvent.defendingTeamId === teamA.id ? "left" : "right"}`} />
             ) : null}
@@ -4934,7 +4937,7 @@ function LiveMatchViewer({
                 <circle className="live-path-end" cx={eventPath.end.x} cy={eventPath.end.y} r="1.7" />
               </svg>
             ) : null}
-            {activeEvent && eventPath && isFinishStep ? (
+            {activeEvent && eventPath && isActiveChance && isFinishStep ? (
               <div className={`live-outcome-marker ${activeEvent.outcome}`} style={{ left: `${eventPath.goalPoint.x}%`, top: `${eventPath.goalPoint.y}%` }}>
                 <span>{formatOutcomeLabel(activeEvent.outcome)}</span>
               </div>
@@ -4945,7 +4948,7 @@ function LiveMatchViewer({
               ...teamB.slots.map((slot) => ({ side: "B" as const, slot, teamId: teamB.id })),
             ].map(({ side, slot, teamId }) => {
               const position = getLivePlayerPosition(slot, side, activeEvent, teamA.id, frameIndex, sceneStep, flowFrame, side === "A" ? tacticsA : tacticsB);
-              const isActor = activeEvent?.scorerId === slot.player.id || activeEvent?.assisterId === slot.player.id;
+              const isActor = activeEvent?.scorerId === slot.player.id || activeEvent?.assisterId === slot.player.id || activeEvent?.primaryPlayerId === slot.player.id || activeEvent?.secondaryPlayerId === slot.player.id;
 
               return (
                 <button
@@ -4961,11 +4964,11 @@ function LiveMatchViewer({
                 </button>
               );
             })}
-            <span className={`live-ball ${activeEvent && isFinishStep ? activeEvent.outcome : ""}`} style={{ left: `${ballPosition.x}%`, top: `${ballPosition.y}%` }} />
+            <span className={`live-ball ${activeEvent && isFinishStep ? (isActiveChance ? activeEvent.outcome : "flow") : ""}`} style={{ left: `${ballPosition.x}%`, top: `${ballPosition.y}%` }} />
             {activeEvent ? (
-              <div className={`live-event-flash ${isFinishStep ? activeEvent.outcome : ""}`}>
+              <div className={`live-event-flash ${isFinishStep ? (isActiveChance ? activeEvent.outcome : "flow") : ""}`}>
                 <span>{activeEvent.eventType}</span>
-                <strong>{sceneStep < 2 ? getLiveSceneStepLabel(sceneStep) : activeEvent.outcome.toUpperCase()}</strong>
+                <strong>{sceneStep < 2 ? getLiveSceneStepLabel(sceneStep) : getLiveFinishLabel(activeEvent)}</strong>
               </div>
             ) : null}
           </div>
@@ -5042,7 +5045,7 @@ function LiveMatchViewer({
         <aside className="live-event-board">
           <div>
             <span>Current</span>
-            <strong>{activeEvent ? `${matchClock} · ${activeEvent.minute}' ${activeEvent.outcome.toUpperCase()}` : frameIndex >= events.length ? "90:00 · Full Time" : "00:00 · Kickoff"}</strong>
+            <strong>{activeEvent ? `${matchClock} · ${activeEvent.minute}' ${getLiveFinishLabel(activeEvent)}` : frameIndex >= events.length ? "90:00 · Full Time" : "00:00 · Kickoff"}</strong>
             <p>{activeEvent?.description ?? "경기 시작 전 포메이션이 정렬되어 있습니다."}</p>
           </div>
           <div className="live-event-feed">
@@ -5271,6 +5274,15 @@ function getLiveFlowState(activeEvent: LiveMatchEvent | null, sceneStep: number,
     };
   }
 
+  if (activeEvent.phase === "flow") {
+    return {
+      detail: getFlowEventDetail(activeEvent.eventType),
+      intensity: getFlowEventIntensity(activeEvent.eventType),
+      phase: getFlowEventPhase(activeEvent.eventType),
+      zone: getFlowEventZone(activeEvent.eventType),
+    };
+  }
+
   if (sceneStep === 0) {
     return {
       detail: activeEvent.eventType === "counter" ? "Turnover opens transition space" : "Back line and midfield circulate",
@@ -5295,6 +5307,118 @@ function getLiveFlowState(activeEvent: LiveMatchEvent | null, sceneStep: number,
     phase: "Final third",
     zone: "final",
   };
+}
+
+function isLiveChanceEvent(event: LiveMatchEvent) {
+  return event.phase !== "flow";
+}
+
+function getLiveFinishLabel(event: LiveMatchEvent) {
+  if (isLiveChanceEvent(event)) {
+    return event.outcome.toUpperCase();
+  }
+
+  if (event.eventType === "circulation") {
+    return "KEEP";
+  }
+
+  if (event.eventType === "switchPlay") {
+    return "SWITCH";
+  }
+
+  if (event.eventType === "secondBall") {
+    return "DUEL";
+  }
+
+  if (event.eventType === "clearance") {
+    return "CLEAR";
+  }
+
+  if (event.eventType === "offside") {
+    return "OFFSIDE";
+  }
+
+  if (event.eventType === "foul") {
+    return "FOUL";
+  }
+
+  return "FLOW";
+}
+
+function getFlowEventPhase(eventType: LiveMatchEvent["eventType"]) {
+  if (eventType === "clearance") {
+    return "Defensive reset";
+  }
+
+  if (eventType === "secondBall") {
+    return "Second ball";
+  }
+
+  if (eventType === "foul" || eventType === "offside") {
+    return "Stoppage";
+  }
+
+  if (eventType === "switchPlay") {
+    return "Side switch";
+  }
+
+  return "Possession flow";
+}
+
+function getFlowEventDetail(eventType: LiveMatchEvent["eventType"]) {
+  if (eventType === "circulation") {
+    return "Short passing rhythm between lines";
+  }
+
+  if (eventType === "switchPlay") {
+    return "Ball travels across the block";
+  }
+
+  if (eventType === "secondBall") {
+    return "Loose ball contested after contact";
+  }
+
+  if (eventType === "clearance") {
+    return "Defence clears and pushes out";
+  }
+
+  if (eventType === "offside") {
+    return "Run breaks beyond the line";
+  }
+
+  if (eventType === "foul") {
+    return "Contact stops the sequence";
+  }
+
+  return "Tempo settles before the next action";
+}
+
+function getFlowEventIntensity(eventType: LiveMatchEvent["eventType"]) {
+  if (eventType === "secondBall" || eventType === "clearance") {
+    return "Contact";
+  }
+
+  if (eventType === "offside" || eventType === "foul") {
+    return "Reset";
+  }
+
+  return "Controlled";
+}
+
+function getFlowEventZone(eventType: LiveMatchEvent["eventType"]) {
+  if (eventType === "clearance") {
+    return "reset";
+  }
+
+  if (eventType === "switchPlay" || eventType === "offside") {
+    return "final";
+  }
+
+  if (eventType === "circulation") {
+    return "build";
+  }
+
+  return "midfield";
 }
 
 function formatTacticStyle(style: SimulationTactics["style"]) {
@@ -5363,6 +5487,10 @@ function getLaneCurveOffset(event: LiveMatchEvent) {
     return event.minute % 2 === 0 ? -10 : 10;
   }
 
+  if (event.eventType === "switchPlay") {
+    return event.minute % 2 === 0 ? -18 : 18;
+  }
+
   if (event.eventType === "counter") {
     return event.minute % 2 === 0 ? -7 : 7;
   }
@@ -5371,18 +5499,28 @@ function getLaneCurveOffset(event: LiveMatchEvent) {
     return event.minute % 2 === 0 ? -13 : 13;
   }
 
+  if (event.eventType === "secondBall" || event.eventType === "foul") {
+    return event.minute % 2 === 0 ? -5 : 5;
+  }
+
   return event.minute % 2 === 0 ? -4 : 4;
 }
 
 function getEventLane(event: LiveMatchEvent) {
   const laneByType: Record<LiveMatchEvent["eventType"], { buildX: number; targetX: number; y: number }> = {
     centralCombination: { buildX: 54, targetX: 80, y: 50 },
+    circulation: { buildX: 29, targetX: 48, y: 48 },
+    clearance: { buildX: 22, targetX: 40, y: 50 },
     counter: { buildX: 44, targetX: 84, y: event.minute % 2 === 0 ? 38 : 62 },
     error: { buildX: 60, targetX: 78, y: 50 },
+    foul: { buildX: 42, targetX: 53, y: event.minute % 2 === 0 ? 44 : 56 },
     lateMoment: { buildX: 58, targetX: 84, y: 50 },
     openPlay: { buildX: 52, targetX: 78, y: event.minute % 2 === 0 ? 45 : 55 },
+    offside: { buildX: 48, targetX: 76, y: event.minute % 2 === 0 ? 40 : 60 },
     pressWin: { buildX: 58, targetX: 76, y: event.minute % 2 === 0 ? 42 : 58 },
+    secondBall: { buildX: 39, targetX: 56, y: event.minute % 2 === 0 ? 47 : 53 },
     setPiece: { buildX: 66, targetX: 82, y: event.minute % 2 === 0 ? 35 : 65 },
+    switchPlay: { buildX: 31, targetX: 66, y: event.minute % 2 === 0 ? 28 : 72 },
     wideAttack: { buildX: 57, targetX: 80, y: event.minute % 2 === 0 ? 22 : 78 },
   };
 

@@ -22,7 +22,9 @@ type RunningPlayerRating = PlayerMatchRating & {
   involvement: number;
 };
 
-const eventTypes: MatchEventType[] = ["openPlay", "centralCombination", "wideAttack", "counter", "pressWin", "setPiece", "error", "lateMoment"];
+const eventTypes: MatchEventType[] = ["openPlay", "centralCombination", "wideAttack", "counter", "pressWin", "setPiece", "error", "lateMoment", "circulation", "switchPlay", "secondBall", "foul", "offside", "clearance"];
+const chanceEventTypes = new Set<MatchEventType>(["openPlay", "centralCombination", "wideAttack", "counter", "pressWin", "setPiece", "error", "lateMoment"]);
+const flowEventTypes: MatchEventType[] = ["circulation", "switchPlay", "secondBall", "foul", "offside", "clearance"];
 
 export function simulateMatch(
   teamA: SimulationTeamInput,
@@ -241,13 +243,51 @@ function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfi
       eventType,
       minute,
       outcome,
+      phase: "chance",
+      primaryPlayerId: scorer?.player.id,
       scorerId: scorer?.player.id,
+      secondaryPlayerId: assister?.player.id,
       teamId: attacking.team.id,
       xg,
     });
   }
 
-  return events.sort((a, b) => a.minute - b.minute || eventTypes.indexOf(a.eventType) - eventTypes.indexOf(b.eventType));
+  events.push(...simulateFlowEvents(profileA, profileB, baseEvents, tempoMultiplier, random, randomness));
+
+  return events.sort((a, b) => a.minute - b.minute || getEventSortWeight(a) - getEventSortWeight(b));
+}
+
+function simulateFlowEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, baseEvents: number, tempoMultiplier: number, random: SeededRandom, randomness: RandomnessLevel) {
+  const randomnessMultiplier = randomness === "controlled" ? 0.75 : randomness === "wild" ? 1.16 : 1;
+  const flowEvents = Math.round(baseEvents * random.between(0.85, 1.15) * tempoMultiplier * randomnessMultiplier);
+  const events: MatchEvent[] = [];
+
+  for (let index = 0; index < flowEvents; index += 1) {
+    const minute = Math.min(90, Math.max(1, Math.round(((index + random.next()) / flowEvents) * 90)));
+    const side = pickAttackingSide(profileA.adjustedMetrics, profileB.adjustedMetrics, random);
+    const possessionTeam = side === "A" ? profileA : profileB;
+    const opponent = side === "A" ? profileB : profileA;
+    const eventType = pickFlowEventType(possessionTeam.adjustedMetrics, opponent.adjustedMetrics, possessionTeam.tactics, opponent.tactics, random);
+    const acting = eventType === "clearance" ? opponent : possessionTeam;
+    const defending = eventType === "clearance" ? possessionTeam : opponent;
+    const primary = pickFlowPlayer(acting, eventType, random);
+    const secondary = random.chance(0.46) ? pickFlowPlayer(acting, eventType, random, primary?.player.id) : undefined;
+
+    events.push({
+      defendingTeamId: defending.team.id,
+      description: describeFlowEvent(minute, acting, defending, eventType, primary?.player.name, secondary?.player.name),
+      eventType,
+      minute,
+      outcome: getFlowOutcome(eventType),
+      phase: "flow",
+      primaryPlayerId: primary?.player.id,
+      secondaryPlayerId: secondary?.player.id,
+      teamId: acting.team.id,
+      xg: 0,
+    });
+  }
+
+  return events;
 }
 
 function pickAttackingSide(metricsA: TeamMetrics, metricsB: TeamMetrics, random: SeededRandom): MatchSide {
@@ -272,21 +312,98 @@ function pickEventType(attacking: TeamMetrics, defending: TeamMetrics, minute: n
   );
 }
 
+function pickFlowEventType(attacking: TeamMetrics, defending: TeamMetrics, tactics: SimulationTactics, defendingTactics: SimulationTactics, random: SeededRandom): MatchEventType {
+  return selectByWeight(
+    [
+      { item: "circulation" as const, weight: 12 + attacking.midfieldControl * 0.15 + attacking.chemistry * 0.09 + (tactics.style === "possession" ? 8 : 0) },
+      { item: "switchPlay" as const, weight: 7 + attacking.progression * 0.12 + Math.max(0, 86 - defending.wideSecurity) * 0.09 },
+      { item: "secondBall" as const, weight: 6 + attacking.pressingPower * 0.09 + attacking.setPieceThreat * 0.06 + (tactics.style === "direct" ? 5 : 0) },
+      { item: "foul" as const, weight: 3 + defending.pressingPower * 0.1 + defending.roleConflict * 0.08 + (defendingTactics.risk === "aggressive" ? 5 : 0) },
+      { item: "offside" as const, weight: 2 + attacking.transitionThreat * 0.08 + (defendingTactics.lineHeight === "high" ? 5 : 0) },
+      { item: "clearance" as const, weight: 5 + defending.defensiveSecurity * 0.11 + (defendingTactics.style === "low-block" ? 6 : 0) },
+    ],
+    random,
+  );
+}
+
 function calculateXg(attacking: TeamMetrics, defending: TeamMetrics, eventType: MatchEventType, random: SeededRandom, randomness: RandomnessLevel) {
   const typeBase: Record<MatchEventType, number> = {
     centralCombination: 0.09,
+    circulation: 0,
+    clearance: 0,
     counter: 0.11,
     error: 0.14,
+    foul: 0,
     lateMoment: 0.08,
     openPlay: 0.07,
+    offside: 0,
     pressWin: 0.1,
+    secondBall: 0,
     setPiece: 0.075,
+    switchPlay: 0,
     wideAttack: 0.065,
   };
   const quality = attacking.chanceQuality * 0.24 + attacking.attackPower * 0.18 + attacking.progression * 0.12 - defending.defensiveSecurity * 0.18 - defending.goalkeeperImpact * 0.08;
   const volatility = randomness === "controlled" ? 0.75 : randomness === "wild" ? 1.35 : 1;
   const randomBoost = random.between(-0.025, 0.085) * volatility;
   return round2(Math.max(0.015, Math.min(0.55, typeBase[eventType] + quality / 1000 + randomBoost)));
+}
+
+function pickFlowPlayer(profile: AppliedTeamProfile, eventType: MatchEventType, random: SeededRandom, excludePlayerId?: string) {
+  const candidates = profile.playerAttributes.filter((entry) => entry.player.id !== excludePlayerId);
+  const weightedCandidates = candidates.map((entry) => {
+    const attributes = entry.attributes;
+    const roleWeight = getRoleFlowWeight(entry.role, eventType);
+    const skillWeight =
+      eventType === "circulation"
+        ? attributes.control * 0.45 + attributes.chanceCreation * 0.25 + attributes.leadership * 0.15 + attributes.ballProgression * 0.15
+        : eventType === "switchPlay"
+          ? attributes.ballProgression * 0.38 + attributes.chanceCreation * 0.3 + attributes.control * 0.2 + attributes.versatility * 0.12
+          : eventType === "secondBall" || eventType === "clearance"
+            ? attributes.defending * 0.34 + attributes.aerial * 0.28 + attributes.pressing * 0.22 + attributes.leadership * 0.16
+            : eventType === "foul"
+              ? attributes.pressing * 0.34 + attributes.defending * 0.26 + attributes.bigMatch * 0.18 + attributes.versatility * 0.12
+              : attributes.ballProgression * 0.34 + attributes.scoring * 0.24 + attributes.chanceCreation * 0.24 + attributes.finishing * 0.18;
+
+    return {
+      item: entry,
+      weight: Math.max(1, skillWeight * roleWeight * entry.fit),
+    };
+  });
+
+  return selectByWeight(weightedCandidates, random);
+}
+
+function getRoleFlowWeight(role: string, eventType: MatchEventType) {
+  if (eventType === "circulation") {
+    if (role === "CM" || role === "DM") return 1.42;
+    if (role === "AM" || role === "CB") return 1.16;
+    if (role === "GK") return 0.58;
+  }
+
+  if (eventType === "switchPlay") {
+    if (role === "LB" || role === "RB" || role === "CM" || role === "AM") return 1.32;
+    if (role === "LW" || role === "RW") return 1.14;
+    if (role === "GK") return 0.32;
+  }
+
+  if (eventType === "secondBall" || eventType === "clearance") {
+    if (role === "CB" || role === "DM") return 1.38;
+    if (role === "CM" || role === "LB" || role === "RB") return 1.16;
+    if (role === "ST") return 0.75;
+  }
+
+  if (eventType === "foul") {
+    if (role === "DM" || role === "CB" || role === "CM") return 1.28;
+    if (role === "AM" || role === "SS") return 0.9;
+  }
+
+  if (eventType === "offside") {
+    if (role === "ST" || role === "SS" || role === "LW" || role === "RW") return 1.34;
+    if (role === "GK" || role === "CB") return 0.2;
+  }
+
+  return 1;
 }
 
 function resolveOutcome(xg: number, attacking: TeamMetrics, defending: TeamMetrics, random: SeededRandom): MatchEvent["outcome"] {
@@ -379,6 +496,10 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
   };
 
   for (const event of events) {
+    if (!isChanceEvent(event)) {
+      continue;
+    }
+
     const teamStats = stats[event.teamId];
     teamStats.xg = round2(teamStats.xg + event.xg);
     teamStats.shots += 1;
@@ -448,6 +569,19 @@ function buildPlayerRatings(
   }
 
   for (const event of events) {
+    if (!isChanceEvent(event)) {
+      for (const playerId of [event.primaryPlayerId, event.secondaryPlayerId]) {
+        const player = playerId ? running.get(playerId) : null;
+
+        if (player) {
+          player.involvement += 0.015;
+          player.rating += 0.018;
+        }
+      }
+
+      continue;
+    }
+
     if (event.scorerId) {
       const scorer = running.get(event.scorerId);
       if (scorer) {
@@ -736,11 +870,15 @@ function describeShapeMatchups(profileA: AppliedTeamProfile, profileB: AppliedTe
 function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile, events: MatchEvent[]) {
   return [profileA, profileB].flatMap((profile) => {
     const profileEvents = events.filter((event) => event.teamId === profile.team.id);
+    const chanceEvents = profileEvents.filter(isChanceEvent);
+    const flowEvents = profileEvents.filter((event) => event.phase === "flow");
     const goals = profileEvents.filter((event) => event.outcome === "goal").length;
-    const counters = profileEvents.filter((event) => event.eventType === "counter").length;
-    const pressWins = profileEvents.filter((event) => event.eventType === "pressWin").length;
-    const setPieces = profileEvents.filter((event) => event.eventType === "setPiece").length;
-    const highXg = profileEvents.filter((event) => event.xg >= 0.14).length;
+    const counters = chanceEvents.filter((event) => event.eventType === "counter").length;
+    const pressWins = chanceEvents.filter((event) => event.eventType === "pressWin").length;
+    const setPieces = chanceEvents.filter((event) => event.eventType === "setPiece").length;
+    const highXg = chanceEvents.filter((event) => event.xg >= 0.14).length;
+    const circulation = flowEvents.filter((event) => event.eventType === "circulation" || event.eventType === "switchPlay").length;
+    const defensiveFlow = flowEvents.filter((event) => event.eventType === "clearance" || event.eventType === "secondBall").length;
     const notes: string[] = [];
 
     if (counters >= 4) {
@@ -757,6 +895,14 @@ function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedT
 
     if (goals > 0 && highXg >= goals) {
       notes.push(`${profile.team.name}의 득점은 낮은 확률 난사가 아니라 높은 xG 장면에서 나왔습니다.`);
+    }
+
+    if (circulation >= 6) {
+      notes.push(`${profile.team.name}은 연결/전환 flow ${circulation}회로 공격 장면 사이의 점유 리듬을 유지했습니다.`);
+    }
+
+    if (defensiveFlow >= 5) {
+      notes.push(`${profile.team.name}은 세컨볼/클리어링 ${defensiveFlow}회로 상대 흐름을 끊는 장면이 많았습니다.`);
     }
 
     return notes;
@@ -834,16 +980,73 @@ function describeEvent(
   };
   const typeText: Record<MatchEventType, string> = {
     centralCombination: "중앙 연계로 박스 근처를 열었고",
+    circulation: "짧은 패스 흐름으로 압박을 풀었고",
+    clearance: "위험 지역에서 공을 걷어냈고",
     counter: "빠른 역습으로 수비 뒷공간을 찔렀고",
     error: `${defending.team.name}의 실수를 놓치지 않았고`,
+    foul: "거친 경합 이후 흐름이 끊겼고",
     lateMoment: "후반 막판 집중력으로 결정적인 장면을 만들었고",
     openPlay: "일반 공격 흐름에서 찬스를 만들었고",
+    offside: "수비 라인 뒤를 노리는 움직임을 만들었고",
     pressWin: "전방 압박 성공 직후 찬스를 잡았고",
+    secondBall: "세컨볼 경합에서 우위를 잡았고",
     setPiece: "세트피스에서 위협적인 장면을 만들었고",
+    switchPlay: "반대편으로 전환하며 공간을 열었고",
     wideAttack: "측면 공격으로 수비를 흔들었고",
   };
 
   return `${minute}' ${creator}${subject}이 ${typeText[eventType]} ${outcomeText[outcome]}`;
+}
+
+function describeFlowEvent(
+  minute: number,
+  acting: AppliedTeamProfile,
+  defending: AppliedTeamProfile,
+  eventType: MatchEventType,
+  primaryName?: string,
+  secondaryName?: string,
+) {
+  const subject = primaryName ?? acting.team.name;
+  const support = secondaryName ? ` ${secondaryName}와 함께` : "";
+  const typeText: Record<MatchEventType, string> = {
+    centralCombination: "중앙에서 짧은 연결을 이어갔습니다.",
+    circulation: "후방과 중원을 오가며 점유를 안정시켰습니다.",
+    clearance: `${defending.team.name}의 압박을 피해 위험 지역에서 걷어냈습니다.`,
+    counter: "전환 타이밍을 노리며 전방으로 속도를 붙였습니다.",
+    error: `${defending.team.name}의 압박 속에서 공 소유가 흔들렸습니다.`,
+    foul: "경합 과정에서 파울로 흐름이 끊겼습니다.",
+    lateMoment: "후반 집중 싸움에서 볼 소유를 지켜냈습니다.",
+    openPlay: "일반 전개 속에서 다음 패스 각도를 만들었습니다.",
+    offside: "라인 뒤 침투를 시도했지만 오프사이드에 걸렸습니다.",
+    pressWin: "전방 압박으로 다음 공격권을 만들었습니다.",
+    secondBall: "세컨볼 경합을 따내며 중원 싸움을 이어갔습니다.",
+    setPiece: "세트피스 이전 위치 싸움을 가져갔습니다.",
+    switchPlay: "반대편으로 전환하며 수비 블록을 흔들었습니다.",
+    wideAttack: "측면에서 폭을 유지하며 다음 크로스 각도를 봤습니다.",
+  };
+
+  return `${minute}' ${subject}이${support} ${typeText[eventType]}`;
+}
+
+function isChanceEvent(event: MatchEvent) {
+  return event.phase !== "flow" && chanceEventTypes.has(event.eventType);
+}
+
+function getEventSortWeight(event: MatchEvent) {
+  const base = eventTypes.indexOf(event.eventType);
+  return (event.phase === "flow" ? 0 : 20) + (base === -1 ? 99 : base);
+}
+
+function getFlowOutcome(eventType: MatchEventType): MatchEvent["outcome"] {
+  if (eventType === "clearance" || eventType === "secondBall") {
+    return "blocked";
+  }
+
+  if (eventType === "offside" || eventType === "foul") {
+    return "miss";
+  }
+
+  return "saved";
 }
 
 function selectByWeight<T>(items: Array<{ item: T; weight: number }>, random: SeededRandom): T {

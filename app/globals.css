@@ -3626,6 +3626,10 @@ td strong {
   opacity: 0.72;
 }
 
+.live-ball.flow {
+  box-shadow: 0 0 0 6px rgba(244, 239, 227, 0.16), 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
 .live-event-flash {
   background: rgba(18, 61, 50, 0.82);
   border: 1px solid rgba(244, 239, 227, 0.26);
@@ -3657,6 +3661,10 @@ td strong {
 
 .live-event-flash.miss {
   background: rgba(91, 100, 96, 0.9);
+}
+
+.live-event-flash.flow {
+  background: rgba(24, 75, 63, 0.9);
 }
 
 .live-event-flash span {

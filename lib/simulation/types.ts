@@ -97,12 +97,18 @@ export type AppliedTeamProfile = TeamSimulationProfile & {
 
 export type MatchEventType =
   | "centralCombination"
+  | "circulation"
+  | "clearance"
   | "counter"
   | "error"
+  | "foul"
   | "lateMoment"
   | "openPlay"
+  | "offside"
   | "pressWin"
+  | "secondBall"
   | "setPiece"
+  | "switchPlay"
   | "wideAttack";
 
 export type MatchEvent = {
@@ -112,7 +118,10 @@ export type MatchEvent = {
   eventType: MatchEventType;
   minute: number;
   outcome: "goal" | "miss" | "saved" | "blocked";
+  phase?: "chance" | "flow";
+  primaryPlayerId?: string;
   scorerId?: string;
+  secondaryPlayerId?: string;
   teamId: string;
   xg: number;
 };
