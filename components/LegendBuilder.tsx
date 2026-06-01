@@ -4841,6 +4841,10 @@ function LiveMatchViewer({
   const isActiveChance = Boolean(activeEvent && isLiveChanceEvent(activeEvent));
   const isDefensiveMoment = Boolean(activeEvent && isLiveDefensiveEvent(activeEvent) && isFinishStep);
   const latestEvents = visibleEvents.slice(-5).reverse();
+  const replayMoments = useMemo(() => events.map((event, index) => ({ event, index })).filter(({ event }) => isLiveReplayMoment(event)).slice(0, 14), [events]);
+  const activeReplayIndex = activeEvent ? events.indexOf(activeEvent) : -1;
+  const previousReplayMoment = [...replayMoments].reverse().find((moment) => moment.index < activeReplayIndex) ?? replayMoments[replayMoments.length - 1] ?? null;
+  const nextReplayMoment = replayMoments.find((moment) => moment.index > activeReplayIndex) ?? replayMoments[0] ?? null;
   const playerNameById = new Map([...teamA.slots, ...teamB.slots].map((slot) => [slot.player.id, slot.player.name]));
   const possessionTeam = activeEvent?.teamId === teamA.id ? teamA.name : activeEvent?.teamId === teamB.id ? teamB.name : "Neutral";
   const primaryActorId = activeEvent?.scorerId ?? activeEvent?.primaryPlayerId;
@@ -4890,6 +4894,13 @@ function LiveMatchViewer({
 
     return () => window.clearInterval(timer);
   }, [events.length, frameIndex, isPlaying, sceneStep, speed]);
+
+  function jumpToReplayMoment(index: number, nextSceneStep = 0) {
+    setIsPlaying(false);
+    setFrameIndex(Math.max(1, Math.min(events.length, index + 1)));
+    setSceneStep(nextSceneStep);
+    setFlowFrame((current) => current + 1);
+  }
 
   return (
     <section className="live-match-panel">
@@ -5089,6 +5100,33 @@ function LiveMatchViewer({
             <span>Current</span>
             <strong>{activeEvent ? `${matchClock} · ${activeEvent.minute}' ${getLiveFinishLabel(activeEvent)}` : frameIndex >= events.length ? "90:00 · Full Time" : "00:00 · Kickoff"}</strong>
             <p>{activeEvent?.description ?? "경기 시작 전 포메이션이 정렬되어 있습니다."}</p>
+            {replayMoments.length ? (
+              <div className="live-replay-actions">
+                <button disabled={!previousReplayMoment} onClick={() => previousReplayMoment && jumpToReplayMoment(previousReplayMoment.index)} type="button">
+                  Prev
+                </button>
+                <button disabled={!activeEvent} onClick={() => activeEvent && jumpToReplayMoment(Math.max(0, activeReplayIndex), 0)} type="button">
+                  Replay
+                </button>
+                <button disabled={!nextReplayMoment} onClick={() => nextReplayMoment && jumpToReplayMoment(nextReplayMoment.index)} type="button">
+                  Next
+                </button>
+              </div>
+            ) : null}
+          </div>
+          <div className="live-highlight-list">
+            <span>Highlights</span>
+            {replayMoments.length ? (
+              replayMoments.map(({ event, index }) => (
+                <button className={index === activeReplayIndex ? "active" : ""} key={`${event.minute}-${event.teamId}-${event.eventType}-${index}`} onClick={() => jumpToReplayMoment(index)} type="button">
+                  <em>{event.minute}'</em>
+                  <strong>{getLiveReplayMomentTitle(event)}</strong>
+                  <small>{event.description}</small>
+                </button>
+              ))
+            ) : (
+              <p className="sim-inline-empty">리플레이할 주요 장면이 없습니다.</p>
+            )}
           </div>
           <div className="live-event-feed">
             {latestEvents.length ? (
@@ -5600,6 +5638,26 @@ function getTimelineEventTitle(event: LiveMatchEvent) {
   }
 
   return event.outcome.toUpperCase();
+}
+
+function isLiveReplayMoment(event: LiveMatchEvent) {
+  return event.outcome === "goal" || event.xg >= 0.1 || Boolean(event.card) || event.setPieceSituation === "penalty" || event.momentumSwing >= 7;
+}
+
+function getLiveReplayMomentTitle(event: LiveMatchEvent) {
+  if (event.card || event.eventType === "setPiece") {
+    return getTimelineEventTitle(event);
+  }
+
+  if (event.outcome === "goal") {
+    return "GOAL";
+  }
+
+  if (event.xg >= 0.1) {
+    return `${event.outcome.toUpperCase()} · xG ${event.xg.toFixed(2)}`;
+  }
+
+  return `${getLiveFinishLabel(event)} · Flow ${formatSignedMetric(event.momentumSwing)}`;
 }
 
 function formatLiveSetPieceLabel(situation: LiveMatchEvent["setPieceSituation"]) {
