@@ -124,21 +124,26 @@ export type MatchEvent = {
   description: string;
   eventType: MatchEventType;
   minute: number;
+  momentumSwing: number;
   outcome: "goal" | "miss" | "saved" | "blocked";
   phase?: "chance" | "flow";
   primaryPlayerId?: string;
   scorerId?: string;
   secondaryPlayerId?: string;
   setPieceSituation?: SetPieceSituation;
+  staminaPressure: number;
   teamId: string;
   xg: number;
 };
 
 export type MatchTeamStats = {
   defensiveActions: number;
+  fatigueLoad: number;
   fouls: number;
   goals: number;
   keeperSaves: number;
+  lateEnergy: number;
+  momentumScore: number;
   passFlow: number;
   possession: number;
   pressingWins: number;

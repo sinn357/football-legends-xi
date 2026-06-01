@@ -4720,6 +4720,7 @@ function MatchSimulatorView({
               <Metric label="GK" value={`${statsA?.keeperSaves ?? 0}-${statsB?.keeperSaves ?? 0}`} detail="GK 처리" />
               <Metric label="Set" value={`${statsA?.setPieces ?? 0}-${statsB?.setPieces ?? 0}`} detail="세트피스 장면" />
               <Metric label="Cards" value={`${formatCardMetric(statsA)}-${formatCardMetric(statsB)}`} detail={`파울 ${statsA?.fouls ?? 0}-${statsB?.fouls ?? 0}`} />
+              <Metric label="Flow" value={`${formatSignedMetric(statsA?.momentumScore)}-${formatSignedMetric(statsB?.momentumScore)}`} detail={`energy ${statsA?.lateEnergy ?? 0}-${statsB?.lateEnergy ?? 0}`} />
               <Metric label="Seed" value={result.matchSeed.slice(-8)} detail="동일 seed 재현 가능" />
             </div>
 
@@ -4830,6 +4831,7 @@ function LiveMatchViewer({
   const progress = Math.round((currentSceneStep / totalSceneSteps) * 100);
   const matchClock = formatLiveMatchClock(currentSceneStep, totalSceneSteps);
   const liveFlowState = getLiveFlowState(activeEvent, sceneStep, frameIndex, events.length);
+  const liveMomentum = getLiveMomentumSnapshot(visibleEvents, teamA.id, teamB.id, result.stats);
   const activeTactic = activeEvent?.teamId === teamA.id ? tacticsA : activeEvent?.teamId === teamB.id ? tacticsB : tacticsA;
   const defendingTactic = activeEvent?.defendingTeamId === teamA.id ? tacticsA : activeEvent?.defendingTeamId === teamB.id ? tacticsB : tacticsB;
   const ballPosition = getLiveBallPosition(activeEvent, teamA.id, sceneStep, frameIndex, flowFrame, events.length, activeTactic);
@@ -4921,6 +4923,20 @@ function LiveMatchViewer({
             <span>{liveFlowState.phase}</span>
             <strong>{liveFlowState.detail}</strong>
             <em>{liveFlowState.intensity}</em>
+          </div>
+          <div className="live-momentum-row">
+            <span>{teamA.name}</span>
+            <div className="live-momentum-track" aria-label="Live momentum">
+              <i style={{ width: `${liveMomentum.teamAShare}%` }} />
+              <b style={{ width: `${liveMomentum.teamBShare}%` }} />
+            </div>
+            <span>{teamB.name}</span>
+            <strong>
+              Flow {formatSignedMetric(liveMomentum.teamAMomentum)} / {formatSignedMetric(liveMomentum.teamBMomentum)}
+            </strong>
+            <em>
+              Energy {liveMomentum.teamAEnergy}-{liveMomentum.teamBEnergy}
+            </em>
           </div>
           <div className={`live-pitch live-step-${sceneStep}`} aria-label="Animated match pitch">
             <div className="live-pitch-line halfway" />
@@ -5610,8 +5626,36 @@ function formatCardMetric(stats: SimulatedMatchResult["stats"][string] | null) {
   return `${stats?.yellowCards ?? 0}/${stats?.redCards ?? 0}`;
 }
 
+function formatSignedMetric(value: number | null | undefined) {
+  const next = value ?? 0;
+  return next > 0 ? `+${next.toFixed(1)}` : next.toFixed(1);
+}
+
 function formatCardLabel(card: LiveMatchEvent["card"]) {
   return card === "red" ? "Red" : "Yellow";
+}
+
+function getLiveMomentumSnapshot(events: LiveMatchEvent[], teamAId: string, teamBId: string, finalStats: SimulatedMatchResult["stats"]) {
+  const teamAMomentum = roundLiveValue(events.filter((event) => event.teamId === teamAId).reduce((sum, event) => sum + event.momentumSwing, 0));
+  const teamBMomentum = roundLiveValue(events.filter((event) => event.teamId === teamBId).reduce((sum, event) => sum + event.momentumSwing, 0));
+  const teamAFatigue = events.filter((event) => event.teamId === teamAId).reduce((sum, event) => sum + event.staminaPressure, 0);
+  const teamBFatigue = events.filter((event) => event.teamId === teamBId).reduce((sum, event) => sum + event.staminaPressure, 0);
+  const positiveA = Math.max(0, teamAMomentum) + 8;
+  const positiveB = Math.max(0, teamBMomentum) + 8;
+  const total = Math.max(1, positiveA + positiveB);
+
+  return {
+    teamAEnergy: Math.max(45, Math.min(finalStats[teamAId]?.lateEnergy ?? 100, Math.round(100 - teamAFatigue * 0.75))),
+    teamAMomentum,
+    teamAShare: Math.round((positiveA / total) * 100),
+    teamBEnergy: Math.max(45, Math.min(finalStats[teamBId]?.lateEnergy ?? 100, Math.round(100 - teamBFatigue * 0.75))),
+    teamBMomentum,
+    teamBShare: Math.round((positiveB / total) * 100),
+  };
+}
+
+function roundLiveValue(value: number) {
+  return Math.round(value * 10) / 10;
 }
 
 function getLiveSetPieceClass(event: LiveMatchEvent) {

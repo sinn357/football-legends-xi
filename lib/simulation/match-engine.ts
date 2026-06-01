@@ -263,6 +263,8 @@ function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfi
         : outcome === "blocked"
           ? pickFlowPlayer(defending, random.chance(0.55) ? "tackle" : "interception", random)
           : undefined;
+    const momentumSwing = calculateMomentumSwing(eventType, outcome, xg, minute);
+    const staminaPressure = calculateStaminaPressure(attacking, eventType, minute, momentumSwing);
 
     events.push({
       assisterId: assister?.player.id,
@@ -271,12 +273,14 @@ function simulateEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamProfi
       description: describeEvent(minute, attacking, defending, eventType, outcome, scorer?.player.name, assister?.player.name, defensivePlayer?.player.name, setPieceSituation),
       eventType,
       minute,
+      momentumSwing,
       outcome,
       phase: "chance",
       primaryPlayerId: scorer?.player.id,
       scorerId: scorer?.player.id,
       secondaryPlayerId: assister?.player.id,
       setPieceSituation,
+      staminaPressure,
       teamId: attacking.team.id,
       xg,
     });
@@ -304,6 +308,9 @@ function simulateFlowEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamP
     const secondary = random.chance(0.46) ? pickFlowPlayer(acting, eventType, random, primary?.player.id) : undefined;
     const setPieceSituation = eventType === "setPiece" ? pickSetPieceSituation(acting.adjustedMetrics, defending.adjustedMetrics, random) : undefined;
     const card = eventType === "foul" ? resolveCardDecision(acting, minute, random) : undefined;
+    const outcome = getFlowOutcome(eventType);
+    const momentumSwing = calculateMomentumSwing(eventType, outcome, 0, minute, card);
+    const staminaPressure = calculateStaminaPressure(acting, eventType, minute, momentumSwing);
 
     events.push({
       card,
@@ -311,11 +318,13 @@ function simulateFlowEvents(profileA: AppliedTeamProfile, profileB: AppliedTeamP
       description: describeFlowEvent(minute, acting, defending, eventType, primary?.player.name, secondary?.player.name, setPieceSituation, card),
       eventType,
       minute,
-      outcome: getFlowOutcome(eventType),
+      momentumSwing,
+      outcome,
       phase: "flow",
       primaryPlayerId: primary?.player.id,
       secondaryPlayerId: secondary?.player.id,
       setPieceSituation,
+      staminaPressure,
       teamId: acting.team.id,
       xg: 0,
     });
@@ -416,6 +425,69 @@ function calculateXg(attacking: TeamMetrics, defending: TeamMetrics, eventType: 
   const randomBoost = random.between(-0.025, 0.085) * volatility;
   const setPieceBoost = getSetPieceXgBoost(setPieceSituation);
   return round2(Math.max(0.015, Math.min(0.6, typeBase[eventType] + setPieceBoost + quality / 1000 + randomBoost)));
+}
+
+function calculateMomentumSwing(eventType: MatchEventType, outcome: MatchEvent["outcome"], xg: number, minute: number, card?: CardDecision) {
+  if (card === "red") {
+    return -8.5;
+  }
+
+  if (card === "yellow") {
+    return -2.8;
+  }
+
+  if (outcome === "goal") {
+    return round1(6.5 + xg * 18 + (minute >= 75 ? 1.4 : 0));
+  }
+
+  if (eventType === "pressWin") {
+    return round1(1.8 + xg * 9);
+  }
+
+  if (eventType === "counter" || eventType === "lateMoment") {
+    return round1(1.4 + xg * 8 + (minute >= 75 ? 0.8 : 0));
+  }
+
+  if (eventType === "setPiece") {
+    return round1(1.2 + xg * 7);
+  }
+
+  if (outcome === "saved" || outcome === "blocked") {
+    return round1(0.8 + xg * 4);
+  }
+
+  if (eventType === "clearance" || eventType === "interception" || eventType === "tackle" || eventType === "keeperClaim") {
+    return 1.4;
+  }
+
+  if (eventType === "secondBall" || eventType === "switchPlay") {
+    return 0.9;
+  }
+
+  if (eventType === "foul") {
+    return 0.3;
+  }
+
+  if (eventType === "offside") {
+    return -0.5;
+  }
+
+  return 0.6;
+}
+
+function calculateStaminaPressure(profile: AppliedTeamProfile, eventType: MatchEventType, minute: number, momentumSwing: number) {
+  const tempoLoad = profile.tactics.tempo === "fast" ? 1.25 : profile.tactics.tempo === "slow" ? 0.82 : 1;
+  const styleLoad = profile.tactics.style === "high-press" ? 1.32 : profile.tactics.style === "counter" || profile.tactics.style === "direct" ? 1.12 : profile.tactics.style === "low-block" ? 0.92 : 1;
+  const riskLoad = profile.tactics.risk === "aggressive" ? 1.16 : profile.tactics.risk === "conservative" ? 0.9 : 1;
+  const minuteLoad = minute >= 75 ? 1.28 : minute >= 60 ? 1.16 : minute >= 45 ? 1.06 : 0.94;
+  const eventLoad =
+    eventType === "pressWin" || eventType === "counter" || eventType === "tackle"
+      ? 1.2
+      : eventType === "circulation" || eventType === "keeperClaim"
+        ? 0.78
+        : 1;
+
+  return round1(Math.max(0.3, Math.min(3.8, (0.72 + Math.abs(momentumSwing) * 0.045) * tempoLoad * styleLoad * riskLoad * minuteLoad * eventLoad)));
 }
 
 function getSetPieceXgBoost(situation?: SetPieceSituation) {
@@ -615,9 +687,19 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
   };
 
   for (const event of events) {
+    const teamStats = stats[event.teamId];
+    const defendingStats = stats[event.defendingTeamId];
+    teamStats.fatigueLoad = round1(teamStats.fatigueLoad + event.staminaPressure);
+
+    if (event.momentumSwing >= 0) {
+      teamStats.momentumScore = round1(teamStats.momentumScore + event.momentumSwing);
+    } else {
+      teamStats.momentumScore = round1(teamStats.momentumScore + event.momentumSwing);
+      defendingStats.momentumScore = round1(defendingStats.momentumScore + Math.abs(event.momentumSwing) * 0.45);
+    }
+
     if (!isChanceEvent(event)) {
       if (event.eventType === "foul") {
-        const teamStats = stats[event.teamId];
         teamStats.fouls += 1;
 
         if (event.card === "yellow") {
@@ -630,7 +712,6 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
       }
 
       if (isDefensiveFlowEventType(event.eventType)) {
-        const teamStats = stats[event.teamId];
         teamStats.defensiveActions += 1;
 
         if (event.eventType === "keeperClaim") {
@@ -641,8 +722,6 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
       continue;
     }
 
-    const teamStats = stats[event.teamId];
-    const defendingStats = stats[event.defendingTeamId];
     teamStats.xg = round2(teamStats.xg + event.xg);
     teamStats.shots += 1;
 
@@ -670,6 +749,10 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
   const possessionA = calculatePossession(profileA.adjustedMetrics, profileB.adjustedMetrics);
   stats[profileA.team.id].possession = possessionA;
   stats[profileB.team.id].possession = 100 - possessionA;
+  stats[profileA.team.id].lateEnergy = calculateLateEnergy(stats[profileA.team.id].fatigueLoad, profileA.adjustedMetrics);
+  stats[profileB.team.id].lateEnergy = calculateLateEnergy(stats[profileB.team.id].fatigueLoad, profileB.adjustedMetrics);
+  stats[profileA.team.id].momentumScore = round1(stats[profileA.team.id].momentumScore);
+  stats[profileB.team.id].momentumScore = round1(stats[profileB.team.id].momentumScore);
 
   return stats;
 }
@@ -677,9 +760,12 @@ function buildMatchStats(profileA: AppliedTeamProfile, profileB: AppliedTeamProf
 function createEmptyStats(metrics: TeamMetrics): MatchTeamStats {
   return {
     defensiveActions: 0,
+    fatigueLoad: 0,
     fouls: 0,
     goals: 0,
     keeperSaves: 0,
+    lateEnergy: 100,
+    momentumScore: 0,
     passFlow: Math.round(metrics.midfieldControl * 0.55 + metrics.progression * 0.25 + metrics.chemistry * 0.2),
     possession: 50,
     pressingWins: 0,
@@ -691,6 +777,11 @@ function createEmptyStats(metrics: TeamMetrics): MatchTeamStats {
     yellowCards: 0,
     xg: 0,
   };
+}
+
+function calculateLateEnergy(fatigueLoad: number, metrics: TeamMetrics) {
+  const recoveryBase = metrics.chemistry * 0.04 + metrics.midfieldControl * 0.025;
+  return Math.max(48, Math.min(96, Math.round(100 - fatigueLoad * 0.72 + recoveryBase)));
 }
 
 function calculatePossession(metricsA: TeamMetrics, metricsB: TeamMetrics) {
@@ -805,6 +896,7 @@ function buildTacticalReport(
       ? [
           `${winningProfile.team.name}은 xG ${stats[winningProfile.team.id].xg.toFixed(2)}로 ${losingProfile.team.name}의 ${stats[losingProfile.team.id].xg.toFixed(2)}보다 좋은 찬스를 만들었습니다.`,
           getMetricEdgeText(winningProfile, losingProfile),
+          getMomentumEdgeText(winningProfile, losingProfile, stats),
         ]
       : ["양 팀의 핵심 지표가 비슷해 단판에서는 승부가 갈리지 않았습니다."];
 
@@ -834,6 +926,21 @@ function summarizeProfile(profile: AppliedTeamProfile, opponent: AppliedTeamProf
   }
 
   return notes;
+}
+
+function getMomentumEdgeText(winningProfile: AppliedTeamProfile, losingProfile: AppliedTeamProfile, stats: Record<string, MatchTeamStats>) {
+  const winningStats = stats[winningProfile.team.id];
+  const losingStats = stats[losingProfile.team.id];
+
+  if (winningStats.momentumScore - losingStats.momentumScore >= 4) {
+    return `${winningProfile.team.name}은 모멘텀 ${winningStats.momentumScore.toFixed(1)}-${losingStats.momentumScore.toFixed(1)}로 경기 흐름을 더 오래 잡았습니다.`;
+  }
+
+  if (winningStats.lateEnergy - losingStats.lateEnergy >= 5) {
+    return `${winningProfile.team.name}은 후반 에너지 ${winningStats.lateEnergy}-${losingStats.lateEnergy}로 막판 유지력이 더 좋았습니다.`;
+  }
+
+  return `${winningProfile.team.name}은 결정적 장면 전환에서 흐름 손실을 더 잘 억제했습니다.`;
 }
 
 function buildBalanceInsights(profileA: AppliedTeamProfile, profileB: AppliedTeamProfile) {
@@ -1047,6 +1154,8 @@ function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedT
     const fouls = flowEvents.filter((event) => event.eventType === "foul").length;
     const yellowCards = flowEvents.filter((event) => event.card === "yellow").length;
     const redCards = flowEvents.filter((event) => event.card === "red").length;
+    const momentum = round1(profileEvents.reduce((sum, event) => sum + event.momentumSwing, 0));
+    const fatigue = round1(profileEvents.reduce((sum, event) => sum + event.staminaPressure, 0));
     const highXg = chanceEvents.filter((event) => event.xg >= 0.14).length;
     const circulation = flowEvents.filter((event) => event.eventType === "circulation" || event.eventType === "switchPlay").length;
     const defensiveFlow = flowEvents.filter((event) => isDefensiveFlowEventType(event.eventType)).length;
@@ -1083,6 +1192,14 @@ function buildEventPatternNotes(profileA: AppliedTeamProfile, profileB: AppliedT
     if (fouls >= 3 || yellowCards + redCards > 0) {
       const cardText = yellowCards + redCards > 0 ? ` 카드 ${yellowCards + redCards}장` : "";
       notes.push(`${profile.team.name}은 파울 ${fouls}회${cardText}으로 경기 리듬을 끊거나 위험을 감수했습니다.`);
+    }
+
+    if (momentum >= 12) {
+      notes.push(`${profile.team.name}은 누적 모멘텀 ${momentum.toFixed(1)}로 장면 간 흐름을 강하게 이어갔습니다.`);
+    }
+
+    if (fatigue >= 38) {
+      notes.push(`${profile.team.name}은 활동량 부담 ${fatigue.toFixed(1)}로 후반 에너지 관리가 중요했습니다.`);
     }
 
     return notes;

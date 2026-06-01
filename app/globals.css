@@ -3294,6 +3294,68 @@ td strong {
   text-align: right;
 }
 
+.live-momentum-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(64px, 0.8fr) minmax(120px, 1.6fr) minmax(64px, 0.8fr) auto auto;
+}
+
+.live-momentum-row span,
+.live-momentum-row strong,
+.live-momentum-row em {
+  background: rgba(255, 250, 240, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  min-width: 0;
+  overflow: hidden;
+  padding: 7px 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-momentum-row span {
+  color: var(--muted);
+}
+
+.live-momentum-row strong {
+  color: var(--gold);
+  text-align: center;
+}
+
+.live-momentum-row em {
+  color: var(--main);
+  font-style: normal;
+  text-align: right;
+}
+
+.live-momentum-track {
+  background: rgba(255, 250, 240, 0.07);
+  border: 1px solid rgba(244, 239, 227, 0.18);
+  border-radius: 999px;
+  display: flex;
+  height: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.live-momentum-track i,
+.live-momentum-track b {
+  display: block;
+  min-width: 10%;
+  transition: width 420ms ease;
+}
+
+.live-momentum-track i {
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.45), rgba(255, 209, 102, 0.9));
+}
+
+.live-momentum-track b {
+  background: linear-gradient(90deg, rgba(244, 239, 227, 0.85), rgba(244, 239, 227, 0.38));
+}
+
 .live-pitch {
   aspect-ratio: 16 / 10;
   background:
@@ -5158,6 +5220,12 @@ td strong {
   }
 
   .inspector-score-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .live-tactic-row,
+  .live-flow-row,
+  .live-momentum-row {
     grid-template-columns: 1fr;
   }
 
